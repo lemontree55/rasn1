@@ -1,6 +1,8 @@
 require 'rasn1/version'
 require 'rasn1/types'
 
+# Rasn1 is a pure ruby library to parse, decode and encode ASN.1 data.
+# @author Sylvain Daubert
 module Rasn1
 
   # Base error class
@@ -11,6 +13,7 @@ module Rasn1
 
   # ASN.1 class error
   class ClassError < Error
+    # @return [String]
     def message
       "Tag class should be a symbol: #{Types::Base::CLASSES.keys.join(', ')}"
     end
