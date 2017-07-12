@@ -61,5 +61,40 @@ module Rasn1::Types
         expect(Base.new(:name).constructed?).to be(false)
       end
     end
+
+    describe '#parse!' do
+      let(:unexpected_der) { "\x02\x02\xca\xfe".force_encoding('BINARY') }
+
+      it 'raises on unexpected tag value' do
+        bool = Boolean.new(:bool)
+        expect { bool.parse!(unexpected_der) }.to raise_error(Rasn1::ASN1Error).
+          with_message('Expected tag UNIVERSAL PRIMITIVE BOOLEAN but get UNIVERSAL PRIMITIVE 0x02 for bool')
+      end
+
+      it 'does not raise on unexpected tag value with OPTIONAL tag' do
+        bool = Boolean.new(:bool, optional: true)
+        expect { bool.parse!(unexpected_der) }.to_not raise_error
+        expect(bool.value).to be(nil)
+      end
+
+      it 'does not raise on unexpected tag value with DEFAULT tag' do
+        bool = Boolean.new(:bool, default: false)
+        expect { bool.parse!(unexpected_der) }.to_not raise_error
+      end
+
+      it 'sets value to default one when parsing an unexpected tag with DEFAULT one' do
+        bool = Boolean.new(:bool, default: false)
+        bool.parse!(unexpected_der)
+        expect(bool.value).to be(false)
+      end
+
+      it 'raises on indefinite length with primitive types' do
+        bool = Boolean.new(:bool)
+        der = "\x01\x80\xff\x00\x00".force_encoding('BINARY')
+        expect { bool.parse!(der) }.to raise_error(Rasn1::ASN1Error).
+          with_message('malformed BOOLEAN TAG (bool): indefinite length forbidden for primitive types')
+      end
+      it 'raises on indefinite length with constructed types'
+    end
   end
 end

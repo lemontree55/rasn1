@@ -44,6 +44,27 @@ module Rasn1::Types
         expect(bool.to_der).to eq("\x01\x01\xff".force_encoding('BINARY'))
       end
     end
+
+    describe '#parse!' do
+      let(:bool) { Boolean.new(:bool) }
+      let(:ber) { "\x01\x01\x56".force_encoding('BINARY') }
+
+      it 'parses a DER BOOLEAN string' do
+        bool.parse!("\x01\x01\x00".force_encoding('BINARY'))
+        expect(bool.value).to be(false)
+        bool.parse!("\x01\x01\xFF".force_encoding('BINARY'))
+        expect(bool.value).to be(true)
+      end
+
+      it 'parses a BER BOOLEAN string if ber parameter is true' do
+        bool.parse!(ber, ber: true)
+        expect(bool.value).to be(true)
+      end
+
+      it 'raises on a BER BOOLEAN string if ber parameter is not set' do
+        expect { bool.parse!(ber) }.to raise_error(Rasn1::ASN1Error, /bad value 0x56/)
+      end
+    end
   end
 end
 
