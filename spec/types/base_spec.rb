@@ -94,7 +94,9 @@ module Rasn1::Types
         expect { bool.parse!(der) }.to raise_error(Rasn1::ASN1Error).
           with_message('malformed BOOLEAN TAG (bool): indefinite length forbidden for primitive types')
       end
-      it 'raises on indefinite length with constructed types'
+
+      it 'raises on indefinite length with constructed types on DER encoding'
+      it 'raises on indefinite length with constructed types on BER encoding'
     end
   end
 end

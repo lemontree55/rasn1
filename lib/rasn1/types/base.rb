@@ -115,7 +115,11 @@ module Rasn1
           if primitive?
             raise ASN1Error, "malformed #{type} TAG (#@name): indefinite length forbidden for primitive types"
           else
-            raise ASN1Error, "TAG #@name: indefinite length not supported yet"
+            if ber
+              raise NotImplementedError, "TAG #@name: indefinite length not supported yet"
+            else
+              raise ASN1Error, "TAG #@name: indefinite length forbidden in DER encoding"
+            end
           end
         elsif length < INDEFINITE_LENGTH
           der_to_value(der[2, length], ber: ber)
