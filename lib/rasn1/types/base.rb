@@ -33,6 +33,22 @@ module Rasn1
         raise NotImplementedError, 'should be implemented by subclasses'
       end
 
+      def primitive?
+        if self.class < Primitive
+          true
+        else
+          false
+        end
+      end
+
+      def constructed?
+        if self.class < Constructed
+          true
+        else
+          false
+        end
+      end
+
 
       private
 

@@ -3,4 +3,6 @@ module Rasn1
   end
 end
 
-Dir["#{File.dirname(__FILE__)}/types/*.rb"].each { |f| require f }
+require_relative 'types/base'
+require_relative 'types/primitive'
+require_relative 'types/constructed'
