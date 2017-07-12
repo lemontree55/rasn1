@@ -47,7 +47,11 @@ module Rasn1
 
       # @return [String] DER-formated string
       def to_der
-        raise NotImplementedError, 'should be implemented by subclasses'
+        if self.class.const_defined?('TAG')
+          build_tag value_to_der
+        else
+          raise NotImplementedError, 'should be implemented by subclasses'
+        end
       end
 
       # @return [::Boolean] +true+ if this is a primitive type
@@ -98,6 +102,39 @@ module Rasn1
 
       def set_default(default)
         @default = default
+      end
+
+      def build_tag(encoded_value)
+        if (!@default.nil? and @value == @default) or (optional? and @value.nil?)
+          ''
+        else
+          encode_tag << encode_size(encoded_value.size) << encoded_value
+        end
+      end
+
+      def encode_tag
+        tag = self.class::TAG
+        if tag <= MAX_TAG
+          [tag | CLASSES[@asn1_class] | self.class::ASN1_PC].pack('C')
+        else
+          raise ASN1Error, 'multi-byte tag value are not supported'
+        end
+      end
+
+      def encode_size(size)
+        if size >= 0x80
+          bytes = []
+          while size > 255
+            bytes << (size & 0xff)
+            size >>= 8
+          end
+          bytes << size
+          bytes.reverse!
+          bytes.unshift(0x80 | bytes.size)
+          bytes.pack('C*')
+        else
+          [size].pack('C')
+        end
       end
     end
   end
