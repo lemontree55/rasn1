@@ -68,7 +68,7 @@ module Rasn1::Types
       it 'raises on unexpected tag value' do
         bool = Boolean.new(:bool)
         expect { bool.parse!(unexpected_der) }.to raise_error(Rasn1::ASN1Error).
-          with_message('Expected tag UNIVERSAL PRIMITIVE BOOLEAN but get UNIVERSAL PRIMITIVE 0x02 for bool')
+          with_message('Expected tag UNIVERSAL PRIMITIVE BOOLEAN but get UNIVERSAL PRIMITIVE INTEGER for bool')
       end
 
       it 'does not raise on unexpected tag value with OPTIONAL tag' do
