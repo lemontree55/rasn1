@@ -5,7 +5,12 @@ module Rasn1
     # @author Sylvain Daubert
     class Base
       # Allowed ASN.1 tag classes
-      CLASSES =%i(universal application context private)
+      CLASSES = {
+                 universal:   0x00,
+                 application: 0x40,
+                 context:     0x80,
+                 private:     0xc0
+                }
 
       MAX_TAG = 0x1e
 
@@ -40,8 +45,9 @@ module Rasn1
       def set_class(asn1_class)
         case asn1_class
         when nil
+          @asn1_class = :universal
         when Symbol
-          if CLASSES.include? asn1_class
+          if CLASSES.keys.include? asn1_class
             @asn1_class = asn1_class
           else
             raise ClassError

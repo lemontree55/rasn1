@@ -12,7 +12,7 @@ module Rasn1
   # ASN.1 class error
   class ClassError < Error
     def message
-      "Tag class should be a symbol: #{Types::Base::CLASSES.join(', ')}"
+      "Tag class should be a symbol: #{Types::Base::CLASSES.keys.join(', ')}"
     end
   end
 end
