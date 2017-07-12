@@ -3,6 +3,12 @@ require_relative '../spec_helper'
 module Rasn1::Types
 
   describe Integer do
+    describe '.type' do
+      it 'gets ASN.1 type' do
+        expect(Integer.type).to eq('INTEGER')
+      end
+    end
+
     describe '#initialize' do
       it 'creates an Integer with default values' do
         int = Integer.new(:int)

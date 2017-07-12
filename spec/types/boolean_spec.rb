@@ -3,6 +3,12 @@ require_relative '../spec_helper'
 module Rasn1::Types
 
   describe Boolean do
+    describe '.type' do
+      it 'gets ASN.1 type' do
+        expect(Boolean.type).to eq('BOOLEAN')
+      end
+    end
+
     describe '#initialize' do
       it 'creates a Boolean with default values' do
         bool = Boolean.new(:bool)
