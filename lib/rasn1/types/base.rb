@@ -60,7 +60,7 @@ module Rasn1
       # @return [String] DER-formated string
       def to_der
         if self.class.const_defined?('TAG')
-          build_tag value_to_der
+          build_tag
         else
           raise NotImplementedError, 'should be implemented by subclasses'
         end
@@ -161,10 +161,11 @@ module Rasn1
         @default = default
       end
 
-      def build_tag(encoded_value)
+      def build_tag
         if (!@default.nil? and @value == @default) or (optional? and @value.nil?)
           ''
         else
+          encoded_value = value_to_der
           encode_tag << encode_size(encoded_value.size) << encoded_value
         end
       end
