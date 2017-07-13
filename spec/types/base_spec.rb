@@ -63,7 +63,7 @@ module RASN1::Types
     end
 
     describe '#parse!' do
-      let(:unexpected_der) { "\x02\x02\xca\xfe".force_encoding('BINARY') }
+      let(:unexpected_der) { binary("\x02\x02\xca\xfe") }
 
       it 'raises on unexpected tag value' do
         bool = Boolean.new(:bool)
@@ -99,17 +99,17 @@ module RASN1::Types
 
       it 'returns total number of parsed bytes' do
         int = Integer.new(:int)
-        bytes = int.parse!("\x02\x01\x01".force_encoding('BINARY'))
+        bytes = int.parse!(binary("\x02\x01\x01"))
         expect(bytes).to eq(3)
         expect(int.value).to eq(1)
-        bytes = int.parse!("\x02\x01\x01\x02".force_encoding('BINARY'))
+        bytes = int.parse!(binary("\x02\x01\x01\x02"))
         expect(bytes).to eq(3)
         expect(int.value).to eq(1)
       end
 
       it 'raises on indefinite length with primitive types' do
         bool = Boolean.new(:bool)
-        der = "\x01\x80\xff\x00\x00".force_encoding('BINARY')
+        der = binary("\x01\x80\xff\x00\x00")
         expect { bool.parse!(der) }.to raise_error(RASN1::ASN1Error).
           with_message('malformed BOOLEAN TAG (bool): indefinite length forbidden for primitive types')
       end
@@ -173,26 +173,26 @@ module RASN1::Types
         it 'creates a DER string with explicit tagged type' do
           type = Integer.new(:explicit_type, explicit: 5)
           type.value = 48
-          expect(type.to_der).to eq("\x85\x03\x02\x01\x30".force_encoding('BINARY'))
+          expect(type.to_der).to eq(binary("\x85\x03\x02\x01\x30"))
         end
 
         it 'creates a DER string with implicit tagged type' do
           type = Integer.new(:explicit_type, implicit: 5)
           type.value = 48
-          expect(type.to_der).to eq("\x85\x01\x30".force_encoding('BINARY'))
+          expect(type.to_der).to eq(binary("\x85\x01\x30"))
         end
       end
 
       describe '#parse!' do
         it 'parses a DER string with explicit tagged type' do
           type = Integer.new(:explicit_type, explicit: 5)
-          type.parse!("\x85\x03\x02\x01\x30".force_encoding('BINARY'))
+          type.parse!(binary("\x85\x03\x02\x01\x30"))
           expect(type.value).to eq(48)
         end
 
         it 'parses a DER string with implicit tagged type' do
           type = Integer.new(:implicit_type, implicit: 5)
-          type.parse!("\x85\x01\x30".force_encoding('BINARY'))
+          type.parse!(binary("\x85\x01\x30"))
           expect(type.value).to eq(48)
         end
       end

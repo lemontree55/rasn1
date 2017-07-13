@@ -23,13 +23,13 @@ module RASN1::Types
       it 'generates a DER string' do
         os = OctetString.new(:os)
         os.value = 'NOP'
-        expect(os.to_der).to eq("\x04\x03NOP".force_encoding('BINARY'))
+        expect(os.to_der).to eq(binary("\x04\x03NOP"))
       end
 
       it 'generates a DER string according to ASN.1 class' do
         os = OctetString.new(:os, class: :context)
         os.value = 'a'
-        expect(os.to_der).to eq("\x84\x01a".force_encoding('BINARY'))
+        expect(os.to_der).to eq(binary("\x84\x01a"))
       end
 
       it 'generates a DER string according to default' do
@@ -37,7 +37,7 @@ module RASN1::Types
         os.value = 'NOP'
         expect(os.to_der).to eq('')
         os.value = 'N'
-        expect(os.to_der).to eq("\x04\x01N".force_encoding('BINARY'))
+        expect(os.to_der).to eq(binary("\x04\x01N"))
       end
 
       it 'generates a DER string according to optional' do
@@ -45,7 +45,7 @@ module RASN1::Types
         os.value = nil
         expect(os.to_der).to eq('')
         os.value = 'abc'
-        expect(os.to_der).to eq("\x04\x03abc".force_encoding('BINARY'))
+        expect(os.to_der).to eq(binary("\x04\x03abc"))
       end
     end
 
@@ -53,8 +53,8 @@ module RASN1::Types
       let(:os) { OctetString.new(:os) }
 
       it 'parses a DER OCTET STRING' do
-        os.parse!("\x04\x02\x01\x02".force_encoding('BINARY'))
-        expect(os.value).to eq("\x01\x02".force_encoding('BINARY'))
+        os.parse!(binary("\x04\x02\x01\x02"))
+        expect(os.value).to eq(binary("\x01\x02"))
       end
     end
   end

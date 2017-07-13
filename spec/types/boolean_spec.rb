@@ -23,15 +23,15 @@ module RASN1::Types
       it 'generates a DER string' do
         bool = Boolean.new(:bool)
         bool.value = true
-        expect(bool.to_der).to eq("\x01\x01\xff".force_encoding('BINARY'))
+        expect(bool.to_der).to eq(binary("\x01\x01\xff"))
         bool.value = false
-        expect(bool.to_der).to eq("\x01\x01\x00".force_encoding('BINARY'))
+        expect(bool.to_der).to eq(binary("\x01\x01\x00"))
       end
 
       it 'generates a DER string according to ASN.1 class' do
         bool = Boolean.new(:bool, class: :private)
         bool.value = true
-        expect(bool.to_der).to eq("\xC1\x01\xff".force_encoding('BINARY'))
+        expect(bool.to_der).to eq(binary("\xC1\x01\xff"))
       end
 
       it 'generates a DER string according to default' do
@@ -39,7 +39,7 @@ module RASN1::Types
         bool.value = true
         expect(bool.to_der).to eq('')
         bool.value = false
-        expect(bool.to_der).to eq("\x01\x01\x00".force_encoding('BINARY'))
+        expect(bool.to_der).to eq(binary("\x01\x01\x00"))
       end
 
       it 'generates a DER string according to optional' do
@@ -47,18 +47,18 @@ module RASN1::Types
         bool.value = nil
         expect(bool.to_der).to eq('')
         bool.value = true
-        expect(bool.to_der).to eq("\x01\x01\xff".force_encoding('BINARY'))
+        expect(bool.to_der).to eq(binary("\x01\x01\xff"))
       end
     end
 
     describe '#parse!' do
       let(:bool) { Boolean.new(:bool) }
-      let(:ber) { "\x01\x01\x56".force_encoding('BINARY') }
+      let(:ber) { binary("\x01\x01\x56") }
 
       it 'parses a DER BOOLEAN string' do
-        bool.parse!("\x01\x01\x00".force_encoding('BINARY'))
+        bool.parse!(binary("\x01\x01\x00"))
         expect(bool.value).to be(false)
-        bool.parse!("\x01\x01\xFF".force_encoding('BINARY'))
+        bool.parse!(binary("\x01\x01\xFF"))
         expect(bool.value).to be(true)
       end
 

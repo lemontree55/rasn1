@@ -107,7 +107,7 @@ module RASN1::Types
       it 'generates a DER string according to ASN.1 class' do
         enum = Enumerated.new(:enum, enum: enumerated, class: :application)
         enum.value = :a
-        expect(enum.to_der).to eq("\x42\x01\x00".force_encoding('BINARY'))
+        expect(enum.to_der).to eq(binary("\x42\x01\x00"))
       end
 
       it 'generates a DER string according to default' do
@@ -115,7 +115,7 @@ module RASN1::Types
         enum.value = :a
         expect(enum.to_der).to eq('')
         enum.value = :b
-        expect(enum.to_der).to eq("\x02\x01\x01".force_encoding('BINARY'))
+        expect(enum.to_der).to eq(binary("\x02\x01\x01"))
       end
 
       it 'generates a DER string according to optional' do
@@ -123,7 +123,7 @@ module RASN1::Types
         enum.value = nil
         expect(enum.to_der).to eq('')
         enum.value = :c
-        expect(enum.to_der).to eq("\x02\x01\x02".force_encoding('BINARY'))
+        expect(enum.to_der).to eq(binary("\x02\x01\x02"))
       end
     end
 

@@ -42,21 +42,21 @@ module RASN1::Types
       it 'generates a DER string' do
         int = Integer.new(:int)
         int.value = 42
-        expect(int.to_der).to eq("\x02\x01\x2a".force_encoding('BINARY'))
+        expect(int.to_der).to eq(binary("\x02\x01\x2a"))
         int.value = 65536
-        expect(int.to_der).to eq("\x02\x03\x01\x00\x00".force_encoding('BINARY'))
+        expect(int.to_der).to eq(binary("\x02\x03\x01\x00\x00"))
         int.value = 255
-        expect(int.to_der).to eq("\x02\x02\x00\xff".force_encoding('BINARY'))
+        expect(int.to_der).to eq(binary("\x02\x02\x00\xff"))
         int.value = -1
-        expect(int.to_der).to eq("\x02\x01\xff".force_encoding('BINARY'))
+        expect(int.to_der).to eq(binary("\x02\x01\xff"))
         int.value = -543210
-        expect(int.to_der).to eq("\x02\x03\xf7\xb6\x16".force_encoding('BINARY'))
+        expect(int.to_der).to eq(binary("\x02\x03\xf7\xb6\x16"))
       end
 
       it 'generates a DER string according to ASN.1 class' do
         int = Integer.new(:int, class: :application)
         int.value = 16
-        expect(int.to_der).to eq("\x42\x01\x10".force_encoding('BINARY'))
+        expect(int.to_der).to eq(binary("\x42\x01\x10"))
       end
 
       it 'generates a DER string according to default' do
@@ -64,7 +64,7 @@ module RASN1::Types
         int.value = 545
         expect(int.to_der).to eq('')
         int.value = 65000
-        expect(int.to_der).to eq("\x02\x03\x00\xfd\xe8".force_encoding('BINARY'))
+        expect(int.to_der).to eq(binary("\x02\x03\x00\xfd\xe8"))
       end
 
       it 'generates a DER string according to optional' do
@@ -72,7 +72,7 @@ module RASN1::Types
         int.value = nil
         expect(int.to_der).to eq('')
         int.value = 545
-        expect(int.to_der).to eq("\x02\x02\x02\x21".force_encoding('BINARY'))
+        expect(int.to_der).to eq(binary("\x02\x02\x02\x21"))
       end
     end
 
@@ -80,15 +80,15 @@ module RASN1::Types
      let(:int) { Integer.new(:int) }
 
      it 'parses a DER INTEGER string' do
-       int.parse!("\x02\x01\x00".force_encoding('BINARY'))
+       int.parse!(binary("\x02\x01\x00"))
        expect(int.value).to eq(0)
-       int.parse!("\x02\x02\x00\xff".force_encoding('BINARY'))
+       int.parse!(binary("\x02\x02\x00\xff"))
        expect(int.value).to eq(255)
-       int.parse!("\x02\x03\x01\x00\x00".force_encoding('BINARY'))
+       int.parse!(binary("\x02\x03\x01\x00\x00"))
        expect(int.value).to eq(65536)
-       int.parse!("\x02\x01\xFF".force_encoding('BINARY'))
+       int.parse!(binary("\x02\x01\xFF"))
        expect(int.value).to eq(-1)
-       int.parse!("\x02\x03\xf7\xb6\x16".force_encoding('BINARY'))
+       int.parse!(binary("\x02\x03\xf7\xb6\x16"))
        expect(int.value).to eq(-543210)
      end
    end
