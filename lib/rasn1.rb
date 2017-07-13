@@ -3,7 +3,7 @@ require 'rasn1/types'
 
 # Rasn1 is a pure ruby library to parse, decode and encode ASN.1 data.
 # @author Sylvain Daubert
-module Rasn1
+module RASN1
 
   # Base error class
   class Error < StandardError; end

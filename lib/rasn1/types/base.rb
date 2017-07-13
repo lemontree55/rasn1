@@ -1,4 +1,4 @@
-module Rasn1
+module RASN1
   module Types
 
     # @abstract This is base class for all ASN.1 types.

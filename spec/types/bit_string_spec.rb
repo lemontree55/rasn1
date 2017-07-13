@@ -1,6 +1,6 @@
 require_relative '../spec_helper'
 
-module Rasn1::Types
+module RASN1::Types
 
   describe BitString do
     describe '.type' do
@@ -23,7 +23,7 @@ module Rasn1::Types
       it 'raises if bit length is not set' do
         bs = BitString.new(:bs)
         bs.value = 'NOP'
-        expect { bs.to_der }.to raise_error(Rasn1::ASN1Error)
+        expect { bs.to_der }.to raise_error(RASN1::ASN1Error)
       end
 
       it 'generates a DER string' do

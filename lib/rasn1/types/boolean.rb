@@ -1,4 +1,4 @@
-module Rasn1
+module RASN1
   module Types
 
     # ASN.1 Boolean

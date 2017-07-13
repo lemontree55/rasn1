@@ -5,7 +5,7 @@ require 'rasn1/version'
 
 Gem::Specification.new do |spec|
   spec.name          = 'rasn1'
-  spec.version       = Rasn1::VERSION
+  spec.version       = RASN1::VERSION
   spec.authors       = ['Sylvain Daubert']
   spec.email         = ['sylvain.daubert@laposte.net']
 

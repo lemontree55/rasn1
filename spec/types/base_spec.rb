@@ -1,6 +1,6 @@
 require_relative '../spec_helper'
 
-module Rasn1::Types
+module RASN1::Types
 
   describe Base do
 
@@ -25,8 +25,8 @@ module Rasn1::Types
       end
 
       it 'raises on unknown class' do
-        expect { Base.new(:name, class: :unknown) }.to raise_error(Rasn1::ClassError)
-        expect { Base.new(:name, class: 'not a symbol') }.to raise_error(Rasn1::ClassError)
+        expect { Base.new(:name, class: :unknown) }.to raise_error(RASN1::ClassError)
+        expect { Base.new(:name, class: 'not a symbol') }.to raise_error(RASN1::ClassError)
       end
 
       it 'sets optional option' do
@@ -67,7 +67,7 @@ module Rasn1::Types
 
       it 'raises on unexpected tag value' do
         bool = Boolean.new(:bool)
-        expect { bool.parse!(unexpected_der) }.to raise_error(Rasn1::ASN1Error).
+        expect { bool.parse!(unexpected_der) }.to raise_error(RASN1::ASN1Error).
           with_message('Expected tag UNIVERSAL PRIMITIVE BOOLEAN but get UNIVERSAL PRIMITIVE INTEGER for bool')
       end
 
@@ -91,7 +91,7 @@ module Rasn1::Types
       it 'raises on indefinite length with primitive types' do
         bool = Boolean.new(:bool)
         der = "\x01\x80\xff\x00\x00".force_encoding('BINARY')
-        expect { bool.parse!(der) }.to raise_error(Rasn1::ASN1Error).
+        expect { bool.parse!(der) }.to raise_error(RASN1::ASN1Error).
           with_message('malformed BOOLEAN TAG (bool): indefinite length forbidden for primitive types')
       end
 

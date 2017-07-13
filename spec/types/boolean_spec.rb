@@ -1,6 +1,6 @@
 require_relative '../spec_helper'
 
-module Rasn1::Types
+module RASN1::Types
 
   describe Boolean do
     describe '.type' do
@@ -68,7 +68,7 @@ module Rasn1::Types
       end
 
       it 'raises on a BER BOOLEAN string if ber parameter is not set' do
-        expect { bool.parse!(ber) }.to raise_error(Rasn1::ASN1Error, /bad value 0x56/)
+        expect { bool.parse!(ber) }.to raise_error(RASN1::ASN1Error, /bad value 0x56/)
       end
     end
   end

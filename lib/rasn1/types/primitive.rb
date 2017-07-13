@@ -1,4 +1,4 @@
-module Rasn1
+module RASN1
   module Types
 
     # @abstract This class SHOULD be used as base class for all ASN.1 primitive

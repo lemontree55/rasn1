@@ -1,4 +1,4 @@
-module Rasn1
+module RASN1
   # This modules is a namesapce for all ASN.1 type classes.
   # @author Sylvain Daubert
   module Types

@@ -31,7 +31,7 @@ Record ::= SEQUENCE {
 ## Create a ASN.1 model
 
 ```ruby
-class Record < Rasn1::Model
+class Record < RASN1::Model
 
   set_model sequence(integer(:id),
                      integer(:room, class: :contex, optional: true),
@@ -43,7 +43,7 @@ end
 ## Parse a DER-encoded string
 ```ruby
 record = Record.parse(der_string)
-record[:id]             # => Rasn1::Types::Integer
+record[:id]             # => RASN1::Types::Integer
 record[:id].value       # => Integer
 record[:id].to_i        # => Integer
 record[:id].asn1_class  # => Symbol

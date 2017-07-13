@@ -1,6 +1,6 @@
 require_relative '../spec_helper'
 
-module Rasn1::Types
+module RASN1::Types
 
   describe Integer do
     describe '.type' do
