@@ -34,7 +34,7 @@ module Rasn1
 
       def self.type
         return @type if @type
-        @type = self.to_s.gsub(/.*::/, '').upcase
+        @type = self.to_s.gsub(/.*::/, '').gsub(/([a-z])([A-Z])/, '\1 \2').upcase
       end
 
 
@@ -161,12 +161,16 @@ module Rasn1
         @default = default
       end
 
+      def build_tag?
+        !(!@default.nil? and @value == @default) and !(optional? and @value.nil?)
+      end
+
       def build_tag
-        if (!@default.nil? and @value == @default) or (optional? and @value.nil?)
-          ''
-        else
+        if build_tag?
           encoded_value = value_to_der
           encode_tag << encode_size(encoded_value.size) << encoded_value
+        else
+          ''
         end
       end
 
