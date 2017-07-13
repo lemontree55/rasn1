@@ -124,8 +124,10 @@ module RASN1
         elsif length < INDEFINITE_LENGTH
           der_to_value(der[2, length], ber: ber)
         else
-          length = der[2, length & 0x7f].unpack('C*').reduce(0) { |len, b| (len << 8) & b }
-          der_to_value(der[2, length], ber: ber)
+          length_length = length & 0x7f
+          length = der[2, length_length].unpack('C*').
+            reduce(0) { |len, b| (len << 8) | b }
+          der_to_value(der[2 + length_length, length], ber: ber)
         end
       end
 

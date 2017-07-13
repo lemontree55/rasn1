@@ -88,6 +88,15 @@ module RASN1::Types
         expect(bool.value).to be(false)
       end
 
+      it 'parses tags with multi-byte length' do
+        bs = BitString.new(:bs)
+
+        der = "\x03\x82\x01\x03\x00" + 'a' * 0x102
+        bs.parse!(der)
+        expect(bs.value).to eq('a' * 0x102)
+        expect(bs.bit_length).to eq(0x102 * 8)
+      end
+
       it 'raises on indefinite length with primitive types' do
         bool = Boolean.new(:bool)
         der = "\x01\x80\xff\x00\x00".force_encoding('BINARY')
