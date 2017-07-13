@@ -18,4 +18,7 @@ module RASN1
       "Tag class should be a symbol: #{Types::Base::CLASSES.keys.join(', ')}"
     end
   end
+
+  # Enumerated error
+  class EnumeratedError < Error; end
 end

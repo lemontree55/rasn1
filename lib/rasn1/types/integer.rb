@@ -13,16 +13,17 @@ module RASN1
 
       private
 
-      def value_to_der
-        size = @value.bit_length / 8 + (@value.bit_length % 8 > 0 ? 1 : 0)
+      def value_to_der(value=nil)
+        v = value || @value
+        size = v.bit_length / 8 + (v.bit_length % 8 > 0 ? 1 : 0)
         size = 1 if size == 0
-        comp_value = if @value > 0
+        comp_value = if v > 0
                        # If MSB is 1, increment size to set initial octet
                        # to 0 to amrk it as a positive integer
-                       size += 1 if @value >> (size * 8 - 1) == 1
-                       @value
+                       size += 1 if v >> (size * 8 - 1) == 1
+                       v
                      else
-                       ~(@value.abs) + 1
+                       ~(v.abs) + 1
                      end
         ary = []
         size.times { ary << (comp_value & 0xff); comp_value >>= 8 }
