@@ -6,6 +6,11 @@ module RASN1
     class Integer < Primitive
       TAG = 0x02
 
+      # @return [Integer]
+      def to_i
+        @value || @default || 0
+      end
+
       private
 
       def value_to_der
@@ -30,10 +35,6 @@ module RASN1
         if ary[0] & 0x80 == 0x80
           @value = -((~@value & ((1 << @value.bit_length) - 1)) + 1)
         end
-      end
-
-      def to_i
-        @value || 0
       end
     end
   end

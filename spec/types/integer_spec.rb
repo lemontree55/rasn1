@@ -19,6 +19,25 @@ module RASN1::Types
       end
     end
 
+    describe '#to_i' do
+      it 'gets ruby Integer object' do
+        int = Integer.new(:int)
+        int.value = 53
+        expect(int.to_i).to eq(53)
+      end
+
+      it 'gets default value is one is defined and not value was set' do
+        int = Integer.new(:int, default: 123456)
+        expect(int.to_i).to eq(123456)
+        int.value = 12
+        expect(int.to_i).to eq(12)
+      end
+
+      it 'returns 0 if no default value nor value were set' do
+        expect(Integer.new(:int).to_i).to eq(0)
+      end
+    end
+
     describe '#to_der' do
       it 'generates a DER string' do
         int = Integer.new(:int)
