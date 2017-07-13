@@ -19,6 +19,7 @@ Or install it yourself as:
     $ gem install rasn1
 
 ## Usage
+All examples below will be based on:
 
 ```
 Record ::= SEQUENCE {
@@ -34,8 +35,8 @@ Record ::= SEQUENCE {
 class Record < RASN1::Model
 
   set_model sequence(integer(:id),
-                     integer(:room, class: :contex, optional: true),
-		     integer(:house, class: :contex, default: 0))
+                     integer(:room, implicit: 0, optional: true),
+		     integer(:house, implicit: 1, default: 0))
 end
                            
 ```
@@ -62,8 +63,12 @@ record[:id].to_i      # => 12
 record[:room]         # => nil
 record[:house]        # => 0
 
-record.set :room, 43
+# Set one value
+record[:room] = 43
 record[:room]         # => 43
+
+# Set mulitple values
+record.set id: 124, house: 155
 
 record.to_der         # => String
 ```
