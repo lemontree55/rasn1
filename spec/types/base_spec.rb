@@ -97,6 +97,16 @@ module RASN1::Types
         expect(bs.bit_length).to eq(0x102 * 8)
       end
 
+      it 'returns total number of parsed bytes' do
+        int = Integer.new(:int)
+        bytes = int.parse!("\x02\x01\x01".force_encoding('BINARY'))
+        expect(bytes).to eq(3)
+        expect(int.value).to eq(1)
+        bytes = int.parse!("\x02\x01\x01\x02".force_encoding('BINARY'))
+        expect(bytes).to eq(3)
+        expect(int.value).to eq(1)
+      end
+
       it 'raises on indefinite length with primitive types' do
         bool = Boolean.new(:bool)
         der = "\x01\x80\xff\x00\x00".force_encoding('BINARY')

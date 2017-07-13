@@ -153,12 +153,12 @@ module RASN1
       # Parse a DER string. This method updates object.
       # @param [String] DER string
       # @param [Boolean] ber if +true+, accept BER encoding
-      # @return [void]
+      # @return [Integer] total number of parsed bytes
       # @raise [ASN1Error] error on parsing
       def parse!(der, ber: false)
         return unless check_tag(der)
 
-        data = get_data(der)
+        total_length, data = get_data(der)
         if explicit?
           type = self.class.new(@name)
           type.parse!(data)
@@ -166,6 +166,8 @@ module RASN1
         else
           der_to_value(data, ber: ber)
         end
+
+        total_length
       end
 
 
@@ -296,7 +298,14 @@ module RASN1
           data = der[2 + length_length, length]
         end
 
-        data
+        total_length = 1 + length
+        if defined? length_lengh
+          total_length += length_length
+        else
+          total_length += 1
+        end
+
+        [total_length, data]
       end
 
       def raise_tag_error(expected_tag, tag)
