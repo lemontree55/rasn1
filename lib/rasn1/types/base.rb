@@ -156,7 +156,7 @@ module RASN1
       # @return [Integer] total number of parsed bytes
       # @raise [ASN1Error] error on parsing
       def parse!(der, ber: false)
-        return unless check_tag(der)
+        return 0 unless check_tag(der)
 
         total_length, data = get_data(der)
         if explicit?
@@ -216,7 +216,8 @@ module RASN1
       end
 
       def build_tag?
-        !(!@default.nil? and @value == @default) and !(optional? and @value.nil?)
+        !(!@default.nil? and (@value.nil? or @value == @default)) and
+          !(optional? and @value.nil?)
       end
 
       def build_tag

@@ -30,8 +30,8 @@ module RASN1
       private
 
       def build_tag?
-        !(!@default.nil? and @value == @default and
-          @bit_length == @default_bit_length) and
+        !(!@default.nil? and (@value.nil? or @value == @default and
+                              @bit_length == @default_bit_length)) and
           !(optional? and @value.nil?)
       end
 
