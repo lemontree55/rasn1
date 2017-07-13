@@ -7,6 +7,38 @@ module RASN1
     #   * a TAG constant defining ASN.1 tag number,
     #   * a private method {#value_to_der} converting its {#value} to DER,
     #   * a private method {#der_to_value} converting DER into {#value}.
+    #
+    # ==Define an optional value
+    # An optional value may be defined using +:optional+ key from {#initialize}:
+    #   Integer.new(:int, optional: true)
+    # An optional value implies:
+    # * while parsing, if decoded tag is not optional expected tag, no {ASN1Error}
+    #   is raised, and parser tries net tag,
+    # * while encoding, if {#value} is +nil+, this value is not encoded.
+    # ==Define a default value
+    # A default value may be defined using +:default+ key from {#initialize}:
+    #  Integer.new(:int, default: 0)
+    # A default value implies:
+    # * while parsing, if decoded tag is not expected tag, no {ASN1Error} is raised
+    #   and parser sets default value to this tag. Then parser tries nex tag,
+    # * while encoding, if {#value} is equal to default value, this value is not
+    #   encoded.
+    # ==Define a tagged value
+    # ASN.1 permits to define tagged values.
+    # By example:
+    #  -- context specific tag
+    #  CType ::= [0] EXPLICIT INTEGER
+    #  -- application specific tag
+    #  AType ::= [APPLICATION 1] EXPLICIT INTEGER
+    #  -- private tag
+    #  PType ::= [PRIVATE 2] EXPLICIT INTEGER
+    # These types may be defined as:
+    #  ctype = RASN1::Types::Integer.new(:ctype, explicit: 0)                      # with explicit, default #asn1_class is :context
+    #  atype = RASN1::Types::Integer.new(:atype, explicit: 1, class: :application)
+    #  ptype = RASN1::Types::Integer.new(:ptype, explicit: 2, class: :private)
+    #
+    # Implicit tagged values may also be defined:
+    #  ctype_implicit = RASN1::Types::Integer.new(:ctype, implicit: 0)
     # @author Sylvain Daubert
     class Base
       # Allowed ASN.1 tag classes
@@ -55,6 +87,26 @@ module RASN1
         @optional
       end
 
+      # Say if this type is tagged or not
+      # @return [::Boolean]
+      def tagged?
+        !@tag.nil?
+      end
+
+      # Say if a tagged type is explicit
+      # @return [::Boolean,nil] return +nil+ if not tagged, return +true+
+      #   if explicit, else +false+
+      def explicit?
+        @tag.nil? ? @tag : @tag == :explicit
+      end
+
+      # Say if a tagged type is implicit
+      # @return [::Boolean,nil] return +nil+ if not tagged, return +true+
+      #   if implicit, else +false+
+      def implicit?
+        @tag.nil? ? @tag : @tag == :implicit
+      end
+
       # @abstract This method SHOULD be partly implemented by subclasses, which
       #   SHOULD respond to +#value_to_der+.
       # @return [String] DER-formated string
@@ -90,6 +142,12 @@ module RASN1
         self.class.type
       end
 
+      # Get tag value
+      # @return [Integer]
+      def tag
+        (@tag_value || self.class::TAG) | CLASSES[@asn1_class] | self.class::ASN1_PC
+      end
+
       # @abstract This method SHOULD be partly implemented by subclasses to parse
       #  data. Subclasses SHOULD respond to +#der_to_value+.
       # Parse a DER string. This method updates object.
@@ -98,36 +156,15 @@ module RASN1
       # @return [void]
       # @raise [ASN1Error] error on parsing
       def parse!(der, ber: false)
-        tag = der[0, 1]
-        length = der[1, 1].unpack('C').first
-        if tag != encode_tag
-          if optional?
-            @value = nil
-          elsif !@default.nil?
-            @value = @default
-          else
-            raise_tag_error(encode_tag, tag)
-          end
-          return
-        end
+        return unless check_tag(der)
 
-        if length == INDEFINITE_LENGTH
-          if primitive?
-            raise ASN1Error, "malformed #{type} TAG (#@name): indefinite length forbidden for primitive types"
-          else
-            if ber
-              raise NotImplementedError, "TAG #@name: indefinite length not supported yet"
-            else
-              raise ASN1Error, "TAG #@name: indefinite length forbidden in DER encoding"
-            end
-          end
-        elsif length < INDEFINITE_LENGTH
-          der_to_value(der[2, length], ber: ber)
+        data = get_data(der)
+        if explicit?
+          type = self.class.new(@name)
+          type.parse!(data)
+          @value = type.value
         else
-          length_length = length & 0x7f
-          length = der[2, length_length].unpack('C*').
-            reduce(0) { |len, b| (len << 8) | b }
-          der_to_value(der[2 + length_length, length], ber: ber)
+          der_to_value(data, ber: ber)
         end
       end
 
@@ -138,6 +175,7 @@ module RASN1
         set_class options[:class]
         set_optional options[:optional]
         set_default options[:default]
+        set_tag options
       end
 
       def set_class(asn1_class)
@@ -163,13 +201,31 @@ module RASN1
         @default = default
       end
 
+      def set_tag(options)
+        if options[:explicit]
+          @tag = :explicit
+          @tag_value = options[:explicit]
+        elsif options[:implicit]
+          @tag = :implicit
+          @tag_value = options[:implicit]
+        end
+
+        @asn1_class = :context if @tag and @asn1_class == :universal
+      end
+
       def build_tag?
         !(!@default.nil? and @value == @default) and !(optional? and @value.nil?)
       end
 
       def build_tag
         if build_tag?
-          encoded_value = value_to_der
+          if explicit?
+            v = self.class.new(nil)
+            v.value = @value
+            encoded_value = v.to_der
+          else
+            encoded_value = value_to_der
+          end
           encode_tag << encode_size(encoded_value.size) << encoded_value
         else
           ''
@@ -177,9 +233,8 @@ module RASN1
       end
 
       def encode_tag
-        tag = self.class::TAG
-        if tag <= MAX_TAG
-          [tag | CLASSES[@asn1_class] | self.class::ASN1_PC].pack('C')
+        if (@tag_value || self.class::TAG) <= MAX_TAG
+          [tag].pack('C')
         else
           raise ASN1Error, 'multi-byte tag value are not supported'
         end
@@ -199,6 +254,49 @@ module RASN1
         else
           [size].pack('C')
         end
+      end
+
+      def check_tag(der)
+        tag = der[0, 1]
+        if tag != encode_tag
+          if optional?
+            @value = nil
+          elsif !@default.nil?
+            @value = @default
+          else
+            raise_tag_error(encode_tag, tag)
+          end
+          false
+        else
+          true
+        end
+      end
+
+      def get_data(der)
+        length = der[1, 1].unpack('C').first
+        if length == INDEFINITE_LENGTH
+          if primitive?
+            raise ASN1Error, "malformed #{type} TAG (#@name): indefinite length " \
+              "forbidden for primitive types"
+          else
+            if ber
+              raise NotImplementedError, "TAG #@name: indefinite length not " \
+                "supported yet"
+            else
+              raise ASN1Error, "TAG #@name: indefinite length forbidden in DER " \
+                "encoding"
+            end
+          end
+        elsif length < INDEFINITE_LENGTH
+          data = der[2, length]
+        else
+          length_length = length & 0x7f
+          length = der[2, length_length].unpack('C*').
+            reduce(0) { |len, b| (len << 8) | b }
+          data = der[2 + length_length, length]
+        end
+
+        data
       end
 
       def raise_tag_error(expected_tag, tag)

@@ -107,5 +107,85 @@ module RASN1::Types
       it 'raises on indefinite length with constructed types on DER encoding'
       it 'raises on indefinite length with constructed types on BER encoding'
     end
+
+    context 'tagged types' do
+      describe '#initialize' do
+        it 'creates an explicit tagged type' do
+          type = Integer.new(:explicit_type, explicit: 5)
+          expect(type.tagged?).to be(true)
+          expect(type.explicit?).to be(true)
+          expect(type.asn1_class).to eq(:context)
+          expect(type.tag).to eq(0x85)
+        end
+
+        it 'creates an explicit application tagged type' do
+          type = Integer.new(:explicit_type, explicit: 0, class: :application)
+          expect(type.tagged?).to be(true)
+          expect(type.explicit?).to be(true)
+          expect(type.asn1_class).to eq(:application)
+          expect(type.tag).to eq(0x40)
+        end
+
+        it 'creates an explicit private tagged type' do
+          type = Integer.new(:explicit_type, explicit: 15, class: :private)
+          expect(type.tagged?).to be(true)
+          expect(type.explicit?).to be(true)
+          expect(type.asn1_class).to eq(:private)
+          expect(type.tag).to eq(0xcf)
+        end
+
+        it 'creates an implicit tagged type' do
+          type = Integer.new(:implicit_type, implicit: 5)
+          expect(type.tagged?).to be(true)
+          expect(type.implicit?).to be(true)
+          expect(type.asn1_class).to eq(:context)
+          expect(type.tag).to eq(0x85)
+        end
+
+        it 'creates an implicit application tagged type' do
+          type = Integer.new(:implicit_type, implicit: 0, class: :application)
+          expect(type.tagged?).to be(true)
+          expect(type.implicit?).to be(true)
+          expect(type.asn1_class).to eq(:application)
+          expect(type.tag).to eq(0x40)
+        end
+
+        it 'creates an implicit private tagged type' do
+          type = Integer.new(:implicit_type, implicit: 15, class: :private)
+          expect(type.tagged?).to be(true)
+          expect(type.implicit?).to be(true)
+          expect(type.asn1_class).to eq(:private)
+          expect(type.tag).to eq(0xcf)
+        end
+      end
+
+      describe '#to_der' do
+        it 'creates a DER string with explicit tagged type' do
+          type = Integer.new(:explicit_type, explicit: 5)
+          type.value = 48
+          expect(type.to_der).to eq("\x85\x03\x02\x01\x30".force_encoding('BINARY'))
+        end
+
+        it 'creates a DER string with implicit tagged type' do
+          type = Integer.new(:explicit_type, implicit: 5)
+          type.value = 48
+          expect(type.to_der).to eq("\x85\x01\x30".force_encoding('BINARY'))
+        end
+      end
+
+      describe '#parse!' do
+        it 'parses a DER string with explicit tagged type' do
+          type = Integer.new(:explicit_type, explicit: 5)
+          type.parse!("\x85\x03\x02\x01\x30".force_encoding('BINARY'))
+          expect(type.value).to eq(48)
+        end
+
+        it 'parses a DER string with implicit tagged type' do
+          type = Integer.new(:implicit_type, implicit: 5)
+          type.parse!("\x85\x01\x30".force_encoding('BINARY'))
+          expect(type.value).to eq(48)
+        end
+      end
+    end
   end
 end
