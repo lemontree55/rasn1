@@ -158,7 +158,7 @@ module RASN1
       def parse!(der, ber: false)
         return 0 unless check_tag(der)
 
-        total_length, data = get_data(der)
+        total_length, data = get_data(der, ber)
         if explicit?
           type = self.class.new(@name)
           type.parse!(data)
@@ -275,7 +275,7 @@ module RASN1
         end
       end
 
-      def get_data(der)
+      def get_data(der, ber)
         length = der[1, 1].unpack('C').first
         if length == INDEFINITE_LENGTH
           if primitive?

@@ -114,8 +114,18 @@ module RASN1::Types
           with_message('malformed BOOLEAN TAG (bool): indefinite length forbidden for primitive types')
       end
 
-      it 'raises on indefinite length with constructed types on DER encoding'
-      it 'raises on indefinite length with constructed types on BER encoding'
+      context 'raises on indefinite length with constructed types' do
+        let(:der) { binary("\x30\x80\x01\x01\xFF\x00\x00") }
+        let(:seq) { seq = Sequence.new(:seq); seq.value = [Boolean.new(:bool)]; seq }
+
+        it 'on DER encoding' do
+          expect { seq.parse!(der) }.to raise_error(RASN1::ASN1Error)
+        end
+
+        it 'on BER encoding' do
+          expect { seq.parse!(der, ber: true) }.to raise_error(NotImplementedError)
+        end
+      end
     end
 
     context 'tagged types' do
