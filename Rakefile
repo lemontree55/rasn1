@@ -4,7 +4,7 @@ require 'yard'
 
 RSpec::Core::RakeTask.new
 YARD::Rake::YardocTask.new do |t|
-  t.files = ['lib/**/*.rb', 'README.md', 'LICENSE']
+  t.files = ['lib/**/*.rb', '-', 'README.md', 'LICENSE']
   t.options = %w(--no-private)
 end
 
