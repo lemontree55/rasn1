@@ -1,0 +1,148 @@
+module RASN1
+
+  # @abstract
+  # {Model} class is a base class to define ASN.1 models.
+  # == Create a ASN.1 model
+  # Given this ASN.1 example:
+  #  Record ::= SEQUENCE {
+  #    id        INTEGER,
+  #    room  [0] IMPLICIT INTEGER OPTIONAL,
+  #    house [1] EXPLICIT INTEGER DEFAULT 0
+  #  }
+  # you may create your model like this:
+  #  class Record < RASN1::Model
+  #    sequence(:record,
+  #             content: [integer(:id),
+  #                       integer(:room, implicit: 0, optional: true),
+  #                       integer(:house, explicit: 1, default: 0)])
+  #  end
+  #
+  # == Parse a DER-encoded string
+  #  record = Record.parse(der_string)
+  #  record[:id]             # => RASN1::Types::Integer
+  #  record[:id].value       # => Integer
+  #  record[:id].to_i        # => Integer
+  #  record[:id].asn1_class  # => Symbol
+  #  record[:id].optional?   # => false
+  #  record[:id].default     # => nil
+  #  record[:room].optional  # => true
+  #  record[:house].default  # => 0
+  #
+  # You may also parse a BER-encoded string this way:
+  #  record = Record.parse(der_string, ber: true)
+  #
+  # == Generate a DER-encoded string
+  #  record = Record.new(id: 12, room: 24)
+  #  record.to_der
+  # @author Sylvain Daubert
+  class Model
+
+    class << self
+
+      # Define a SEQUENCE type
+      # @param [Hash] options
+      # @option options [Array] :content
+      # @see Types::Sequence#initialize
+      # @return [Types::Sequence]
+      def sequence(name, options={})
+        @records ||= {}
+        @records[name] = Proc.new do
+          seq = Types::Sequence.new(name, options)
+          seq.value = options[:content] if options[:content]
+          seq
+        end
+      end
+
+      # define all class methods to instance a ASN.1 TAG
+      Types.primitives.each do |prim|
+        class_eval "def #{prim.type.downcase.gsub(/\s+/, '_')}(name, options={})\n" \
+                   "  Proc.new { #{prim.to_s}.new(name, options) }\n" \
+                   "end"
+      end
+    end
+
+    # Create a new instance of a {Model}
+    # @param [Hash] args
+    def initialize(args={})
+      set_elements
+    end
+
+    # Give access to element +name+ in model
+    # @param [String,Symbol] name
+    # @return [Types::Base]
+    def [](name)
+      @elements[name]
+    end
+
+    # Get name frm root type
+    # @return [String,Symbol]
+    def name
+      @elements[@root].name
+    end
+
+    # Return a hash image of model
+    # @return [Hash]
+    def to_h
+      { @root => private_to_h(@elements[@root]) }
+    end
+
+    # @return [String]
+    def to_der
+      @elements[@root].to_der
+    end
+
+
+    private
+
+    def set_elements(element=nil)
+      if element.nil?
+        records = self.class.class_eval { @records }
+        @root = records.keys.first
+        @elements = {}
+        @elements[@root] = records[@root].call
+        if @elements[@root].value.is_a? Array
+          @elements[@root].value = @elements[@root].value.map do |subel|
+            se = case subel
+                 when Proc
+                   subel.call
+                 when Class
+                   subel.new
+                 end
+            @elements[se.name] = se
+            set_elements se if se.is_a? Types::Sequence
+            se
+          end
+        end
+      else
+        element.value.map! do |subel|
+          se = case subel
+               when Proc
+                 subel.call
+               when Class
+                 subel.new
+               end
+          @elements[se.name] = se
+          set_elements se if se.is_a? Types::Sequence
+          se
+        end
+      end
+    end
+
+    def private_to_h(element)
+      h = {}
+      element.value.each do |subel|
+        h[subel.name] = case subel
+                        when Types::Sequence
+                          private_to_h(subel)
+                        when Model
+                          subel.to_h[subel.name]
+                        else
+                          next if subel.value.nil? and subel.optional?
+                          subel.value
+                        end
+      end
+
+      h
+    end
+  end
+end
