@@ -62,8 +62,10 @@ module RASN1
       # @return [Object,nil] default value, if defined
       attr_reader :default
       # @return [Object]
-      attr_accessor :value
+      attr_writer :value
 
+      # Get ASN.1 type
+      # @return [String]
       def self.type
         return @type if @type
         @type = self.to_s.gsub(/.*::/, '').gsub(/([a-z])([A-Z])/, '\1 \2').upcase
@@ -80,6 +82,15 @@ module RASN1
         @name = name
 
         set_options options
+      end
+
+      # Get value or default value
+      def value
+        if @value.nil?
+          @default
+        else
+          @value
+        end
       end
 
       # @return [::Boolean]
