@@ -23,6 +23,12 @@ module RASN1
       end
     end
 
+    describe '#name' do
+      it 'returns name of root element' do
+        expect(ModelTest.new.name).to eq(:record)
+      end
+    end
+
     describe '#to_h' do
       it 'generates a Hash image of model' do
         test = ModelTest.new
