@@ -19,6 +19,7 @@ module RASN1
   OPTIONAL_VALUE = "\x30\x0b\x02\x03\x01\x00\x01\x81\x04\x02\x02\x12\x34".force_encoding('BINARY')
   DEFAULT_VALUE = "\x30\x08\x02\x03\x01\x00\x01\x80\x01\x2b".force_encoding('BINARY')
   NESTED_VALUE = "\x30\x0d\x01\x01\xff\x30\x08\x02\x03\x01\x00\x01\x80\x01\x2b".force_encoding('BINARY')
+  ERRORED_VALUE = "\x01\x01\x00"
 
   describe Model do
     describe '#initialize' do
@@ -72,6 +73,38 @@ module RASN1
       it 'generates a DER string from a nested model' do
         test2 = ModelTest2.new(rented: true, record: { id: 65537, room: 43 })
         expect(test2.to_der).to eq(NESTED_VALUE)
+      end
+    end
+
+    describe '.parse' do
+      it 'parses a DER string from a simple model' do
+        test = ModelTest.parse(SIMPLE_VALUE)
+        expect(test[:id].value).to eq(65537)
+        expect(test[:room].value).to eq(43)
+        expect(test[:house].value).to eq(0x1234)
+      end
+
+      it 'parses a DER string from a simple model, optional value being not present' do
+        test = ModelTest.parse(OPTIONAL_VALUE)
+        expect(test[:id].value).to eq(65537)
+        expect(test[:room].value).to eq(nil)
+        expect(test[:house].value).to eq(0x1234)
+      end
+
+      it 'parses a DER string from a simple model, default value being not present' do
+        test = ModelTest.parse(DEFAULT_VALUE)
+        expect(test[:id].value).to eq(65537)
+        expect(test[:room].value).to eq(43)
+        expect(test[:house].value).to eq(0)
+      end
+
+      it 'parses a DER string from a nested model' do
+        test2 = ModelTest2.parse(NESTED_VALUE)
+        expect(test2.to_h).to eq(record2: { rented: true,
+                                            record: { id: 65537,
+                                                      room: 43,
+                                                      house: 0 }
+                                          })
       end
     end
   end

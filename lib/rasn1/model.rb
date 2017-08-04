@@ -54,7 +54,7 @@ module RASN1
 
     class << self
 
-      # Define a SEQUENCE type
+      # Define a SEQUENCE type. Should be used to define a new subclass of {Model}.
       # @param [Hash] options
       # @option options [Array] :content
       # @see Types::Sequence#initialize
@@ -73,6 +73,16 @@ module RASN1
         class_eval "def #{prim.type.downcase.gsub(/\s+/, '_')}(name, options={})\n" \
                    "  Proc.new { #{prim.to_s}.new(name, options) }\n" \
                    "end"
+      end
+
+      # Parse a DER/BER encoded string
+      # @param [String] str
+      # @param [Boolean] ber accept BER encoding or not
+      # @return [Model]
+      def parse(str, ber: false)
+        model = new
+        model.parse! str, ber: ber
+        model
       end
     end
 
@@ -107,6 +117,13 @@ module RASN1
       @elements[@root].to_der
     end
 
+    # Parse a DER/BER encoded string, and modify object in-place.
+    # @param [String] str
+    # @param [Boolean] ber accept BER encoding or not
+    # @return [Integer] number of parsed bytes
+    def parse!(str, ber: false)
+      @elements[@root].parse!(str, ber: ber)
+    end
 
     private
 
