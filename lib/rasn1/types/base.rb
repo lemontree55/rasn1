@@ -162,7 +162,7 @@ module RASN1
       # @abstract This method SHOULD be partly implemented by subclasses to parse
       #  data. Subclasses SHOULD respond to +#der_to_value+.
       # Parse a DER string. This method updates object.
-      # @param [String] DER string
+      # @param [String] der DER string
       # @param [Boolean] ber if +true+, accept BER encoding
       # @return [Integer] total number of parsed bytes
       # @raise [ASN1Error] error on parsing

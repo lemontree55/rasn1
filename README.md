@@ -38,7 +38,17 @@ class Record < RASN1::Model
                      integer(:room, implicit: 0, optional: true),
                      integer(:house, implicit: 1, default: 0)]
 end
-                           
+```
+
+More comple classes may be designed by nesting simple classes. For example:
+
+```ruby
+class ComplexRecord < RASN1::Model
+  sequence :cplx_record,
+           content: [boolean(:bool),
+	             octet_string(:data, explicit: 0),
+		     Record]
+end
 ```
 
 ## Parse a DER-encoded string
