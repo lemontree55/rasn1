@@ -13,8 +13,12 @@ module RASN1
     sequence :record2,
              content: [boolean(:rented),
                        ModelTest]
-  end                     
-             
+  end
+
+  SIMPLE_VALUE = "\x30\x0e\x02\x03\x01\x00\x01\x80\x01\x2b\x81\x04\x02\x02\x12\x34".force_encoding('BINARY')
+  OPTIONAL_VALUE = "\x30\x0b\x02\x03\x01\x00\x01\x81\x04\x02\x02\x12\x34".force_encoding('BINARY')
+  DEFAULT_VALUE = "\x30\x08\x02\x03\x01\x00\x01\x80\x01\x2b".force_encoding('BINARY')
+  NESTED_VALUE = "\x30\x0d\x01\x01\xff\x30\x08\x02\x03\x01\x00\x01\x80\x01\x2b".force_encoding('BINARY')
 
   describe Model do
     describe '#initialize' do
@@ -47,6 +51,27 @@ module RASN1
                                                 { id: 12, house: 1 }
                                             }
                                  })
+      end
+    end
+
+    describe '#to_der' do
+      it 'generates a DER string from a simple model' do
+        test = ModelTest.new(id: 65537, room: 43, house: 0x1234)
+        expect(test.to_der).to eq(SIMPLE_VALUE)
+      end
+
+      it 'generates a DER string from a simple model, without optional value' do
+        test = ModelTest.new(id: 65537, house: 0x1234)
+        expect(test.to_der).to eq(OPTIONAL_VALUE)
+      end
+
+      it 'generates a DER string from a simple model, without default value' do
+        test = ModelTest.new(id: 65537, room: 43)
+        expect(test.to_der).to eq(DEFAULT_VALUE)
+      end
+      it 'generates a DER string from a nested model' do
+        test2 = ModelTest2.new(rented: true, record: { id: 65537, room: 43 })
+        expect(test2.to_der).to eq(NESTED_VALUE)
       end
     end
   end

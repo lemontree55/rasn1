@@ -2,7 +2,7 @@ module RASN1
 
   # @abstract
   # {Model} class is a base class to define ASN.1 models.
-  # == Create a ASN.1 model
+  # == Create a simple ASN.1 model
   # Given this ASN.1 example:
   #  Record ::= SEQUENCE {
   #    id        INTEGER,
@@ -17,7 +17,7 @@ module RASN1
   #                       integer(:house, explicit: 1, default: 0)])
   #  end
   #
-  # == Parse a DER-encoded string
+  # === Parse a DER-encoded string
   #  record = Record.parse(der_string)
   #  record[:id]             # => RASN1::Types::Integer
   #  record[:id].value       # => Integer
@@ -31,9 +31,24 @@ module RASN1
   # You may also parse a BER-encoded string this way:
   #  record = Record.parse(der_string, ber: true)
   #
-  # == Generate a DER-encoded string
+  # === Generate a DER-encoded string
   #  record = Record.new(id: 12, room: 24)
   #  record.to_der
+  #
+  # == Create a more complex model
+  # Models may be nested. For example:
+  #  class Record2 < RASN1::Model
+  #    sequence(:record2,
+  #             content: [boolean(:rented, default: false),
+  #                       Record])
+  #  end
+  # Set values like this:
+  #  record2 = Record2.new
+  #  record2[:rented] = true
+  #  record2[:record][:id] = 65537
+  #  record2[:record][:room] = 43
+  # or like this:
+  #  record2 = Record2.new(rented: true, record: { id: 65537, room: 43 })
   # @author Sylvain Daubert
   class Model
 
@@ -65,6 +80,7 @@ module RASN1
     # @param [Hash] args
     def initialize(args={})
       set_elements
+      initialize_elements self, args
     end
 
     # Give access to element +name+ in model
@@ -124,6 +140,22 @@ module RASN1
           @elements[se.name] = se
           set_elements se if se.is_a? Types::Sequence
           se
+        end
+      end
+    end
+
+    def initialize_elements(obj, args)
+      args.each do |name, value|
+        if obj[name]
+          if value.is_a? Hash
+            if obj[name].is_a? Model
+              initialize_elements obj[name], value
+            else
+              raise ArgumentError, "element #{name}: may only pass a Hash for Sequence elements"
+            end
+          else
+            obj[name].value = value
+          end
         end
       end
     end
