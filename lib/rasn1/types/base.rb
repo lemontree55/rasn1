@@ -327,12 +327,14 @@ module RASN1
       end
 
       def tag2name(tag)
+        return 'no tag' if tag.nil? or tag.empty?
+
         itag = tag.unpack('C').first
         name = CLASSES.key(itag & 0xc0).to_s.upcase
         name << " #{itag & Constructed::ASN1_PC > 0 ? 'CONSTRUCTED' : 'PRIMITIVE'}"
         type =  Types.constants.map { |c| Types.const_get(c) }.
-          select { |klass| klass < Primitive || klass < Constructed }.
-          find { |klass| klass::TAG == itag & 0x1f }
+                  select { |klass| klass < Primitive || klass < Constructed }.
+                  find { |klass| klass::TAG == itag & 0x1f }
         name << " #{type.nil? ? "0x%02X" % (itag & 0x1f) : type.type }"
       end
     end
