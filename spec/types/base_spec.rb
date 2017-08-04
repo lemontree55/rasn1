@@ -48,6 +48,20 @@ module RASN1::Types
       it 'raises NotImplementedError' do
         expect { Base.new(:name).to_der }.to raise_error(NotImplementedError)
       end
+
+      it 'should encode long length when subclasses' do
+        os = OctetString.new(:os)
+        os.value = binary("\x00") * 65537
+        os_der = os.to_der
+        expect(os_der[1, 4]).to eq(binary("\x83\x01\x00\x01"))
+        expect(os_der[5, os_der.length]).to eq(os.value)
+      end
+
+      it 'should raise on multi-byte tag when subclassed' do
+        int = Integer.new(:int, implicit: 43)
+        int.value = 0
+        expect { int.to_der }.to raise_error(RASN1::ASN1Error, /multi-byte/)
+      end
     end
 
     describe '#primitive?' do

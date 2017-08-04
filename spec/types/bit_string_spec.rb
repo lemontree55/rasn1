@@ -17,6 +17,10 @@ module RASN1::Types
         expect(bs.asn1_class).to eq(:universal)
         expect(bs.default).to eq(nil)
       end
+
+      it 'raises if bit_length option is not set when default value is set' do
+        expect { BitString.new(:bs, default: '123') }.to raise_error(RASN1::ASN1Error)
+      end
     end
     
     describe '#to_der' do

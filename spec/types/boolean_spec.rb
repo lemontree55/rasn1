@@ -70,6 +70,13 @@ module RASN1::Types
       it 'raises on a BER BOOLEAN string if ber parameter is not set' do
         expect { bool.parse!(ber) }.to raise_error(RASN1::ASN1Error, /bad value 0x56/)
       end
+
+      it 'raises on malformed BOOLEAN (size not equak 1)' do
+        ber = binary("\x01\x00")
+        expect {bool.parse!(ber) }.to raise_error(RASN1::ASN1Error, /length of 1/)
+        ber = binary("\x01\x02\xff\xff")
+        expect {bool.parse!(ber) }.to raise_error(RASN1::ASN1Error, /length of 1/)
+      end
     end
   end
 end

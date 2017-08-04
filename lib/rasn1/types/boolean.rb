@@ -13,7 +13,7 @@ module RASN1
       end
 
       def der_to_value(der, ber: false)
-        if der.size > 1
+        unless der.size == 1
           raise ASN1Error, "tag #@name: BOOLEAN should have a length of 1"
         end
 
