@@ -92,7 +92,7 @@ module RASN1::Types
         bs = BitString.new(:bs)
 
         der = "\x03\x82\x01\x03\x00" + 'a' * 0x102
-        bs.parse!(der)
+        expect(bs.parse!(der)).to eq(0x107)
         expect(bs.value).to eq('a' * 0x102)
         expect(bs.bit_length).to eq(0x102 * 8)
       end

@@ -288,6 +288,8 @@ module RASN1
 
       def get_data(der, ber)
         length = der[1, 1].unpack('C').first
+        length_length = 0
+
         if length == INDEFINITE_LENGTH
           if primitive?
             raise ASN1Error, "malformed #{type} TAG (#@name): indefinite length " \
@@ -310,12 +312,8 @@ module RASN1
           data = der[2 + length_length, length]
         end
 
-        total_length = 1 + length
-        if defined? length_lengh
-          total_length += length_length
-        else
-          total_length += 1
-        end
+        total_length = 2 + length
+        total_length += length_length if length_length > 0
 
         [total_length, data]
       end
