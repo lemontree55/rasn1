@@ -33,10 +33,10 @@ Record ::= SEQUENCE {
 
 ```ruby
 class Record < RASN1::Model
-
-  set_model sequence(integer(:id),
+  sequence :record,
+           content: [integer(:id),
                      integer(:room, implicit: 0, optional: true),
-		     integer(:house, implicit: 1, default: 0))
+                     integer(:house, implicit: 1, default: 0)]
 end
                            
 ```
