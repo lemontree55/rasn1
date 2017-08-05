@@ -68,7 +68,7 @@ module RASN1
       # @return [String]
       def self.type
         return @type if @type
-        @type = self.to_s.gsub(/.*::/, '').gsub(/([a-z])([A-Z])/, '\1 \2').upcase
+        @type = self.to_s.gsub(/.*::/, '').gsub(/([a-z0-9])([A-Z])/, '\1 \2').upcase
       end
 
 
