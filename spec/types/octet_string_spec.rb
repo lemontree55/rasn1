@@ -47,6 +47,14 @@ module RASN1::Types
         os.value = 'abc'
         expect(os.to_der).to eq(binary("\x04\x03abc"))
       end
+
+      it 'serializes a Types::Base object when set as value' do
+        os = OctetString.new(:os)
+        int = Integer.new(:int)
+        int.value = 12
+        os.value = int
+        expect(os.to_der).to eq(binary("\x04\x03\x02\x01\x0c"))
+      end
     end
 
     describe '#parse!' do
