@@ -68,7 +68,7 @@ module RASN1
         when nil
           @value = nil
         else
-          raise TypeError, "TAG #@name: not in enumeration"
+          raise EnumeratedError, "TAG #@name: not in enumeration"
         end
       end
 

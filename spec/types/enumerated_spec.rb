@@ -74,6 +74,11 @@ module RASN1::Types
         expect { enum.value = :d }.to raise_error(RASN1::EnumeratedError,
                                                   /unknwon enumerated value/)
       end
+
+      it 'raises on setting object which is not an Integer nor a String nor a Symbol' do
+        expect { enum.value = Object.new }.to raise_error(RASN1::EnumeratedError,
+                                                          /not in enumeration/)
+      end
     end
 
     describe '#to_i' do
