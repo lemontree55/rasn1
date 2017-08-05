@@ -10,6 +10,7 @@ module RASN1
                                         Types::BitString,
                                         Types::OctetString,
                                         Types::Null,
+                                        Types::ObjectId,
                                         Types::Enumerated])
       end
     end
