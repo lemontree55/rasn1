@@ -22,4 +22,11 @@ module RASN1
 
   # Enumerated error
   class EnumeratedError < Error; end
+
+  # CHOICE error: #chosen not set
+  class ChoiceError < RASN1::Error
+    def message
+      "CHOICE #@name: #chosen not set"
+    end
+  end
 end
