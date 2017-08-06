@@ -18,7 +18,7 @@ module RASN1
 
     describe '.constructed' do
       it 'gives all subclasses of Constructed' do
-        expect(Types.constructed).to eq([Types::Sequence])
+        expect(Types.constructed).to eq([Types::Sequence, Types::Set])
       end
     end
   end
