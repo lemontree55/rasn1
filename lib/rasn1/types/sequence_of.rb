@@ -21,7 +21,8 @@ module RASN1
     #  seqof.value << [0, 'data0']
     #  seqof.value << [1, 'data1']
     # @author Sylvain Daubert
-    class SequenceOf < Sequence
+    class SequenceOf < Constructed
+      TAG = Sequence::TAG
 
       # @return [Class, Base]
       attr_reader :type
