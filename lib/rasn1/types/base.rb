@@ -85,6 +85,11 @@ module RASN1
         set_options options
       end
 
+      # Used by +#dup+ and +#clone+. Deep copy @value.
+      def initialize_copy(other)
+        @value = @value.nil? ? nil : @value.dup
+      end
+
       # Get value or default value
       def value
         if @value.nil?
