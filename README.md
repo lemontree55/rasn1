@@ -1,3 +1,5 @@
+[![Gem Version](https://badge.fury.io/rb/rasn1.svg)](https://badge.fury.io/rb/rasn1)
+
 # Rasn1
 
 Rasn1 will be a ruby ASN.1 library to encode, parse and decode ASN.1 data in DER format.
