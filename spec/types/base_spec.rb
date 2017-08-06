@@ -42,6 +42,11 @@ module RASN1::Types
         base = Base.new(:name, default: '123')
         expect(base.default).to eq('123')
       end
+
+      it 'accepts a value' do
+        int = Integer.new(:int, value: 155)
+        expect(int.value).to eq(155)
+      end
     end
 
     describe '#to_der' do

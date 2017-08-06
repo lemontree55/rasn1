@@ -78,6 +78,7 @@ module RASN1
       # @option options [::Boolean] :optional define this tag as optional. Default
       #   is +false+
       # @option options [Object] :default default value for DEFAULT tag
+      # @option options [Object] :value value to set
       def initialize(name, options={})
         @name = name
 
@@ -189,6 +190,7 @@ module RASN1
         set_optional options[:optional]
         set_default options[:default]
         set_tag options
+        @value = options[:value]
       end
 
       def set_class(asn1_class)
