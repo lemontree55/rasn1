@@ -75,9 +75,9 @@ module RASN1
       #  @see Types::SequenceOf#initialize
       # @method set_of(name, type, options)
       #  @see Types::SetOf#initialize
-      %w(sequence_of set_of).each do |type|
-        klass_name = "Types::#{type.capitalize.gsub(/_(\w)/) { "$1".upcase }}"
-        class_eval "def #{type}(name, type, options={})\n" \
+      %w(sequence set).each do |type|
+        klass_name = "Types::#{type.capitalize}Of"
+        class_eval "def #{type}_of(name, type, options={})\n" \
                    "  @records ||= {}\n" \
                    "  @records[name] = Proc.new do\n" \
                    "    #{klass_name}.new(name, type, options)\n" \
@@ -168,7 +168,7 @@ module RASN1
     def set_elements(element=nil)
       if element.nil?
         records = self.class.class_eval { @records }
-        @root = records.keys.first
+        @root = records.keys.last
         @elements = {}
         @elements[@root] = records[@root].call
         if @elements[@root].value.is_a? Array
