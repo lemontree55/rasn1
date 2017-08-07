@@ -60,7 +60,7 @@ module RASN1
       #  @see Types::Set#initialize
       # @method choice(name, options)
       #  @see Types::Choice#initialize
-      %w(sequence set choice).each do |type|
+      %w(sequence set choice any).each do |type|
         class_eval "def #{type}(name, options={})\n" \
                    "  @records ||= {}\n" \
                    "  @records[name] = Proc.new do\n" \
