@@ -39,6 +39,12 @@ module RASN1
           @bool.value = false
           expect(@seq.to_der).to eq(@der)
         end
+
+        it 'generates a DER string from a DER-valued SEQUENCE' do
+          seq2 = Sequence.new(:seq2)
+          seq2.value = @no_bool_der[2, @no_bool_der.length]
+          expect(seq2.to_der).to eq(@no_bool_der)
+        end
       end
 
       describe '#parse!' do
@@ -54,6 +60,12 @@ module RASN1
           expect(@int.value).to eq(42)
           expect(@bs.value).to eq([1,4,6].pack('C3'))
           expect(@bs.bit_length).to eq(23)
+        end
+
+        it 'parses a DER string without parsing SEQUENCE content' do
+          seq2 = Sequence.new(:seq2)
+          seq2.parse!(@der)
+          expect(seq2.value).to eq(@der[2, @der.length])
         end
       end
     end

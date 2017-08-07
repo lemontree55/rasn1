@@ -199,7 +199,7 @@ module RASN1
                       proc_or_class.new(root: name)
                     end
             @elements[name] = subel
-            set_elements(subel) if is_composed?(subel)
+            set_elements(subel) if is_composed?(subel) and subel.value.is_a? Array
             subel
           end
         end

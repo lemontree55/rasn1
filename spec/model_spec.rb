@@ -15,6 +15,15 @@ module RASN1
                        model(:a_record, ModelTest)]
   end
 
+  class VoidSeq < Model
+    sequence :voidseq
+  end
+
+  class VoidSeq2 < Model
+    sequence :voidseq2,
+             content: [boolean(:bool), sequence(:seq)]
+  end
+
   SIMPLE_VALUE = "\x30\x0e\x02\x03\x01\x00\x01\x80\x01\x2b\x81\x04\x02\x02\x12\x34".force_encoding('BINARY')
   OPTIONAL_VALUE = "\x30\x0b\x02\x03\x01\x00\x01\x81\x04\x02\x02\x12\x34".force_encoding('BINARY')
   DEFAULT_VALUE = "\x30\x08\x02\x03\x01\x00\x01\x80\x01\x2b".force_encoding('BINARY')
@@ -105,6 +114,14 @@ module RASN1
                                                         room: 43,
                                                         house: 0 }
                                           })
+      end
+
+      it 'parses a DER string with a model containing a void SEQUENCE' do
+        voidseq = VoidSeq.parse(SIMPLE_VALUE)
+        expect(voidseq[:voidseq].value).to eq(SIMPLE_VALUE[2, SIMPLE_VALUE.length])
+
+        voidseq2 = VoidSeq2.parse(NESTED_VALUE)
+        expect(voidseq2[:seq].value).to eq(NESTED_VALUE[7..-1])
       end
     end
 
