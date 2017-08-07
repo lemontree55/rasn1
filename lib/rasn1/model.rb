@@ -54,6 +54,10 @@ module RASN1
 
     class << self
 
+      # @method sequence(name, options)
+      #  @see Types::Sequence#initialize
+      # @method set(name, options)
+      #  @see Types::Set#initialize
       %w(sequence set).each do |type|
         class_eval "def #{type}(name, options={})\n" \
                    "  @records ||= {}\n" \
@@ -65,7 +69,22 @@ module RASN1
                    "end"
       end
 
-      # define all class methods to instance a ASN.1 TAG
+      # @method boolean(name, options)
+      #  @see Types::Boolean#initialize
+      # @method integer(name, options)
+      #  @see Types::Integer#initialize
+      # @method bit_string(name, options)
+      #  @see Types::BitString#initialize
+      # @method octet_string(name, options)
+      #  @see Types::OctetString#initialize
+      # @method null(name, options)
+      #  @see Types::Null#initialize
+      # @method object_id(name, options)
+      #  @see Types::ObjecId#initialize
+      # @method enumerated(name, options)
+      #  @see Types::Enumerated#initialize
+      # @method utf8_string(name, options)
+      #  @see Types::Utf8String#initialize
       Types.primitives.each do |prim|
         class_eval "def #{prim.type.downcase.gsub(/\s+/, '_')}(name, options={})\n" \
                    "  Proc.new { #{prim.to_s}.new(name, options) }\n" \
