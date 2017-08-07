@@ -95,16 +95,22 @@ module RASN1
       #  @see Types::OctetString#initialize
       # @method null(name, options)
       #  @see Types::Null#initialize
-      # @method object_id(name, options)
-      #  @see Types::ObjecId#initialize
       # @method enumerated(name, options)
       #  @see Types::Enumerated#initialize
       # @method utf8_string(name, options)
       #  @see Types::Utf8String#initialize
       Types.primitives.each do |prim|
+        next if prim == Types::ObjectId
         class_eval "def #{prim.type.downcase.gsub(/\s+/, '_')}(name, options={})\n" \
                    "  Proc.new { #{prim.to_s}.new(name, options) }\n" \
                    "end"
+      end
+
+      # @note This method is named +objectid+ and not +object_id+ to not override
+      #   +Object#object_id+.
+      # @see Types::ObjectId#initialize
+      def objectid(name, options={})
+        Proc.new { Types::ObjectId.new(name, options) }
       end
 
       # Parse a DER/BER encoded string
