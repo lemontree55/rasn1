@@ -36,6 +36,9 @@ module RASN1
     #  ctype = RASN1::Types::Integer.new(:ctype, explicit: 0)                      # with explicit, default #asn1_class is :context
     #  atype = RASN1::Types::Integer.new(:atype, explicit: 1, class: :application)
     #  ptype = RASN1::Types::Integer.new(:ptype, explicit: 2, class: :private)
+    # Sometimes, an EXPLICIT type should be CONSTRUCTED. To do that, use +:constructed+
+    # option:
+    #  ptype = RASN1::Types::Integer.new(:ptype, explicit: 2, class: :private, constructed: true)
     #
     # Implicit tagged values may also be defined:
     #  ctype_implicit = RASN1::Types::Integer.new(:ctype, implicit: 0)
@@ -74,13 +77,19 @@ module RASN1
 
       # @param [Symbol, String] name name for this tag in grammar
       # @param [Hash] options
-      # @option options [Symbol] :class ASN.1 tag class. Default value is +:universal+
+      # @option options [Symbol] :class ASN.1 tag class. Default value is +:universal+.
+      #  If +:explicit+ or +:implicit:+ is defined, default value is +:context+.
       # @option options [::Boolean] :optional define this tag as optional. Default
       #   is +false+
       # @option options [Object] :default default value for DEFAULT tag
       # @option options [Object] :value value to set
+      # @option options [::Integer] :implicit define an IMPLICIT tagged type
+      # @option options [::Integer] :explicit define an EXPLICIT tagged type
+      # @option options [::Boolean] :constructed if +true+, set type as constructed.
+      #  May only be used when +:explicit+ is defined, else it is discarded.
       def initialize(name, options={})
         @name = name
+        @constructed = nil
 
         set_options options
       end
@@ -137,20 +146,12 @@ module RASN1
 
       # @return [::Boolean] +true+ if this is a primitive type
       def primitive?
-        if self.class < Primitive
-          true
-        else
-          false
-        end
+        (self.class < Primitive) && !@constructed
       end
 
       # @return [::Boolean] +true+ if this is a constructed type
       def constructed?
-        if self.class < Constructed
-          true
-        else
-          false
-        end
+        !!((self.class < Constructed) ||  @constructed)
       end
 
       # Get ASN.1 type
@@ -162,7 +163,12 @@ module RASN1
       # Get tag value
       # @return [Integer]
       def tag
-        (@tag_value || self.class::TAG) | CLASSES[@asn1_class] | self.class::ASN1_PC
+        pc = if  @constructed.nil?
+               self.class::ASN1_PC
+             else
+               Constructed::ASN1_PC
+             end
+        (@tag_value || self.class::TAG) | CLASSES[@asn1_class] | pc
       end
 
       # @abstract This method SHOULD be partly implemented by subclasses to parse
@@ -225,6 +231,7 @@ module RASN1
         if options[:explicit]
           @tag = :explicit
           @tag_value = options[:explicit]
+          @constructed = options[:constructed]
         elsif options[:implicit]
           @tag = :implicit
           @tag_value = options[:implicit]

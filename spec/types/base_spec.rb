@@ -152,6 +152,7 @@ module RASN1::Types
         it 'creates an explicit tagged type' do
           type = Integer.new(:explicit_type, explicit: 5)
           expect(type.tagged?).to be(true)
+          expect(type.constructed?).to be(false)
           expect(type.explicit?).to be(true)
           expect(type.asn1_class).to eq(:context)
           expect(type.tag).to eq(0x85)
@@ -160,6 +161,7 @@ module RASN1::Types
         it 'creates an explicit application tagged type' do
           type = Integer.new(:explicit_type, explicit: 0, class: :application)
           expect(type.tagged?).to be(true)
+          expect(type.constructed?).to be(false)
           expect(type.explicit?).to be(true)
           expect(type.asn1_class).to eq(:application)
           expect(type.tag).to eq(0x40)
@@ -168,9 +170,19 @@ module RASN1::Types
         it 'creates an explicit private tagged type' do
           type = Integer.new(:explicit_type, explicit: 15, class: :private)
           expect(type.tagged?).to be(true)
+          expect(type.constructed?).to be(false)
           expect(type.explicit?).to be(true)
           expect(type.asn1_class).to eq(:private)
           expect(type.tag).to eq(0xcf)
+        end
+
+        it 'creates an explicit constructed tagged type' do
+          type = Integer.new(:explicit_int, explicit: 1, constructed: true, value: 2)
+          expect(type.tagged?).to be(true)
+          expect(type.constructed?).to be(true)
+          expect(type.explicit?).to be(true)
+          expect(type.asn1_class).to eq(:context)
+          expect(type.tag).to eq(0xa1)
         end
 
         it 'creates an implicit tagged type' do
@@ -200,9 +212,11 @@ module RASN1::Types
 
       describe '#to_der' do
         it 'creates a DER string with explicit tagged type' do
-          type = Integer.new(:explicit_type, explicit: 5)
-          type.value = 48
+          type = Integer.new(:explicit_type, explicit: 5, value: 48)
           expect(type.to_der).to eq(binary("\x85\x03\x02\x01\x30"))
+
+          type = Integer.new(:explicit_type, explicit: 5, constructed: true, value: 48)
+          expect(type.to_der).to eq(binary("\xa5\x03\x02\x01\x30"))
         end
 
         it 'creates a DER string with implicit tagged type' do
@@ -216,6 +230,12 @@ module RASN1::Types
         it 'parses a DER string with explicit tagged type' do
           type = Integer.new(:explicit_type, explicit: 5)
           type.parse!(binary("\x85\x03\x02\x01\x30"))
+          expect(type.value).to eq(48)
+        end
+
+        it 'parses a DER string with explicit constructed tagged type' do
+          type = Integer.new(:explicit_contructed, explicit: 5, constructed: true)
+          type.parse!(binary("\xa5\x03\x02\x01\x30"))
           expect(type.value).to eq(48)
         end
 
