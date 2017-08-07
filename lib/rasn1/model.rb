@@ -54,18 +54,15 @@ module RASN1
 
     class << self
 
-      # Define a SEQUENCE type. Should be used to define a new subclass of {Model}.
-      # @param [Hash] options
-      # @option options [Array] :content
-      # @see Types::Sequence#initialize
-      # @return [Types::Sequence]
-      def sequence(name, options={})
-        @records ||= {}
-        @records[name] = Proc.new do
-          seq = Types::Sequence.new(name, options)
-          seq.value = options[:content] if options[:content]
-          seq
-        end
+      %w(sequence set).each do |type|
+        class_eval "def #{type}(name, options={})\n" \
+                   "  @records ||= {}\n" \
+                   "  @records[name] = Proc.new do\n" \
+                   "    t = Types::#{type.capitalize}.new(name, options)\n" \
+                   "    t.value = options[:content] if options[:content]\n" \
+                   "    t\n" \
+                   "  end\n" \
+                   "end"
       end
 
       # define all class methods to instance a ASN.1 TAG
