@@ -12,7 +12,7 @@ module RASN1
   class ModelTest2 < Model
     sequence :record2,
              content: [boolean(:rented),
-                       ModelTest]
+                       model(:a_record, ModelTest)]
   end
 
   SIMPLE_VALUE = "\x30\x0e\x02\x03\x01\x00\x01\x80\x01\x2b\x81\x04\x02\x02\x12\x34".force_encoding('BINARY')
@@ -45,10 +45,10 @@ module RASN1
       it 'generates a Hash image of a nested model' do
         test2 = ModelTest2.new
         test2[:rented].value = true
-        test2[:record][:id].value = 12
-        test2[:record][:house].value = 1
+        test2[:a_record][:id].value = 12
+        test2[:a_record][:house].value = 1
         expect(test2.to_h).to eq({ record2: { rented: true,
-                                              record:
+                                              a_record:
                                                 { id: 12, house: 1 }
                                             }
                                  })
@@ -71,7 +71,7 @@ module RASN1
         expect(test.to_der).to eq(DEFAULT_VALUE)
       end
       it 'generates a DER string from a nested model' do
-        test2 = ModelTest2.new(rented: true, record: { id: 65537, room: 43 })
+        test2 = ModelTest2.new(rented: true, a_record: { id: 65537, room: 43 })
         expect(test2.to_der).to eq(NESTED_VALUE)
       end
     end
@@ -101,11 +101,46 @@ module RASN1
       it 'parses a DER string from a nested model' do
         test2 = ModelTest2.parse(NESTED_VALUE)
         expect(test2.to_h).to eq(record2: { rented: true,
-                                            record: { id: 65537,
-                                                      room: 43,
-                                                      house: 0 }
+                                            a_record: { id: 65537,
+                                                        room: 43,
+                                                        house: 0 }
                                           })
       end
     end
+
+    #context 'complex example' do
+    #  class AttributeTypeAndValue < Model
+    #    sequence :attributeTypeAndValue,
+    #             content: [objectid(:type),
+    #                       any(:value)]
+    #  end
+    #
+    #  class AlgorithmIdentifier < Model
+    #    sequence :algorithmIdentifier
+    #  end
+    #
+    #  class X509Name < Model
+    #    sequence_of :rdnSequence,
+    #                set_of(:relativeDN, AttributeTypeAndValue)
+    #  end
+    #
+    #  class TBSCertificate < Model
+    #    sequence :tbsCertificate,
+    #             content: [integer(:version, explicit: 0, default: 0),
+    #                       integer(:serialNumber),
+    #                       AlgorithmIdentifier,
+    #                       X509Name,
+    #                       sequence(:validity,
+    #                                content: [Time
+    #                      ]
+    #  end
+    #
+    #  class X509Certificate < Model
+    #    sequence :certificate,
+    #             content: [TBSCertificate,
+    #                       AlgorithmIdentifier,
+    #                       bit_string(:signatureValue)]
+    #  end
+    #end
   end
 end

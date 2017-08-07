@@ -40,19 +40,26 @@ module RASN1
   #  class Record2 < RASN1::Model
   #    sequence(:record2,
   #             content: [boolean(:rented, default: false),
-  #                       Record])
+  #                       model(:a_record, Record)])
   #  end
   # Set values like this:
   #  record2 = Record2.new
   #  record2[:rented] = true
-  #  record2[:record][:id] = 65537
-  #  record2[:record][:room] = 43
+  #  record2[:a_record][:id] = 65537
+  #  record2[:a_record][:room] = 43
   # or like this:
-  #  record2 = Record2.new(rented: true, record: { id: 65537, room: 43 })
+  #  record2 = Record2.new(rented: true, a_record: { id: 65537, room: 43 })
   # @author Sylvain Daubert
   class Model
 
     class << self
+
+      # Use another model in this model
+      # @param [String,Symbol] name
+      # @param [Class] model_klass
+      def model(name, model_klass)
+        @root = [name, model_klass]
+      end
 
       # @method sequence(name, options)
       #  @see Types::Sequence#initialize
@@ -62,12 +69,12 @@ module RASN1
       #  @see Types::Choice#initialize
       %w(sequence set choice any).each do |type|
         class_eval "def #{type}(name, options={})\n" \
-                   "  @records ||= {}\n" \
-                   "  @records[name] = Proc.new do\n" \
+                   "  proc = Proc.new do\n" \
                    "    t = Types::#{type.capitalize}.new(name, options)\n" \
                    "    t.value = options[:content] if options[:content]\n" \
                    "    t\n" \
                    "  end\n" \
+                   "  @root = [name, proc]\n" \
                    "end"
       end
 
@@ -78,10 +85,10 @@ module RASN1
       %w(sequence set).each do |type|
         klass_name = "Types::#{type.capitalize}Of"
         class_eval "def #{type}_of(name, type, options={})\n" \
-                   "  @records ||= {}\n" \
-                   "  @records[name] = Proc.new do\n" \
+                   "  proc = Proc.new do\n" \
                    "    #{klass_name}.new(name, type, options)\n" \
                    "  end\n" \
+                   "  @root = [name, proc]\n" \
                    "end"
       end
 
@@ -102,7 +109,8 @@ module RASN1
       Types.primitives.each do |prim|
         next if prim == Types::ObjectId
         class_eval "def #{prim.type.downcase.gsub(/\s+/, '_')}(name, options={})\n" \
-                   "  Proc.new { #{prim.to_s}.new(name, options) }\n" \
+                   "  proc = Proc.new { #{prim.to_s}.new(name, options) }\n" \
+                   "  @root = [name, proc]\n" \
                    "end"
       end
 
@@ -110,7 +118,8 @@ module RASN1
       #   +Object#object_id+.
       # @see Types::ObjectId#initialize
       def objectid(name, options={})
-        Proc.new { Types::ObjectId.new(name, options) }
+        proc = Proc.new { Types::ObjectId.new(name, options) }
+        @root = [name, proc]
       end
 
       # Parse a DER/BER encoded string
@@ -171,41 +180,52 @@ module RASN1
 
     private
 
+    def is_composed?(el)
+      [Types::Sequence, Types::Set, Types::SequenceOf, Types::SetOf].include? el.class
+    end
+
     def set_elements(element=nil)
       if element.nil?
-        records = self.class.class_eval { @records }
-        @root = records.keys.last
+        root = self.class.class_eval { @root }
+        @root = root.first
         @elements = {}
-        @elements[@root] = records[@root].call
+        @elements[@root] = root.last.is_a?(Class) ? root.last.new : root.last.call
         if @elements[@root].value.is_a? Array
-          @elements[@root].value = @elements[@root].value.map do |subel|
-            se = case subel
-                 when Proc
-                   subel.call
-                 when Class
-                   subel.new
-                 end
-            @elements[se.name] = se
-            set_elements se if se.is_a? Types::Sequence
-            se
+          @elements[@root].value = @elements[@root].value.map do |name, proc_or_class|
+            subel = case proc_or_class
+                    when Proc
+                      proc_or_class.call
+                    when Class
+                      proc_or_class.new(root: name)
+                    end
+            @elements[name] = subel
+            set_elements(subel) if is_composed?(subel)
+            subel
           end
         end
       else
-        element.value.map! do |subel|
-          se = case subel
+        element.value.map! do |name, proc_or_class|
+          subel = case proc_or_calss
                when Proc
-                 subel.call
+                 proc_or_class.call
                when Class
-                 subel.new
+                 proc_or_class.new(root: name)
                end
-          @elements[se.name] = se
-          set_elements se if se.is_a? Types::Sequence
-          se
+          @elements[name] = subel
+          set_elements(subel) if is_composed?(subel)
+          subel
         end
       end
     end
 
     def initialize_elements(obj, args)
+      if args[:root]
+        rootname = args.delete(:root)
+        @elements[rootname] = @elements.delete(@root)
+        @elements[rootname].name = rootname
+        @root = rootname
+      end
+
       args.each do |name, value|
         if obj[name]
           if value.is_a? Hash
@@ -222,20 +242,23 @@ module RASN1
     end
 
     def private_to_h(element)
-      h = {}
-      element.value.each do |subel|
-        h[subel.name] = case subel
-                        when Types::Sequence
+      if element.value.is_a? Array
+        h = {}
+        element.value.each do |subel|
+          h[subel.name] = case subel
+                        when Types::Sequence, Types::Set
                           private_to_h(subel)
                         when Model
                           subel.to_h[subel.name]
                         else
                           next if subel.value.nil? and subel.optional?
                           subel.value
-                        end
+                          end
+        end
+        h
+      else
+        element.value
       end
-
-      h
     end
   end
 end

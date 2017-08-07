@@ -49,7 +49,7 @@ class ComplexRecord < RASN1::Model
   sequence :cplx_record,
            content: [boolean(:bool),
 	             octet_string(:data, explicit: 0),
-		     Record]
+		     model(:a_record, Record)]
 end
 ```
 
