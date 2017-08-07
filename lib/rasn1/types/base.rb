@@ -56,7 +56,7 @@ module RASN1
       INDEFINITE_LENGTH = 0x80
 
       # @return [Symbol, String]
-      attr_reader :name
+      attr_accessor :name
       # @return [Symbol]
       attr_reader :asn1_class
       # @return [Object,nil] default value, if defined
