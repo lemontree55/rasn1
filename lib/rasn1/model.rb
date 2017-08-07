@@ -58,13 +58,29 @@ module RASN1
       #  @see Types::Sequence#initialize
       # @method set(name, options)
       #  @see Types::Set#initialize
-      %w(sequence set).each do |type|
+      # @method choice(name, options)
+      #  @see Types::Choice#initialize
+      %w(sequence set choice).each do |type|
         class_eval "def #{type}(name, options={})\n" \
                    "  @records ||= {}\n" \
                    "  @records[name] = Proc.new do\n" \
                    "    t = Types::#{type.capitalize}.new(name, options)\n" \
                    "    t.value = options[:content] if options[:content]\n" \
                    "    t\n" \
+                   "  end\n" \
+                   "end"
+      end
+
+      # @method sequence_of(name, type, options)
+      #  @see Types::SequenceOf#initialize
+      # @method set_of(name, type, options)
+      #  @see Types::SetOf#initialize
+      %w(sequence_of set_of).each do |type|
+        klass_name = "Types::#{type.capitalize.gsub(/_(\w)/) { "$1".upcase }}"
+        class_eval "def #{type}(name, type, options={})\n" \
+                   "  @records ||= {}\n" \
+                   "  @records[name] = Proc.new do\n" \
+                   "    #{klass_name}.new(name, type, options)\n" \
                    "  end\n" \
                    "end"
       end
