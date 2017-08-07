@@ -183,7 +183,9 @@ module RASN1
 
         total_length, data = get_data(der, ber)
         if explicit?
-          type = self.class.new(@name)
+          opts = { default: @default }
+          opts[:enum] = self.enum if self.is_a? Enumerated
+          type = self.class.new(@name, opts)
           type.parse!(data)
           @value = type.value
         else
@@ -333,7 +335,7 @@ module RASN1
       end
 
       def raise_tag_error(expected_tag, tag)
-        msg = "Expected tag #{tag2name(expected_tag)} but get #{tag2name(tag)}"
+        msg = "Expected #{tag2name(expected_tag)} but get #{tag2name(tag)}"
         msg << " for #@name"
         raise ASN1Error, msg
       end

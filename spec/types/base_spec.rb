@@ -87,7 +87,7 @@ module RASN1::Types
       it 'raises on unexpected tag value' do
         bool = Boolean.new(:bool)
         expect { bool.parse!(unexpected_der) }.to raise_error(RASN1::ASN1Error).
-          with_message('Expected tag UNIVERSAL PRIMITIVE BOOLEAN but get UNIVERSAL PRIMITIVE INTEGER for bool')
+          with_message('Expected UNIVERSAL PRIMITIVE BOOLEAN but get UNIVERSAL PRIMITIVE INTEGER for bool')
       end
 
       it 'does not raise on unexpected tag value with OPTIONAL tag' do
@@ -237,6 +237,16 @@ module RASN1::Types
           type = Integer.new(:explicit_contructed, explicit: 5, constructed: true)
           type.parse!(binary("\xa5\x03\x02\x01\x30"))
           expect(type.value).to eq(48)
+        end
+
+        it 'parses a DER string with explicit tagged type with default value' do
+          type = Enumerated.new(:version, explicit: 0, constructed: true,
+                                enum: { 'v1' => 0, 'v2' => 1, 'v3' => 2 },
+                                default: 0)
+          type.parse!(binary("\xa0\x03\x02\x01\x02"))
+          expect(type.value).to eq('v3')
+          type.parse!('')
+          expect(type.value).to eq('v1')
         end
 
         it 'parses a DER string with implicit tagged type' do

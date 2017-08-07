@@ -18,6 +18,8 @@ module RASN1
     # A {EnumeratedError} is raised when set value is not in enumeration.
     # @author Sylvain Daubert
     class Enumerated < Integer
+      # @return [Hash]
+      attr_reader :enum
 
       # @param [Symbol, String] name name for this tag in grammar
       # @param [Hash] options
