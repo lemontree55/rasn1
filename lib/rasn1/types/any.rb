@@ -7,7 +7,12 @@ module RASN1
 
       # @return [String] DER-formated string
       def to_der
-        @value.to_s
+        case @value
+        when Base, Model
+          @value.to_der
+        else
+          @value.to_s
+        end
       end
 
       # Parse a DER string. This method updates object: {#value} will a DER string.
