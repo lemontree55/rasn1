@@ -144,6 +144,12 @@ module RASN1
       @elements[@root].name
     end
 
+    # Get elements names
+    # @return [Array<Symbol,String>]
+    def keys
+      @elements.keys
+    end
+
     # Return a hash image of model
     # @return [Hash]
     def to_h
