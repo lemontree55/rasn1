@@ -1,5 +1,12 @@
+require_relative '../spec_helper'
+
 module RASN1
   module Types
+
+    class SimpleModel < Model
+      sequence :seq,
+               content: [boolean(:bool), integer(:int)]
+    end
 
     describe SequenceOf do
       before(:each) do
@@ -33,6 +40,10 @@ module RASN1
           expect(seqof.type).to eq(Types::Integer)
         end
 
+        it 'accepts a Model as type' do
+          expect { SequenceOf.new(:seqof, SimpleModel) }.to_not raise_error
+        end
+
         it 'raises if no type is given' do
           expect { SequenceOf.new(:seqof) }.to raise_error(ArgumentError)
         end
@@ -53,6 +64,16 @@ module RASN1
           expect(@bool.value).to_not be(false)
           expect(@int.value).to be(nil)
         end
+
+        it 'generates a DER string for a model type' do
+          seqof = SequenceOf.new(:seqof, SimpleModel)
+          seqof.value << { bool: true, int: 12 }
+          seqof.value << { bool: false, int: 65535 }
+          expected_der = binary("\x30\x12" \
+                                "\x30\x06\x01\x01\xff\x02\x01\x0c" \
+                                "\x30\x08\x01\x01\x00\x02\x03\x00\xff\xff")
+          expect(seqof.to_der).to eq(expected_der)
+        end
       end
 
       describe '#parse!' do
@@ -65,6 +86,16 @@ module RASN1
         it 'parses DER string for a composed type' do
           @seqof.parse!(@composed_der)
           expect(@seqof.value).to eq([[true, 12, 'abcd'], [false, 65534, 'nop']])
+        end
+
+        it 'parses DER string for a model type' do
+          seqof = SequenceOf.new(:seqof, SimpleModel)
+          der = binary("\x30\x11" \
+                       "\x30\x06\x01\x01\xff\x02\x01\x7f" \
+                       "\x30\x07\x01\x01\x00\x02\x02\x7f\xff")
+          seqof.parse!(der)
+          expect(seqof.value).to eq([{ bool: true, int: 127 },
+                                     {bool: false, int: 32767 }])
         end
       end
     end

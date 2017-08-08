@@ -5,6 +5,7 @@ module RASN1
     #
     # A SEQUENCE OF is an array of one ASN.1 type.
     #
+    # == Use with {Primitive} types
     # To encode this ASN.1 example:
     #  Integers ::= SEQUENCE OF INTEGER
     # do:
@@ -13,6 +14,7 @@ module RASN1
     #  # Set integer values
     #  seqof.value = [1, 2, 3, 4]
     #
+    # == Use with {Constructed} types
     # SEQUENCE OF may be used to create sequence of composed types. For example:
     #  composed_type = RASN1::Sequence.new(:comp)
     #  commposed_type.value = [RASN1::Types::Integer(:id),
@@ -20,6 +22,22 @@ module RASN1
     #  seqof = RASN1::SequenceOf.new(:comp, composed_type)
     #  seqof.value << [0, 'data0']
     #  seqof.value << [1, 'data1']
+    #
+    # == Use with {Model}
+    # SEQUENCE OF may also be used with a Model type:
+    #  class MyModel < RASN1::Model
+    #    sequence :seq,
+    #             content: [boolean(:bool), integer(:int)]
+    #  end
+    #
+    #  seqof = RASN1::Types::SequenceOf.new(:record, MyModel)
+    #  # set values
+    #  seqof.value << { bool: true, int: 12 }
+    #  seqof.value << { bool: false, int: 65535 }
+    #  # Generate DER string
+    #  der = seqof.to_der    # => String
+    #  # parse 
+    #  seqof.parse! der
     # @author Sylvain Daubert
     class SequenceOf < Constructed
       TAG = Sequence::TAG
@@ -59,8 +77,13 @@ module RASN1
             s.value = sval
             s.to_der
           end.join
+        elsif type_class < Model
+          @value.map do |hsh|
+            model = type_class.new(hsh)
+            model.to_der
+          end.join
         else
-          @value.map { |v| t = type_class.new(:t, value: v).to_der }.join
+          @value.map { |v| type_class.new(:t, value: v).to_der }.join
         end
       end
 
@@ -69,10 +92,18 @@ module RASN1
         nb_bytes = 0
 
         while nb_bytes < der.length
-          of_type = composed_type? ? type.dup : type_class.new(:t)
+          of_type = if composed_type?
+                      type.dup
+                    elsif type_class < Model
+                      type_class.new
+                    else
+                      type_class.new(:t)
+                    end
           nb_bytes += of_type.parse!(der[nb_bytes, der.length])
           value = if composed_type?
                     of_type.value.map { |obj| obj.value }
+                  elsif type_class < Model
+                    of_type.to_h[of_type.to_h.keys.first]
                   else
                     of_type.value
                   end
