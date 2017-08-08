@@ -67,14 +67,14 @@ module RASN1
       #  @see Types::Set#initialize
       # @method choice(name, options)
       #  @see Types::Choice#initialize
-      %w(sequence set choice any).each do |type|
+      %w(sequence set choice).each do |type|
         class_eval "def #{type}(name, options={})\n" \
                    "  proc = Proc.new do\n" \
-                   "    t = Types::#{type.capitalize}.new(name, options)\n" \
-                   "    t.value = options[:content] if options[:content]\n" \
-                   "    t\n" \
+                   "    Types::#{type.capitalize}.new(name, options)\n" \
                    "  end\n" \
                    "  @root = [name, proc]\n" \
+                   "  @root << options[:content] unless options[:content].nil?\n" \
+                   "  @root\n" \
                    "end"
       end
 
@@ -122,6 +122,12 @@ module RASN1
         @root = [name, proc]
       end
 
+      # @see Types::Any#initialize
+      def any(name, options={})
+        proc = Proc.new { Types::Any.new(name, options) }
+        @root = [name, proc]
+      end
+
       # Parse a DER/BER encoded string
       # @param [String] str
       # @param [Boolean] ber accept BER encoding or not
@@ -136,7 +142,8 @@ module RASN1
     # Create a new instance of a {Model}
     # @param [Hash] args
     def initialize(args={})
-      set_elements
+      root = generate_root
+      set_elements *root
       initialize_elements self, args
     end
 
@@ -175,44 +182,46 @@ module RASN1
     # @param [Boolean] ber accept BER encoding or not
     # @return [Integer] number of parsed bytes
     def parse!(str, ber: false)
-      @elements[@root].parse!(str, ber: ber)
+      @elements[@root].parse!(str.dup.force_encoding('BINARY'), ber: ber)
     end
 
     private
 
     def is_composed?(el)
-      [Types::Sequence, Types::Set, Types::SequenceOf, Types::SetOf].include? el.class
+      [Types::Sequence, Types::Set].include? el.class
     end
 
-    def set_elements(element=nil)
-      if element.nil?
-        root = self.class.class_eval { @root }
-        @root = root.first
-        @elements = {}
-        @elements[@root] = root.last.is_a?(Class) ? root.last.new : root.last.call
-        if @elements[@root].value.is_a? Array
-          @elements[@root].value = @elements[@root].value.map do |name, proc_or_class|
-            subel = case proc_or_class
-                    when Proc
-                      proc_or_class.call
-                    when Class
-                      proc_or_class.new(root: name)
-                    end
-            @elements[name] = subel
-            set_elements(subel) if is_composed?(subel) and subel.value.is_a? Array
-            subel
+    def is_of?(el)
+      [Types::SequenceOf, Types::SetOf].include? el.class
+    end
+
+    def get_type(proc_or_class, name=nil)
+      case proc_or_class
+      when Proc
+        proc_or_class.call
+      when Class
+        options = {}
+        options[:root] = name unless name.nil?
+        proc_or_class.new(options)
+      end
+    end
+
+    def generate_root
+      root = self.class.class_eval { @root }
+      @root = root[0]
+      @elements = {}
+      @elements[@root] = get_type(root[1])
+      root
+    end
+
+    def set_elements(name, el, content=nil)
+      if content.is_a? Array
+        @elements[name].value = content.map do |name2, proc_or_class, content2|
+          subel = get_type(proc_or_class, name2)
+          @elements[name2] = subel
+          if is_composed?(subel) and content2.is_a? Array
+            set_elements(name2, proc_or_class, content2)
           end
-        end
-      else
-        element.value.map! do |name, proc_or_class|
-          subel = case proc_or_calss
-               when Proc
-                 proc_or_class.call
-               when Class
-                 proc_or_class.new(root: name)
-               end
-          @elements[name] = subel
-          set_elements(subel) if is_composed?(subel)
           subel
         end
       end
@@ -232,7 +241,7 @@ module RASN1
             if obj[name].is_a? Model
               initialize_elements obj[name], value
             else
-              raise ArgumentError, "element #{name}: may only pass a Hash for Sequence elements"
+              raise ArgumentError, "element #{name}: may only pass a Hash for Model elements"
             end
           else
             obj[name].value = value
