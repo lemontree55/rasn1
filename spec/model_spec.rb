@@ -15,6 +15,10 @@ module RASN1
                        model(:a_record, ModelTest)]
   end
 
+  class OfModel < Model
+    sequence_of :seqof, ModelTest
+  end
+
   class VoidSeq < Model
     sequence :voidseq
   end
@@ -60,6 +64,15 @@ module RASN1
                                               a_record:
                                                 { id: 12, house: 1 }
                                             }
+                                 })
+      end
+
+      it 'generates a Hash image of a model with a SequenceOf' do
+        model = OfModel.new
+        model[:seqof].value << { id: 1, house: 1 }
+        model[:seqof].value << { id: 2, house: 1 }
+        expect(model.to_h).to eq({ seqof: [{ id: 1, house: 1 },
+                                           { id: 2, house: 1 }]
                                  })
       end
     end

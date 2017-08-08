@@ -254,15 +254,18 @@ module RASN1
       if element.value.is_a? Array
         h = {}
         element.value.each do |subel|
-          h[subel.name] = case subel
-                        when Types::Sequence, Types::Set
-                          private_to_h(subel)
-                        when Model
-                          subel.to_h[subel.name]
-                        else
-                          next if subel.value.nil? and subel.optional?
-                          subel.value
-                          end
+          case subel
+          when Types::Sequence, Types::Set
+            h[subel.name] = private_to_h(subel)
+          when Model
+            h[subel.name] = subel.to_h[subel.name]
+          when Hash
+            # Array of Hash for SequenceOf and SetOf
+            return element.value
+          else
+            next if subel.value.nil? and subel.optional?
+            h[subel.name] = subel.value
+          end
         end
         h
       else
