@@ -43,33 +43,33 @@ module RASN1
       TAG = Sequence::TAG
 
       # @return [Class, Base]
-      attr_reader :type
+      attr_reader :of_type
 
       # @param [Symbol, String] name name for this tag in grammar
-      # @param [Class, Base] type base type for sequence of
+      # @param [Class, Base] of_type base type for sequence of
       # @see Base#initialize
-      def initialize(name, type, options={})
+      def initialize(name, of_type, options={})
         super(name, options)
-        @type = type
+        @of_type = of_type
         @value = []
       end
 
       private
 
-      def type_class
-        type.is_a?(Class) ? type : type.class
+      def of_type_class
+        @of_type.is_a?(Class) ? @of_type : @of_type.class
       end
 
-      def composed_type?
-        [Sequence, Set].include? type_class
+      def composed_of_type?
+        [Sequence, Set].include? of_type_class
       end
 
       def value_to_der
-        if composed_type?
+        if composed_of_type?
           @value.map do |ary|
-            s = type_class.new(@type.name)
+            s = of_type_class.new(@of_type.name)
             sval = []
-            @type.value.each_with_index do |type, i|
+            @of_type.value.each_with_index do |type, i|
               type2 = type.dup
               type2.value = ary[i]
               sval << type2
@@ -77,13 +77,13 @@ module RASN1
             s.value = sval
             s.to_der
           end.join
-        elsif type_class < Model
+        elsif of_type_class < Model
           @value.map do |hsh|
-            model = type_class.new(hsh)
+            model = of_type_class.new(hsh)
             model.to_der
           end.join
         else
-          @value.map { |v| type_class.new(:t, value: v).to_der }.join
+          @value.map { |v| of_type_class.new(:t, value: v).to_der }.join
         end
       end
 
@@ -92,20 +92,20 @@ module RASN1
         nb_bytes = 0
 
         while nb_bytes < der.length
-          of_type = if composed_type?
-                      type.dup
-                    elsif type_class < Model
-                      type_class.new
-                    else
-                      type_class.new(:t)
-                    end
-          nb_bytes += of_type.parse!(der[nb_bytes, der.length])
-          value = if composed_type?
-                    of_type.value.map { |obj| obj.value }
-                  elsif type_class < Model
-                    of_type.to_h[of_type.to_h.keys.first]
+          type = if composed_of_type?
+                   @of_type.dup
+                 elsif of_type_class < Model
+                   of_type_class.new
+                 else
+                   of_type_class.new(:t)
+                 end
+          nb_bytes += type.parse!(der[nb_bytes, der.length])
+          value = if composed_of_type?
+                    type.value.map { |obj| obj.value }
+                  elsif of_type_class < Model
+                    type.to_h[type.to_h.keys.first]
                   else
-                    of_type.value
+                    type.value
                   end
           @value << value
         end

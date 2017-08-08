@@ -37,7 +37,7 @@ module RASN1
           expect(seqof).to_not be_optional
           expect(seqof.asn1_class).to eq(:universal)
           expect(seqof.default).to eq(nil)
-          expect(seqof.type).to eq(Types::Integer)
+          expect(seqof.of_type).to eq(Types::Integer)
         end
 
         it 'accepts a Model as type' do
