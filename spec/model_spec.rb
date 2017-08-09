@@ -189,7 +189,7 @@ module RASN1
       end
 
       it 'may parse a X.509 certificate' do
-        der = File.read(File.join(__dir__, 'cert_example.der')).force_encoding('BINARY')
+        der = binary(File.read(File.join(__dir__, 'cert_example.der')))
         cert = X509Certificate.parse(der)
         expect(cert[:tbsCertificate][:version].value).to eq('v3')
         expect(cert[:tbsCertificate][:serialNumber].value).to eq(0x123456789123456789)
@@ -201,9 +201,17 @@ module RASN1
         expect(cert[:tbsCertificate][:subjectUniqueID].value).to be(nil)
         expect(cert[:tbsCertificate][:extensions].value.size).to eq(4)
         expect(cert[:signatureValue].value).to eq(der[0x1b6, 128])
+
+        issuer = cert[:tbsCertificate][:issuer].to_h
+        expect(issuer[:rdnSequence][0][0][:value]).to eq(binary("\x13\x03org"))
       end
 
-      it 'may generate a X.509 certificate'
+      it 'may generate a X.509 certificate' do
+        der = binary(File.read(File.join(__dir__, 'cert_example.der')))
+        cert = X509Certificate.parse(der)
+        File.write File.join(__dir__, 'toto.der'), cert.to_der
+        expect(cert.to_der).to eq(der)
+      end
     end
   end
 end

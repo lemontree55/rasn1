@@ -78,10 +78,18 @@ module RASN1
             s.to_der
           end.join
         elsif of_type_class < Model
-          @value.map do |hsh|
-            model = of_type_class.new(hsh)
-            model.to_der
-          end.join
+          if of_type_class.new.root.is_a? SequenceOf
+            @value.map do |ary|
+              model = of_type_class.new
+              model.root.value = ary
+              model.to_der
+            end.join
+          else
+            @value.map do |hsh|
+              model = of_type_class.new(hsh)
+              model.to_der
+            end.join
+          end
         else
           @value.map { |v| of_type_class.new(:t, value: v).to_der }.join
         end

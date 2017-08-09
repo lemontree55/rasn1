@@ -256,8 +256,9 @@ module RASN1
             h[subel.name] = private_to_h(subel)
           when Model
             h[@elements.key(subel)] = subel.to_h[subel.name]
-          when Hash
+          when Hash, Array
             # Array of Hash for SequenceOf and SetOf
+            # Array of Array of... of Hash are nested SequenceOf or SetOf
             return element.value
           else
             next if subel.value.nil? and subel.optional?
