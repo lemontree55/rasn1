@@ -206,9 +206,7 @@ module RASN1
       when Proc
         proc_or_class.call
       when Class
-        options = {}
-        options[:root] = name unless name.nil?
-        proc_or_class.new(options)
+        proc_or_class.new
       end
     end
 
@@ -234,13 +232,6 @@ module RASN1
     end
 
     def initialize_elements(obj, args)
-      if args[:root]
-        rootname = args.delete(:root)
-        @elements[rootname] = @elements.delete(@root)
-        @elements[rootname].name = rootname
-        @root = rootname
-      end
-
       args.each do |name, value|
         if obj[name]
           if value.is_a? Hash
@@ -264,7 +255,7 @@ module RASN1
           when Types::Sequence, Types::Set
             h[subel.name] = private_to_h(subel)
           when Model
-            h[subel.name] = subel.to_h[subel.name]
+            h[@elements.key(subel)] = subel.to_h[subel.name]
           when Hash
             # Array of Hash for SequenceOf and SetOf
             return element.value
