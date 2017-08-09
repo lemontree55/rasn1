@@ -97,6 +97,12 @@ module RASN1
           expect(seqof.value).to eq([{ bool: true, int: 127 },
                                      {bool: false, int: 32767 }])
         end
+
+        it 'parses DER string with explicit option' do
+          seqof = SequenceOf.new(:seqof, Integer, explicit: 3)
+          seqof.parse!(binary("\xa3\x1a" + @integer_der))
+          expect(seqof.value).to eq((0..7).to_a)
+        end
       end
     end
   end

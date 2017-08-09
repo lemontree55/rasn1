@@ -116,6 +116,10 @@ module RASN1
         @value = @enum.key(v)
         raise EnumeratedError, "TAG #@name: value #{v} not in enumeration" if @value.nil?
       end
+
+      def explicit_type
+        self.class.new(@name, enum: self.enum)
+      end
     end
   end
 end

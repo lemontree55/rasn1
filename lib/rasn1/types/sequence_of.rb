@@ -110,6 +110,10 @@ module RASN1
           @value << value
         end
       end
+
+      def explicit_type
+        self.class.new(@name, self.of_type)
+      end
     end
   end
 end

@@ -183,9 +183,8 @@ module RASN1
 
         total_length, data = get_data(der, ber)
         if explicit?
-          opts = { default: @default }
-          opts[:enum] = self.enum if self.is_a? Enumerated
-          type = self.class.new(@name, opts)
+          # Delegate to #explicit type to generate sub-tag
+          type = explicit_type
           type.parse!(data)
           @value = type.value
         else
@@ -332,6 +331,10 @@ module RASN1
         total_length += length_length if length_length > 0
 
         [total_length, data]
+      end
+
+      def explicit_type
+        self.class.new(@name)
       end
 
       def raise_tag_error(expected_tag, tag)
