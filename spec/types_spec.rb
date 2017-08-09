@@ -12,7 +12,8 @@ module RASN1
                                         Types::Null,
                                         Types::ObjectId,
                                         Types::Enumerated,
-                                        Types::Utf8String])
+                                        Types::Utf8String,
+                                        Types::PrintableString])
       end
     end
 
