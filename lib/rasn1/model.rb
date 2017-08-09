@@ -177,6 +177,12 @@ module RASN1
       @elements[@root].to_der
     end
 
+    # Get root element from model
+    # @return [Types::Base,Model]
+    def root
+      @elements[@root]
+    end
+
     # Parse a DER/BER encoded string, and modify object in-place.
     # @param [String] str
     # @param [Boolean] ber accept BER encoding or not
