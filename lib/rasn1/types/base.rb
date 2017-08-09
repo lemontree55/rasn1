@@ -249,7 +249,7 @@ module RASN1
       def build_tag
         if build_tag?
           if explicit?
-            v = self.class.new(nil)
+            v = explicit_type
             v.value = @value
             encoded_value = v.to_der
           else
