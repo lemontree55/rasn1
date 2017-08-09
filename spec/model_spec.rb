@@ -209,7 +209,6 @@ module RASN1
       it 'may generate a X.509 certificate' do
         der = binary(File.read(File.join(__dir__, 'cert_example.der')))
         cert = X509Certificate.parse(der)
-        File.write File.join(__dir__, 'toto.der'), cert.to_der
         expect(cert.to_der).to eq(der)
       end
     end
