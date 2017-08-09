@@ -138,39 +138,72 @@ module RASN1
       end
     end
 
-    #context 'complex example' do
-    #  class AttributeTypeAndValue < Model
-    #    sequence :attributeTypeAndValue,
-    #             content: [objectid(:type),
-    #                       any(:value)]
-    #  end
-    #
-    #  class AlgorithmIdentifier < Model
-    #    sequence :algorithmIdentifier
-    #  end
-    #
-    #  class X509Name < Model
-    #    sequence_of :rdnSequence,
-    #                set_of(:relativeDN, AttributeTypeAndValue)
-    #  end
-    #
-    #  class TBSCertificate < Model
-    #    sequence :tbsCertificate,
-    #             content: [integer(:version, explicit: 0, default: 0),
-    #                       integer(:serialNumber),
-    #                       AlgorithmIdentifier,
-    #                       X509Name,
-    #                       sequence(:validity,
-    #                                content: [Time
-    #                      ]
-    #  end
-    #
-    #  class X509Certificate < Model
-    #    sequence :certificate,
-    #             content: [TBSCertificate,
-    #                       AlgorithmIdentifier,
-    #                       bit_string(:signatureValue)]
-    #  end
-    #end
+    context 'complex example' do
+      class AttributeTypeAndValue < Model
+        sequence :attributeTypeAndValue,
+                 content: [objectid(:type),
+                           any(:value)]
+      end
+
+      class AlgorithmIdentifier < Model
+        sequence :algorithmIdentifier
+      end
+
+      class RelativeDN < Model
+        set_of :relativeDN, AttributeTypeAndValue
+      end
+
+      class X509Name < Model
+        sequence_of :rdnSequence, RelativeDN
+      end
+
+      class Extension < Model
+        sequence :extension,
+                 content: [objectid(:extnID),
+                           boolean(:critical, default: false),
+                           octet_string(:extnValue)]
+      end
+
+      class TBSCertificate < Model
+        sequence :tbsCertificate,
+                 content: [enumerated(:version, explicit: 0, constructed: true,
+                                      enum: { 'v1' => 0, 'v2' => 1, 'v3' => 2 },
+                                      default: 'v1'),
+                           integer(:serialNumber),
+                           model(:signature, AlgorithmIdentifier),
+                           model(:issuer, X509Name),
+                           sequence(:validity),
+                           model(:subject, X509Name),
+                           sequence(:subjectPublicKeyInfo),
+                           bit_string(:issuerUniqueID, implicit: 1, optional: true),
+                           bit_string(:subjectUniqueID, implicit: 2, optional: true),
+                           sequence_of(:extensions, Extension, explicit: 3,
+                                       optional: true)]
+      end
+
+      class X509Certificate < Model
+        sequence :certificate,
+                 content: [model(:tbsCertificate, TBSCertificate),
+                           model(:signatureAlgorithm, AlgorithmIdentifier),
+                           bit_string(:signatureValue)]
+      end
+
+      it 'may parse a X.509 certificate' do
+        der = File.read(File.join(__dir__, 'cert_example.der')).force_encoding('BINARY')
+        cert = X509Certificate.parse(der)
+        expect(cert[:tbsCertificate][:version].value).to eq('v3')
+        expect(cert[:tbsCertificate][:serialNumber].value).to eq(0x123456789123456789)
+        validity = [0x17, 0x0d, 0x31, 0x37, 0x30, 0x38, 0x30, 0x37, 0x31, 0x33, 0x30,
+                    0x36, 0x30, 0x30, 0x5a, 0x17, 0x0d, 0x31, 0x38, 0x30, 0x38, 0x30,
+                    0x37, 0x31, 0x33, 0x30, 0x36, 0x30, 0x30, 0x5a].pack('C*')
+        expect(cert[:tbsCertificate][:validity].value).to eq(validity)
+        expect(cert[:tbsCertificate][:issuerUniqueID].value).to be(nil)
+        expect(cert[:tbsCertificate][:subjectUniqueID].value).to be(nil)
+        expect(cert[:tbsCertificate][:extensions].value.size).to eq(4)
+        expect(cert[:signatureValue].value).to eq(der[0x1b6, 128])
+      end
+
+      it 'may generate a X.509 certificate'
+    end
   end
 end
