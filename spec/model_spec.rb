@@ -28,6 +28,12 @@ module RASN1
              content: [boolean(:bool), sequence(:seq)]
   end
 
+  class ModelChoice < Model
+    choice :choice,
+           content: [integer(:id),
+                     model(:a_record, ModelTest)]
+  end
+
   SIMPLE_VALUE = "\x30\x0e\x02\x03\x01\x00\x01\x80\x01\x2b\x81\x04\x02\x02\x12\x34".force_encoding('BINARY')
   OPTIONAL_VALUE = "\x30\x0b\x02\x03\x01\x00\x01\x81\x04\x02\x02\x12\x34".force_encoding('BINARY')
   DEFAULT_VALUE = "\x30\x08\x02\x03\x01\x00\x01\x80\x01\x2b".force_encoding('BINARY')
@@ -157,6 +163,21 @@ module RASN1
 
         voidseq2 = VoidSeq2.parse(NESTED_VALUE)
         expect(voidseq2[:seq].value).to eq(NESTED_VALUE[7..-1])
+      end
+    end
+
+    describe 'delegation' do
+      it 'example 1: delegation to Sequence#value' do
+        model = ModelTest.new
+        expect(model.value).to be_a(Array)
+        expect(model.value.first).to be_a(Types::Integer)
+      end
+
+      it 'example2: delegation to Choice#chosen' do
+        model = ModelChoice.new
+        model.chosen = 1
+        expect(model[:choice].chosen).to eq(1)
+        expect(model.chosen_value).to be_a(ModelTest)
       end
     end
 

@@ -49,6 +49,13 @@ module RASN1
   #  record2[:a_record][:room] = 43
   # or like this:
   #  record2 = Record2.new(rented: true, a_record: { id: 65537, room: 43 })
+  #
+  # == Delegation
+  # {Model} may delegate some methods to its root element. Thus, if root element
+  # is, for example, a {Types::Choice}, model may delegate +#chosen+ and +#chosen_value+.
+  #
+  # All methods defined by root may be delegated by model, unless model also defines
+  # this method.
   # @author Sylvain Daubert
   class Model
 
@@ -211,6 +218,16 @@ module RASN1
     # @return [Integer] number of parsed bytes
     def parse!(str, ber: false)
       @elements[@root].parse!(str.dup.force_encoding('BINARY'), ber: ber)
+    end
+
+    # Delegate some methods to root element
+    # @param [Symbol] meth
+    def method_missing(meth, *args)
+      if @elements[@root].respond_to? meth
+        @elements[@root].send meth, *args
+      else
+        super
+      end
     end
 
     private
