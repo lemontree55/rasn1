@@ -80,13 +80,15 @@ module RASN1::Types
       end
 
       it 'parses a DER string containing a type from CHOICE' do
-        @choice.parse! "\x04\x03abc"
+        nb_bytes = @choice.parse! "\x04\x03abc"
         expect(@choice.chosen).to eq(1)
         expect(@choice.chosen_value).to eq('abc')
+        expect(nb_bytes).to eq(5)
 
-        @choice.parse! "\x02\x02\x01\x02"
+        nb_bytes = @choice.parse! "\x02\x02\x01\x02"
         expect(@choice.chosen).to eq(0)
         expect(@choice.chosen_value).to eq(0x102)
+        expect(nb_bytes).to eq(4)
       end
 
       it 'raises when parsin a DER string which does not contain any type from CHOICE' do

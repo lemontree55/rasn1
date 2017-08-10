@@ -76,7 +76,7 @@ module RASN1
             @chosen = i
             nb_bytes = element.parse!(der)
             parsed = true
-            break nb_bytes
+            return nb_bytes
           rescue ASN1Error
             @chosen = nil
             next
