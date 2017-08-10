@@ -194,6 +194,12 @@ module RASN1
         total_length
       end
 
+      # Give size in octets of encoded value
+      # @return [Integer]
+      def value_size
+        value_to_der.size
+      end
+
 
       private
 
