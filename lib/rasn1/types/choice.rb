@@ -52,7 +52,12 @@ module RASN1
       # @raise [ChoiceError] {#chosen} not set
       def chosen_value
         check_chosen
-        @value[@chosen].value
+        case @value[@chosen]
+        when Base
+          @value[@chosen].value
+        when Model
+          @value[@chosen]
+        end
       end
 
       # @note {#chosen} MUST be set before calling this method
