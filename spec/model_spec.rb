@@ -47,6 +47,28 @@ module RASN1
       end
     end
 
+    describe '#[]' do
+      it 'gives access to element which name is given' do
+        model = ModelTest.new
+        expect(model[:id]).to be_a(Types::Integer)
+        expect(model[:record]).to be_a(Types::Sequence)
+      end
+    end
+
+    describe '#[]=' do
+      let(:model) { ModelTest2.new }
+
+      it 'sets value to base element which name is given' do
+        int = model[:a_record][:id]
+        model[:a_record][:id] = 156
+        expect(int.value).to eq(156)
+      end
+
+      it 'raises if element is a Model' do
+        expect { model[:a_record] = ModelTest.new }.to raise_error(RASN1::Error)
+      end
+    end
+
     describe '#to_h' do
       it 'generates a Hash image of model' do
         test = ModelTest.new

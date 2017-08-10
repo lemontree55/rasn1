@@ -161,6 +161,15 @@ module RASN1
       @elements[name]
     end
 
+    # Set value of element +name+. Element should be a {Base}.
+    # @param [String,Symbol] name
+    # @param [Object] value
+    # @return [Object] value
+    def []=(name, value)
+      raise Error, "cannot set value for a Model" if @elements[name].is_a? Model
+      @elements[name].value = value
+    end
+
     # Get name frm root type
     # @return [String,Symbol]
     def name
