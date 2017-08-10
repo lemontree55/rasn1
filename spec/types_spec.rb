@@ -14,7 +14,8 @@ module RASN1
                                         Types::Enumerated,
                                         Types::Utf8String,
                                         Types::NumericString,
-                                        Types::PrintableString])
+                                        Types::PrintableString,
+                                        Types::VisibleString])
       end
     end
 
