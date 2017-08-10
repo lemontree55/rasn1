@@ -33,7 +33,7 @@ module RASN1::Types
       end
 
       it 'generates a DER string according to default' do
-        os = OctetString.new(:os, default: 'NOP', octet_length: 22)
+        os = OctetString.new(:os, default: 'NOP')
         os.value = 'NOP'
         expect(os.to_der).to eq('')
         os.value = 'N'

@@ -3,7 +3,7 @@ require_relative '../spec_helper'
 
 module RASN1::Types
 
-  describe Utf8String do
+  describe PrintableString do
     describe '.type' do
       it 'gets ASN.1 type' do
         expect(PrintableString.type).to eq('PRINTABLE STRING')
@@ -34,7 +34,7 @@ module RASN1::Types
       end
 
       it 'generates a DER string according to default' do
-        printable = PrintableString.new(:printable, default: 'NOP', octet_length: 22)
+        printable = PrintableString.new(:printable, default: 'NOP')
         printable.value = 'NOP'
         expect(printable.to_der).to eq('')
         printable.value = 'N'
@@ -60,7 +60,7 @@ module RASN1::Types
       let(:printable) { PrintableString.new(:printable) }
 
       it 'parses a DER PRINTABLE STRING' do
-        printable.parse!(binary("\x13\x041a="))
+        printable.parse!(binary("\x13\x031a="))
         expect(printable.value).to eq('1a=')
       end
 
