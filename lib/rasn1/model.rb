@@ -68,6 +68,32 @@ module RASN1
         @root = [name, model_klass]
       end
 
+      # Update options of root element.
+      # May be used when subclassing.
+      #  class Model1 < RASN1::Model
+      #    sequence :seq, implicit: 0,
+      #             content: [bool(:bool), integer(:int)]
+      #  end
+      #
+      #  # same as Model1 but with implicit tag set to 1
+      #  class Model2 < Model1
+      #    root_options implicit: 1
+      #  end
+      # @param [Hash] options
+      # @return [void]
+      def root_options(options)
+        @options = options
+      end
+
+      # On inheritance, create +@root+ class variable
+      # @param [Class] klass
+      # @return [void]
+      def inherited(klass)
+        super
+        root = @root
+        klass.class_eval { @root = root }
+      end
+
       # @method sequence(name, options)
       #  @see Types::Sequence#initialize
       # @method set(name, options)
@@ -76,8 +102,8 @@ module RASN1
       #  @see Types::Choice#initialize
       %w(sequence set choice).each do |type|
         class_eval "def #{type}(name, options={})\n" \
-                   "  proc = Proc.new do\n" \
-                   "    Types::#{type.capitalize}.new(name, options)\n" \
+                   "  proc = Proc.new do |opts|\n" \
+                   "    Types::#{type.capitalize}.new(name, options.merge(opts))\n" \
                    "  end\n" \
                    "  @root = [name, proc]\n" \
                    "  @root << options[:content] unless options[:content].nil?\n" \
@@ -92,8 +118,8 @@ module RASN1
       %w(sequence set).each do |type|
         klass_name = "Types::#{type.capitalize}Of"
         class_eval "def #{type}_of(name, type, options={})\n" \
-                   "  proc = Proc.new do\n" \
-                   "    #{klass_name}.new(name, type, options)\n" \
+                   "  proc = Proc.new do |opts|\n" \
+                   "    #{klass_name}.new(name, type, options.merge(opts))\n" \
                    "  end\n" \
                    "  @root = [name, proc]\n" \
                    "end"
@@ -116,7 +142,9 @@ module RASN1
       Types.primitives.each do |prim|
         next if prim == Types::ObjectId
         class_eval "def #{prim.type.downcase.gsub(/\s+/, '_')}(name, options={})\n" \
-                   "  proc = Proc.new { #{prim.to_s}.new(name, options) }\n" \
+                   "  proc = Proc.new do |opts|\n" \
+                   "    #{prim.to_s}.new(name, options.merge(opts))\n" \
+                   "  end\n" \
                    "  @root = [name, proc]\n" \
                    "end"
       end
@@ -125,13 +153,13 @@ module RASN1
       #   +Object#object_id+.
       # @see Types::ObjectId#initialize
       def objectid(name, options={})
-        proc = Proc.new { Types::ObjectId.new(name, options) }
+        proc = Proc.new { |opts| Types::ObjectId.new(name, options.merge(opts)) }
         @root = [name, proc]
       end
 
       # @see Types::Any#initialize
       def any(name, options={})
-        proc = Proc.new { Types::Any.new(name, options) }
+        proc = Proc.new { |opts| Types::Any.new(name, options.merge(opts)) }
         @root = [name, proc]
       end
 
@@ -243,7 +271,7 @@ module RASN1
     def get_type(proc_or_class, name=nil)
       case proc_or_class
       when Proc
-        proc_or_class.call
+        proc_or_class.call(self.class.class_eval { @options } || {})
       when Class
         proc_or_class.new
       end

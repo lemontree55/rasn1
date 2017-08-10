@@ -15,6 +15,10 @@ module RASN1
                        model(:a_record, ModelTest)]
   end
 
+  class ModelTest3 < ModelTest
+    root_options implicit: 4
+  end
+
   class OfModel < Model
     sequence_of :seqof, ModelTest
   end
@@ -41,6 +45,15 @@ module RASN1
   ERRORED_VALUE = "\x01\x01\x00"
 
   describe Model do
+    describe '.root_options' do
+      it 'updates root options from a super class' do
+        model = ModelTest.new
+        expect(model.tag).to eq(0x30)
+        model = ModelTest3.new
+        expect(model.tag).to eq(0xa4)
+      end
+    end
+
     describe '#initialize' do
       it 'creates a class from a Model' do
         expect { ModelTest.new }.to_not raise_error
