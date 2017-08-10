@@ -128,6 +128,13 @@ module RASN1
         @root = [name, proc]
       end
 
+      # Give type name (aka class name)
+      # @return [String]
+      def type
+        return @type if @type
+        @type = self.to_s.gsub(/.*::/, '')
+      end
+
       # Parse a DER/BER encoded string
       # @param [String] str
       # @param [Boolean] ber accept BER encoding or not
@@ -181,6 +188,12 @@ module RASN1
     # @return [Types::Base,Model]
     def root
       @elements[@root]
+    end
+
+    # Give type name (aka class name)
+    # @return [String]
+    def type
+      self.class.type
     end
 
     # Parse a DER/BER encoded string, and modify object in-place.
