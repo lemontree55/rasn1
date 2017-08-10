@@ -15,6 +15,7 @@ module RASN1
                                         Types::Utf8String,
                                         Types::NumericString,
                                         Types::PrintableString,
+                                        Types::IA5String,
                                         Types::VisibleString])
       end
     end

@@ -1,27 +1,27 @@
 module RASN1
   module Types
 
-    # ASN.1 UTF8 String
+    # ASN.1 IA5 String
     # @author Sylvain Daubert
-    class Utf8String < OctetString
-      TAG = 12
+    class IA5String < OctetString
+      TAG = 22
 
       # Get ASN.1 type
       # @return [String]
       def self.type
-        'UTF8String'
+        self.to_s.gsub(/.*::/, '')
       end
 
       private
       
       def value_to_der
-        @value.to_s.force_encoding('UTF-8').force_encoding('BINARY')
+        @value.to_s.force_encoding('US-ASCII').force_encoding('BINARY')
       end
 
       def der_to_value(der, ber:false)
         super
-        @value.force_encoding('UTF-8')
+        @value.force_encoding('US-ASCII')
       end
-    end
+     end
   end
 end

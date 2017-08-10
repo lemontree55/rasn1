@@ -6,7 +6,7 @@ module RASN1::Types
   describe NumericString do
     describe '.type' do
       it 'gets ASN.1 type' do
-        expect(NumericString.type).to eq('NUMERIC STRING')
+        expect(NumericString.type).to eq('NumericString')
       end
     end
 

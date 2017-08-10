@@ -6,7 +6,7 @@ module RASN1::Types
   describe Utf8String do
     describe '.type' do
       it 'gets ASN.1 type' do
-        expect(Utf8String.type).to eq('UTF8 STRING')
+        expect(Utf8String.type).to eq('UTF8String')
       end
     end
 

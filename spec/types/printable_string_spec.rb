@@ -6,7 +6,7 @@ module RASN1::Types
   describe PrintableString do
     describe '.type' do
       it 'gets ASN.1 type' do
-        expect(PrintableString.type).to eq('PRINTABLE STRING')
+        expect(PrintableString.type).to eq('PrintableString')
       end
     end
 

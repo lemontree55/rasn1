@@ -6,6 +6,12 @@ module RASN1
     class PrintableString < OctetString
       TAG = 19
 
+      # Get ASN.1 type
+      # @return [String]
+      def self.type
+        'PrintableString'
+      end
+
       private
       
       def value_to_der

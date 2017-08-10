@@ -6,6 +6,12 @@ module RASN1
     class NumericString < OctetString
       TAG = 18
 
+      # Get ASN.1 type
+      # @return [String]
+      def self.type
+        'NumericString'
+      end
+
       private
       
       def value_to_der
