@@ -6,6 +6,7 @@ require 'rasn1/version'
 Gem::Specification.new do |spec|
   spec.name          = 'rasn1'
   spec.version       = RASN1::VERSION
+  spec.license       = 'MIT'
   spec.authors       = ['Sylvain Daubert']
   spec.email         = ['sylvain.daubert@laposte.net']
 
@@ -16,8 +17,6 @@ Gem::Specification.new do |spec|
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
     f.match(%r{^(test|spec|features)/})
   end
-  #spec.bindir        = 'exe'
-  #spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
 
   spec.required_ruby_version = '>= 2.1.0'
