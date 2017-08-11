@@ -46,11 +46,16 @@ module RASN1
 
   describe Model do
     describe '.root_options' do
+      let(:model) { ModelTest3.new }
+
       it 'updates root options from a super class' do
-        model = ModelTest.new
-        expect(model.tag).to eq(0x30)
-        model = ModelTest3.new
+        classical_model = ModelTest.new
+        expect(classical_model.tag).to eq(0x30)
         expect(model.tag).to eq(0xa4)
+      end
+
+      it 'does not update other elements' do
+        expect(model[:id].tag).to eq(0x02)
       end
     end
 

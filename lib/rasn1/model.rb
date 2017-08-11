@@ -268,10 +268,10 @@ module RASN1
       [Types::SequenceOf, Types::SetOf].include? el.class
     end
 
-    def get_type(proc_or_class, name=nil)
+    def get_type(proc_or_class, options={})
       case proc_or_class
       when Proc
-        proc_or_class.call(self.class.class_eval { @options } || {})
+        proc_or_class.call(options)
       when Class
         proc_or_class.new
       end
@@ -281,14 +281,14 @@ module RASN1
       root = self.class.class_eval { @root }
       @root = root[0]
       @elements = {}
-      @elements[@root] = get_type(root[1])
+      @elements[@root] = get_type(root[1], self.class.class_eval { @options } || {})
       root
     end
 
     def set_elements(name, el, content=nil)
       if content.is_a? Array
         @elements[name].value = content.map do |name2, proc_or_class, content2|
-          subel = get_type(proc_or_class, name2)
+          subel = get_type(proc_or_class)
           @elements[name2] = subel
           if is_composed?(subel) and content2.is_a? Array
             set_elements(name2, proc_or_class, content2)
