@@ -32,7 +32,7 @@ Record ::= SEQUENCE {
 }
 ```
 
-## Create a ASN.1 model
+### Create a ASN.1 model
 
 ```ruby
 class Record < RASN1::Model
@@ -54,7 +54,7 @@ class ComplexRecord < RASN1::Model
 end
 ```
 
-## Parse a DER-encoded string
+### Parse a DER-encoded string
 ```ruby
 record = Record.parse(der_string)
 record[:id]             # => RASN1::Types::Integer
@@ -69,7 +69,7 @@ record[:house].default  # => 0
 record[:id].to_der      # => String
 ```
 
-## Generate a DER-encoded string
+### Generate a DER-encoded string
 ```ruby
 record = Record.new(id: 12)
 record[:id].to_i      # => 12
@@ -85,6 +85,10 @@ record.set id: 124, house: 155
 
 record.to_der         # => String
 ```
+
+### More information
+
+see https://github.com/sdaubert/rasn1/wiki
 
 ## Contributing
 
