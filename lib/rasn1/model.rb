@@ -174,6 +174,7 @@ module RASN1
       # @param [String] str
       # @param [Boolean] ber accept BER encoding or not
       # @return [Model]
+      # @raise [ASN1Error] error on parsing
       def parse(str, ber: false)
         model = new
         model.parse! str, ber: ber
@@ -244,6 +245,7 @@ module RASN1
     # @param [String] str
     # @param [Boolean] ber accept BER encoding or not
     # @return [Integer] number of parsed bytes
+    # @raise [ASN1Error] error on parsing
     def parse!(str, ber: false)
       @elements[@root].parse!(str.dup.force_encoding('BINARY'), ber: ber)
     end

@@ -30,6 +30,12 @@ Record ::= SEQUENCE {
   room  [0] INTEGER OPTIONAL,
   house [1] INTEGER DEFAULT 0
 }
+
+ComplexRecord ::= SEQUENCE {
+  bool      BOOLEAN,
+  data  [0] EXPLICIT OCTET STRING,
+  a_record  Record
+}
 ```
 
 ### Create a ASN.1 model
@@ -49,8 +55,8 @@ More comple classes may be designed by nesting simple classes. For example:
 class ComplexRecord < RASN1::Model
   sequence :cplx_record,
            content: [boolean(:bool),
-	             octet_string(:data, explicit: 0),
-		     model(:a_record, Record)]
+	                 octet_string(:data, explicit: 0),
+		             model(:a_record, Record)]
 end
 ```
 
@@ -67,6 +73,13 @@ record[:room].optional  # => true
 record[:house].default  # => 0
 
 record[:id].to_der      # => String
+
+cplx_record = ComplexRecord.parse(der_string)
+cplx_record[:bool]            # => RASN1::Types::Boolean
+cplx_record[:bool].value      # => TrueClass/FalseClass
+cplx_record[:data].value      # => String
+cplx_record[:data].explicit?  # => true
+cplx_record[:a_record]        # => Record
 ```
 
 ### Generate a DER-encoded string
@@ -93,4 +106,3 @@ see https://github.com/sdaubert/rasn1/wiki
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/sdaubert/rasn1.
-
