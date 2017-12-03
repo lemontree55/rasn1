@@ -13,6 +13,12 @@ module RASN1
     class OctetString < Primitive
       TAG = 0x04
 
+      def inspect(level=0)
+        str = ''
+        str << '  ' * level if level > 0
+        str << "#{name} #{type}: #{value.inspect}"
+      end
+
       private
 
       def value_to_der
@@ -30,4 +36,3 @@ module RASN1
     end
   end
 end
-

@@ -260,6 +260,10 @@ module RASN1
       end
     end
 
+    def inspect(level=0)
+      '  ' * level + "#{type} #{root.inspect(-level)}"
+    end
+
     private
 
     def is_composed?(el)

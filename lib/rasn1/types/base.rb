@@ -200,6 +200,11 @@ module RASN1
         value_to_der.size
       end
 
+      def inspect(level=0)
+        str = ''
+        str << '  ' * level if level > 0
+        str << "#{name} #{type}: #{value}"
+      end
 
       private
 

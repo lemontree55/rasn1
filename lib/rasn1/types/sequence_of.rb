@@ -54,6 +54,28 @@ module RASN1
         @value = []
       end
 
+      def inspect(level=0)
+        str = ''
+        str << '  ' * level if level > 0
+        level = level.abs
+        str << "#{type}:\n"
+        level += 1
+        @value.each do |item|
+          case item
+          when Base, Model
+            next if item.optional? and item.value.nil?
+            str << '  ' * level + "#{item.inspect(level)}"
+            str << "\n" unless item.is_a?(Model)
+          when Hash
+            type = of_type_class.new(item)
+            str << '  ' * level + "#{type.inspect(level)}"
+          else
+            str << '  ' * level + "#{item.inspect}\n"
+          end
+        end
+        str
+      end
+
       private
 
       def of_type_class
@@ -125,4 +147,3 @@ module RASN1
     end
   end
 end
-
