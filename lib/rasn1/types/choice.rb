@@ -90,6 +90,17 @@ module RASN1
         raise ASN1Error, "CHOICE #@name: no type matching #{der.inspect}" unless parsed
       end
 
+      def inspect(level=0)
+        str = ''
+        str << '  ' * level if level > 0
+        str << "#{name} #{type}: "
+        if @chosen.nil?
+          str << 'not chosen!'
+        else
+          str << @value[@chosen].inspect(level)
+        end
+      end
+
       private
 
       def check_chosen
