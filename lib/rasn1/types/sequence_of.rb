@@ -20,8 +20,8 @@ module RASN1
     #  commposed_type.value = [RASN1::Types::Integer(:id),
     #                          RASN1::Types::OctetString(:data)]
     #  seqof = RASN1::SequenceOf.new(:comp, composed_type)
-    #  seqof.value << [0, 'data0']
-    #  seqof.value << [1, 'data1']
+    #  seqof << [0, 'data0']
+    #  seqof << [1, 'data1']
     #
     # == Use with {Model}
     # SEQUENCE OF may also be used with a Model type:
@@ -32,8 +32,8 @@ module RASN1
     #
     #  seqof = RASN1::Types::SequenceOf.new(:record, MyModel)
     #  # set values
-    #  seqof.value << { bool: true, int: 12 }
-    #  seqof.value << { bool: false, int: 65535 }
+    #  seqof << { bool: true, int: 12 }
+    #  seqof << { bool: false, int: 65535 }
     #  # Generate DER string
     #  der = seqof.to_der    # => String
     #  # parse 
@@ -52,6 +52,12 @@ module RASN1
         super(name, options)
         @of_type = of_type
         @value = []
+      end
+
+      # Add an item to SEQUENCE OF
+      # @param [Array,Hash]
+      def <<(obj)
+        @value << obj
       end
 
       def inspect(level=0)

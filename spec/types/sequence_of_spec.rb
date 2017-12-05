@@ -57,8 +57,8 @@ module RASN1
         end
 
         it 'generates a DER string for a composed type' do
-          @seqof.value << [true, 12, 'abcd']
-          @seqof.value << [false, 65534, 'nop']
+          @seqof << [true, 12, 'abcd']
+          @seqof << [false, 65534, 'nop']
           expect(@seqof.to_der).to eq(@composed_der)
           # expect #to_der does not alterate type (here @seq, so @bool and @int too)
           expect(@bool.value).to_not be(false)
@@ -67,8 +67,8 @@ module RASN1
 
         it 'generates a DER string for a model type' do
           seqof = SequenceOf.new(:seqof, SimpleModel)
-          seqof.value << { bool: true, int: 12 }
-          seqof.value << { bool: false, int: 65535 }
+          seqof << { bool: true, int: 12 }
+          seqof << { bool: false, int: 65535 }
           expected_der = binary("\x30\x12" \
                                 "\x30\x06\x01\x01\xff\x02\x01\x0c" \
                                 "\x30\x08\x01\x01\x00\x02\x03\x00\xff\xff")
