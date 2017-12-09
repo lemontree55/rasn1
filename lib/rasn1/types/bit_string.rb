@@ -27,6 +27,12 @@ module RASN1
         end
       end
 
+      def inspect(level=0)
+        str = ''
+        str << '  ' * level if level > 0
+        str << "#{name} #{type}: #{value.inspect} (bit length: #{bit_length})"
+      end
+
       private
 
       def build_tag?
@@ -67,4 +73,3 @@ module RASN1
     end
   end
 end
-
