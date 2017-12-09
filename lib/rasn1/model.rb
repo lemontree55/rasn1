@@ -261,7 +261,7 @@ module RASN1
     end
 
     def inspect(level=0)
-      '  ' * level + "#{type} #{root.inspect(-level)}"
+      '  ' * level + "#{@root} (#{type}) #{root.inspect(-level)}"
     end
 
     private
