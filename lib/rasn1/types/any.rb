@@ -37,8 +37,10 @@ module RASN1
           str << "#{name} (ANY) NULL"
         elsif @value.is_a?(OctetString)
           str << "#{name} (ANY) #{@value.type}: #{value.value.inspect}"
-        else
+        elsif @value.class < Base
           str << "#{name} (ANY) #{@value.type}: #{value.value}"
+        else
+          str << "#{name} (ANY) #{value.to_s.inspect}"
         end
       end
     end
