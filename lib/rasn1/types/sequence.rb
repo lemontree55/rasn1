@@ -27,6 +27,27 @@ module RASN1
     class Sequence < Constructed
       TAG = 0x10
 
+      # @param [Symbol, String] name name for this tag in grammar
+      # @param [Hash] options
+      # @option options [Symbol] :class ASN.1 tag class. Default value is +:universal+.
+      #  If +:explicit+ or +:implicit:+ is defined, default value is +:context+.
+      # @option options [::Boolean] :optional define this tag as optional. Default
+      #   is +false+
+      # @option options [Object] :default default value for DEFAULT tag
+      # @option options [Object] :value value to set (default is +[]+)
+      # @option options [::Integer] :implicit define an IMPLICIT tagged type
+      # @option options [::Integer] :explicit define an EXPLICIT tagged type
+      # @option options [::Boolean] :constructed if +true+, set type as constructed.
+      #  May only be used when +:explicit+ is defined, else it is discarded.
+      def initialize(name, options={})
+        super(name, { value: [] }.merge(options))
+      end
+
+      def initialize_copy(other)
+        super
+        @value.map! { |v| v.dup }
+      end
+
       private
 
       def value_to_der
@@ -39,8 +60,7 @@ module RASN1
       end
 
       def der_to_value(der, ber:false)
-        case @value
-        when Array
+        if @value.is_a?(Array) and !@value.empty?
           nb_bytes = 0
           @value.each do |element|
             nb_bytes += element.parse!(der[nb_bytes..-1])

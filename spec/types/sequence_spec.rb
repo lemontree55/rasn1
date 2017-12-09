@@ -1,3 +1,5 @@
+require 'spec_helper'
+
 module RASN1
   module Types
 
