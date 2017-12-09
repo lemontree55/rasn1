@@ -29,6 +29,18 @@ module RASN1
         @value = der[0, total_length]
         total_length
       end
+
+      def inspect(level=0)
+        str = ''
+        str << '  ' * level if level > 0
+        if @value.nil?
+          str << "#{name} (ANY) NULL"
+        elsif @value.is_a?(OctetString)
+          str << "#{name} (ANY) #{@value.type}: #{value.value.inspect}"
+        else
+          str << "#{name} (ANY) #{@value.type}: #{value.value}"
+        end
+      end
     end
   end
 end

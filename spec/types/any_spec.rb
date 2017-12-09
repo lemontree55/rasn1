@@ -56,5 +56,18 @@ module RASN1::Types
         expect(anymodel[:data].value).to eq(binary("\x02\x02\x00\x80"))
       end
     end
+
+    describe '#inspect' do
+      let(:any) { Any.new(:any) }
+
+      it 'gets a String with NULL when value is nil' do
+        expect(any.inspect).to eq('any (ANY) NULL')
+      end
+
+      it 'gets a String with real type' do
+        any.value = OctetString.new(:os, value: '1234')
+        expect(any.inspect).to eq('any (ANY) OCTET STRING: "1234"')
+      end
+    end
   end
 end
