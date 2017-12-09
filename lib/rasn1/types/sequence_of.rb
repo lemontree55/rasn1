@@ -12,7 +12,7 @@ module RASN1
     #  # Create a SEQUENCE OF INTEGER
     #  seqof = RASN1::Types::SequenceOf.new(:record, RASN1::Types::Integer)
     #  # Set integer values
-    #  seqof.value = [1, 2, 3, 4]
+    #  seqof.value << [1, 2, 3, 4]
     #
     # == Use with {Constructed} types
     # SEQUENCE OF may be used to create sequence of composed types. For example:
@@ -54,10 +54,44 @@ module RASN1
         @value = []
       end
 
+      def initialize_copy(other)
+        super
+        @of_type = @of_type.dup
+        @value.map! { |v| v.dup }
+      end
+
       # Add an item to SEQUENCE OF
-      # @param [Array,Hash]
+      # @param [Array,Hash, Model]
       def <<(obj)
-        @value << obj
+        if of_type_class < Primitive
+          raise ASN1Error, 'object to add should be an Array' unless obj.is_a?(Array)
+          @value += obj.map { |item| @of_type.new(nil, value: item) }
+        elsif composed_of_type?
+          raise ASN1Error, 'object to add should be an Array' unless obj.is_a?(Array)
+          new_value = of_type_class.new(@of_type.name, value: [])
+          @of_type.value.each_with_index do |type, i|
+            type2 = type.dup
+            type2.value = obj[i]
+            new_value.value << type2
+          end
+          @value << new_value
+        elsif of_type_class < Model
+          case obj
+          when Hash
+            @value << @of_type.new(obj)
+          when of_type_class
+            @value << obj
+          else
+            raise ASN1Error, "object to add should be a #{of_type_class} or a Hash"
+          end
+        end
+      end
+
+      # Get element of index +idx+
+      # @param [Integer] idx
+      # @return [Base]
+      def [](idx)
+        @value[idx]
       end
 
       def inspect(level=0)
@@ -93,34 +127,7 @@ module RASN1
       end
 
       def value_to_der
-        if composed_of_type?
-          @value.map do |ary|
-            s = of_type_class.new(@of_type.name)
-            sval = []
-            @of_type.value.each_with_index do |type, i|
-              type2 = type.dup
-              type2.value = ary[i]
-              sval << type2
-            end
-            s.value = sval
-            s.to_der
-          end.join
-        elsif of_type_class < Model
-          if of_type_class.new.root.is_a? SequenceOf
-            @value.map do |ary|
-              model = of_type_class.new
-              model.root.value = ary
-              model.to_der
-            end.join
-          else
-            @value.map do |hsh|
-              model = of_type_class.new(hsh)
-              model.to_der
-            end.join
-          end
-        else
-          @value.map { |v| of_type_class.new(:t, value: v).to_der }.join
-        end
+        @value.map { |v| v.to_der }.join
       end
 
       def der_to_value(der, ber:false)
@@ -136,15 +143,16 @@ module RASN1
                    of_type_class.new(:t)
                  end
           nb_bytes += type.parse!(der[nb_bytes, der.length])
-          value = if composed_of_type?
-                    type.value.map { |obj| obj.value }
-                  elsif of_type_class < Model
-                    type.to_h[type.to_h.keys.first]
-                  else
-                    type.value
-                  end
-          @value << value
+          #value = if composed_of_type?
+          #          type.value.map { |obj| obj.value }
+          #        elsif of_type_class < Model
+          #          type.to_h[type.to_h.keys.first]
+          #        else
+          #          type.value
+          #        end
+          @value << type
         end
+        #puts "#{name}: #{@value.inspect}"
       end
 
       def explicit_type

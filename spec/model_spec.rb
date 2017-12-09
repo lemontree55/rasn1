@@ -115,8 +115,8 @@ module RASN1
 
       it 'generates a Hash image of a model with a SequenceOf' do
         model = OfModel.new
-        model[:seqof].value << { id: 1, house: 1 }
-        model[:seqof].value << { id: 2, house: 1 }
+        model[:seqof] << { id: 1, house: 1 }
+        model[:seqof] << { id: 2, house: 1 }
         expect(model.to_h).to eq({ seqof: [{ id: 1, house: 1 },
                                            { id: 2, house: 1 }]
                                  })

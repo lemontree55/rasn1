@@ -329,18 +329,18 @@ module RASN1
     end
 
     def private_to_h(element)
-      if element.value.is_a? Array
+      if element.is_a?(Types::SequenceOf) or
+         (element.is_a?(Model) and element.root.is_a?(Types::SequenceOf))
+        element.value.map { |el| private_to_h(el) }
+      elsif element.value.is_a? Array
         h = {}
         element.value.each do |subel|
           case subel
           when Types::Sequence, Types::Set
             h[subel.name] = private_to_h(subel)
           when Model
-            h[@elements.key(subel)] = subel.to_h[subel.name]
-          when Hash, Array
-            # Array of Hash for SequenceOf and SetOf
-            # Array of Array of... of Hash are nested SequenceOf or SetOf
-            return element.value
+            this_name = @elements.key(subel) || element.name
+            h[this_name] = subel.to_h[subel.name]
           else
             next if subel.value.nil? and subel.optional?
             h[subel.name] = subel.value

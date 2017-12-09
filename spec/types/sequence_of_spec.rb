@@ -52,7 +52,7 @@ module RASN1
       describe '#to_der' do
         it 'generates a DER string for a primitive type' do
           seqof = SequenceOf.new(:seqof, Integer)
-          seqof.value = (0..7).to_a
+          seqof << (0..7).to_a
           expect(seqof.to_der).to eq(@integer_der)
         end
 
@@ -80,12 +80,19 @@ module RASN1
         it 'parses DER string for a primitive type' do
           seqof = SequenceOf.new(:seqof, Integer)
           seqof.parse!(@integer_der)
-          expect(seqof.value).to eq((0..7).to_a)
+          expect(seqof.value).to eq((0..7).to_a.map { |v| Integer.new(:t, value: v) })
         end
 
         it 'parses DER string for a composed type' do
           @seqof.parse!(@composed_der)
-          expect(@seqof.value).to eq([[true, 12, 'abcd'], [false, 65534, 'nop']])
+          golden = []
+          golden << Sequence.new(nil, value: [Boolean.new(:bool, default: true),
+                                              Integer.new(:int, value: 12),
+                                              OctetString.new(:os, value: 'abcd')])
+          golden << Sequence.new(nil, value: [Boolean.new(:bool, value: false),
+                                              Integer.new(:int, value: 65534),
+                                              OctetString.new(:os, value: 'nop')])
+          expect(@seqof.value).to eq(golden)
         end
 
         it 'parses DER string for a model type' do
@@ -94,14 +101,16 @@ module RASN1
                        "\x30\x06\x01\x01\xff\x02\x01\x7f" \
                        "\x30\x07\x01\x01\x00\x02\x02\x7f\xff")
           seqof.parse!(der)
-          expect(seqof.value).to eq([{ bool: true, int: 127 },
-                                     {bool: false, int: 32767 }])
+          golden = []
+          golden << SimpleModel.new(bool: true, int: 127)
+          golden << SimpleModel.new(bool: false, int: 32767)
+          expect(seqof.value).to eq(golden)
         end
 
         it 'parses DER string with explicit option' do
           seqof = SequenceOf.new(:seqof, Integer, explicit: 3)
           seqof.parse!(binary("\xa3\x1a" + @integer_der))
-          expect(seqof.value).to eq((0..7).to_a)
+          expect(seqof.value).to eq((0..7).to_a.map { |v| Integer.new(nil, value: v)})
         end
       end
     end
