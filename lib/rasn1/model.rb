@@ -260,8 +260,16 @@ module RASN1
       end
     end
 
+    # @return [String]
     def inspect(level=0)
       '  ' * level + "#{@root} (#{type}) #{root.inspect(-level)}"
+    end
+
+    # Objects are equal if they have same class AND same DER
+    # @param [Base] other
+    # @return [Boolean]
+    def==(other)
+      (other.class == self.class) && (other.to_der == self.to_der)
     end
 
     private

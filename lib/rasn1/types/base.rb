@@ -97,6 +97,11 @@ module RASN1
       # Used by +#dup+ and +#clone+. Deep copy @value.
       def initialize_copy(other)
         @value = @value.nil? ? nil : @value.dup
+        begin
+          @default = @default.dup
+        rescue TypeError => ex
+          raise unless ex.message =~ /can't (dup|clone)/
+        end
       end
 
       # Get value or default value
@@ -204,6 +209,13 @@ module RASN1
         str = ''
         str << '  ' * level if level > 0
         str << "#{name} #{type}: #{value}"
+      end
+
+      # Objects are equal if they have same class AND same DER
+      # @param [Base] other
+      # @return [Boolean]
+      def ==(other)
+        (other.class == self.class) && (other.to_der == self.to_der)
       end
 
       private
