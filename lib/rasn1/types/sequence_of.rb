@@ -38,6 +38,11 @@ module RASN1
     #  der = seqof.to_der    # => String
     #  # parse 
     #  seqof.parse! der
+    #
+    # After parsing, a SEQUENCE OF may be accessed as an Array:
+    #  seqof[0]                # => MyModel
+    #  seqof[0][:bool].value   # => true
+    #  seqof[0][:int].value    # => 12
     # @author Sylvain Daubert
     class SequenceOf < Constructed
       TAG = Sequence::TAG
