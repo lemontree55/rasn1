@@ -11,7 +11,7 @@ module RASN1::Types
 
     describe '#initialize' do
       it 'creates an Null with default values' do
-        null = Null.new(:null)
+        null = Null.new
         expect(null).to be_primitive
         expect(null).to_not be_optional
         expect(null.asn1_class).to eq(:universal)
@@ -21,7 +21,7 @@ module RASN1::Types
 
     describe '#to_der' do
       it 'generates a DER string' do
-        null = Null.new(:null)
+        null = Null.new
         expect(null.to_der).to eq(binary("\x05\x00"))
         null.value = 'abcd'
         expect(null.to_der).to eq(binary("\x05\x00"))
@@ -29,7 +29,7 @@ module RASN1::Types
     end
 
     describe '#parse!' do
-      let(:null) { Null.new(:null) }
+      let(:null) { Null.new }
 
       it 'parses a NULL DER string' do
         null.parse!(binary("\x05\x00"))

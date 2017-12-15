@@ -25,14 +25,14 @@ module RASN1::Types
       it 'generates a DER string with an octet string' do
         anymodel = AnyModel.new
         anymodel[:id].value = '1.2.3.4'
-        anymodel[:data].value = OctetString.new(:os, value: 'abc')
+        anymodel[:data].value = OctetString.new('abc')
         expect(anymodel.to_der).to eq(os_der)
       end
 
       it 'generates a DER string with an integer' do
         anymodel = AnyModel.new
         anymodel[:id].value = '1.2.3.5'
-        anymodel[:data].value = Integer.new(:int, value: 128)
+        anymodel[:data].value = Integer.new(128)
         expect(anymodel.to_der).to eq(int_der)
       end
 
@@ -58,15 +58,15 @@ module RASN1::Types
     end
 
     describe '#inspect' do
-      let(:any) { Any.new(:any) }
+      let(:any) { Any.new }
 
       it 'gets a String with NULL when value is nil' do
-        expect(any.inspect).to eq('any (ANY) NULL')
+        expect(any.inspect).to eq('(ANY) NULL')
       end
 
       it 'gets a String with real type' do
-        any.value = OctetString.new(:os, value: '1234')
-        expect(any.inspect).to eq('any (ANY) OCTET STRING: "1234"')
+        any.value = OctetString.new('1234')
+        expect(any.inspect).to eq('(ANY) OCTET STRING: "1234"')
       end
     end
   end

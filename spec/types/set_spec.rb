@@ -3,10 +3,10 @@ module RASN1
 
     describe Set do
         before(:each) do
-          @set = Set.new(:set)
-          @bool = Boolean.new(:bool, default: true)
-          @int = Integer.new(:int)
-          @bs = BitString.new(:bs)
+          @set = Set.new
+          @bool = Boolean.new(default: true)
+          @int = Integer.new
+          @bs = BitString.new
           @set.value = [@bool, @int, @bs]
 
           @no_bool_der = binary("\x31\x09\x02\x01\x2A\x03\x04\x01\x01\x04\x06")
@@ -21,7 +21,7 @@ module RASN1
 
       describe '#initialize' do
         it 'creates an Set with default values' do
-          set = Set.new(:set)
+          set = Set.new
           expect(set).to be_constructed
           expect(set).to_not be_optional
           expect(set.asn1_class).to eq(:universal)

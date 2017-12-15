@@ -95,15 +95,22 @@ module RASN1
       end
 
       # @method sequence(name, options)
+      #  @param [Symbol,String] name name of object in model
+      #  @param [Hash] options
       #  @see Types::Sequence#initialize
       # @method set(name, options)
+      #  @param [Symbol,String] name name of object in model
+      #  @param [Hash] options
       #  @see Types::Set#initialize
       # @method choice(name, options)
+      #  @param [Symbol,String] name name of object in model
+      #  @param [Hash] options
       #  @see Types::Choice#initialize
       %w(sequence set choice).each do |type|
         class_eval "def #{type}(name, options={})\n" \
+                   "  options.merge!(name: name)\n" \
                    "  proc = Proc.new do |opts|\n" \
-                   "    Types::#{type.capitalize}.new(name, options.merge(opts))\n" \
+                   "    Types::#{type.capitalize}.new(options.merge(opts))\n" \
                    "  end\n" \
                    "  @root = [name, proc]\n" \
                    "  @root << options[:content] unless options[:content].nil?\n" \
@@ -112,54 +119,82 @@ module RASN1
       end
 
       # @method sequence_of(name, type, options)
+      #  @param [Symbol,String] name name of object in model
+      #  @param [Model, Types::Base] type type for SEQUENCE OF
+      #  @param [Hash] options
       #  @see Types::SequenceOf#initialize
       # @method set_of(name, type, options)
+      #  @param [Symbol,String] name name of object in model
+      #  @param [Model, Types::Base] type type for SET OF
+      #  @param [Hash] options
       #  @see Types::SetOf#initialize
       %w(sequence set).each do |type|
         klass_name = "Types::#{type.capitalize}Of"
         class_eval "def #{type}_of(name, type, options={})\n" \
+                   "  options.merge!(name: name)\n" \
                    "  proc = Proc.new do |opts|\n" \
-                   "    #{klass_name}.new(name, type, options.merge(opts))\n" \
+                   "    #{klass_name}.new(type, options.merge(opts))\n" \
                    "  end\n" \
                    "  @root = [name, proc]\n" \
                    "end"
       end
 
       # @method boolean(name, options)
+      #  @param [Symbol,String] name name of object in model
+      #  @param [Hash] options
       #  @see Types::Boolean#initialize
       # @method integer(name, options)
+      #  @param [Symbol,String] name name of object in model
+      #  @param [Hash] options
       #  @see Types::Integer#initialize
       # @method bit_string(name, options)
+      #  @param [Symbol,String] name name of object in model
+      #  @param [Hash] options
       #  @see Types::BitString#initialize
       # @method octet_string(name, options)
+      #  @param [Symbol,String] name name of object in model
+      #  @param [Hash] options
       #  @see Types::OctetString#initialize
       # @method null(name, options)
+      #  @param [Symbol,String] name name of object in model
+      #  @param [Hash] options
       #  @see Types::Null#initialize
       # @method enumerated(name, options)
+      #  @param [Symbol,String] name name of object in model
+      #  @param [Hash] options
       #  @see Types::Enumerated#initialize
       # @method utf8_string(name, options)
+      #  @param [Symbol,String] name name of object in model
+      #  @param [Hash] options
       #  @see Types::Utf8String#initialize
       Types.primitives.each do |prim|
         next if prim == Types::ObjectId
         class_eval "def #{prim.type.downcase.gsub(/\s+/, '_')}(name, options={})\n" \
+                   "  options.merge!(name: name)\n" \
                    "  proc = Proc.new do |opts|\n" \
-                   "    #{prim.to_s}.new(name, options.merge(opts))\n" \
+                   "    #{prim.to_s}.new(options.merge(opts))\n" \
                    "  end\n" \
                    "  @root = [name, proc]\n" \
                    "end"
       end
 
+      # @param [Symbol,String] name name of object in model
+      # @param [Hash] options
       # @note This method is named +objectid+ and not +object_id+ to not override
       #   +Object#object_id+.
       # @see Types::ObjectId#initialize
       def objectid(name, options={})
-        proc = Proc.new { |opts| Types::ObjectId.new(name, options.merge(opts)) }
+        options.merge!(name: name)
+        proc = Proc.new { |opts| Types::ObjectId.new(options.merge(opts)) }
         @root = [name, proc]
       end
 
+      # @param [Symbol,String] name name of object in model
+      # @param [Hash] options
       # @see Types::Any#initialize
       def any(name, options={})
-        proc = Proc.new { |opts| Types::Any.new(name, options.merge(opts)) }
+        options.merge!(name: name)
+        proc = Proc.new { |opts| Types::Any.new(options.merge(opts)) }
         @root = [name, proc]
       end
 
@@ -186,7 +221,7 @@ module RASN1
     # @param [Hash] args
     def initialize(args={})
       root = generate_root
-      set_elements *root
+      set_elements(*root)
       initialize_elements self, args
     end
 
@@ -209,7 +244,7 @@ module RASN1
     # Get name frm root type
     # @return [String,Symbol]
     def name
-      @elements[@root].name
+      @root
     end
 
     # Get elements names
@@ -221,7 +256,7 @@ module RASN1
     # Return a hash image of model
     # @return [Hash]
     def to_h
-      { @root => private_to_h(@elements[@root]) }
+      private_to_h
     end
 
     # @return [String]
@@ -328,27 +363,32 @@ module RASN1
       end
     end
 
-    def private_to_h(element)
-      if element.is_a?(Types::SequenceOf) or
-         (element.is_a?(Model) and element.root.is_a?(Types::SequenceOf))
-        element.value.map { |el| private_to_h(el) }
-      elsif element.value.is_a? Array
-        h = {}
-        element.value.each do |subel|
-          case subel
-          when Types::Sequence, Types::Set
-            h[subel.name] = private_to_h(subel)
-          when Model
-            this_name = @elements.key(subel) || element.name
-            h[this_name] = subel.to_h[subel.name]
-          else
-            next if subel.value.nil? and subel.optional?
-            h[subel.name] = subel.value
-          end
-        end
-        h
+    def private_to_h(element=nil)
+      my_element = element
+      my_element = root if my_element.nil?
+      my_element = my_element.root if my_element.is_a?(Model)
+      value = case my_element
+              when Types::SequenceOf
+                if my_element.of_type < Model
+                  my_element.value.map { |el| el.to_h.values.first }
+                else
+                  my_element.value.map { |el| private_to_h(el) }
+                end
+              when Types::Sequence
+                seq = my_element.value.map do |el|
+                        next if el.optional? and el.value.nil?
+                        name = el.is_a?(Model) ? @elements.key(el) : el.name
+                        [name, private_to_h(el)]
+                      end
+                seq.compact!
+                Hash[seq]
+              else
+                my_element.value
+              end
+      if element.nil?
+        { @root => value }
       else
-        element.value
+        value
       end
     end
   end

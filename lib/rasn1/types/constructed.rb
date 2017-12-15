@@ -14,6 +14,7 @@ module RASN1
         when Array
           str = ''
           str << '  ' * level if level > 0
+          str << "#{@name} " unless @name.nil?
           level = level.abs
           str << "#{type}:\n"
           level += 1
@@ -21,7 +22,9 @@ module RASN1
             case item
             when Base, Model
               next if item.optional? and item.value.nil?
-              str << '  ' * level + "#{item.inspect(level)}\n"
+              str << '  ' * level
+              str << "#{item.name} " unless item.name.nil?
+              str << "#{item.inspect(level)}\n"
             else
               str << item.inspect
             end

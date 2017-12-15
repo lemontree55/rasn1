@@ -11,7 +11,7 @@ module RASN1::Types
 
     describe '#initialize' do
       it 'creates a Boolean with default values' do
-        bool = Boolean.new(:bool)
+        bool = Boolean.new
         expect(bool).to be_primitive
         expect(bool).to_not be_optional
         expect(bool.asn1_class).to eq(:universal)
@@ -21,7 +21,7 @@ module RASN1::Types
 
     describe '#to_der' do
       it 'generates a DER string' do
-        bool = Boolean.new(:bool)
+        bool = Boolean.new
         bool.value = true
         expect(bool.to_der).to eq(binary("\x01\x01\xff"))
         bool.value = false
@@ -29,13 +29,13 @@ module RASN1::Types
       end
 
       it 'generates a DER string according to ASN.1 class' do
-        bool = Boolean.new(:bool, class: :private)
+        bool = Boolean.new(class: :private)
         bool.value = true
         expect(bool.to_der).to eq(binary("\xC1\x01\xff"))
       end
 
       it 'generates a DER string according to default' do
-        bool = Boolean.new(:bool, default: true)
+        bool = Boolean.new(default: true)
         bool.value = true
         expect(bool.to_der).to eq('')
         bool.value = false
@@ -43,7 +43,7 @@ module RASN1::Types
       end
 
       it 'generates a DER string according to optional' do
-        bool = Boolean.new(:bool, optional: true)
+        bool = Boolean.new(optional: true)
         bool.value = nil
         expect(bool.to_der).to eq('')
         bool.value = true
@@ -52,7 +52,7 @@ module RASN1::Types
     end
 
     describe '#parse!' do
-      let(:bool) { Boolean.new(:bool) }
+      let(:bool) { Boolean.new }
       let(:ber) { binary("\x01\x01\x56") }
 
       it 'parses a DER BOOLEAN string' do
@@ -80,5 +80,3 @@ module RASN1::Types
     end
   end
 end
-
-

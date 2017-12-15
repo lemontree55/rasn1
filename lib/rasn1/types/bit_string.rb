@@ -9,21 +9,24 @@ module RASN1
       # @return [Integer] bit length of bit string
       attr_accessor :bit_length
 
-      # @param [Symbol, String] name name for this tag in grammar
-      # @param [Hash] options
-      # @option options [Symbol] :class ASN.1 tag class. Default value is +:universal+
-      # @option options [::Boolean] :optional define this tag as optional. Default
-      #   is +false+
-      # @option options [Object] :default default value for DEFAULT tag
-      # @option options [Object] :bit_length default bit_length value. Should be
-      #   present if +:default+ is set
-      def initialize(name, options={})
+      # @overload initialize(options={})
+      #   @param [Hash] options
+      #   @option options [Object] :bit_length default bit_length value. Should be
+      #     present if +:default+ is set
+      # @overload initialize(value, options={})
+      #   @param [Object] value value to set for this ASN.1 object
+      #   @param [Hash] options
+      #   @option options [Object] :bit_length default bit_length value. Should be
+      #     present if +:default+ is set
+      # @see Base#initialize common options to all ASN.1 types
+      def initialize(value_or_options={}, options={})
         super
+        opts = value_or_options.is_a?(Hash) ? value_or_options : options
         if @default
-          if options[:bit_length].nil?
+          if opts[:bit_length].nil?
             raise ASN1Error, "TAG #@name: default bit length is not defined"
           end
-          @default_bit_length = options[:bit_length]
+          @default_bit_length = opts[:bit_length]
         end
       end
 

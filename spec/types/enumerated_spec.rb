@@ -14,7 +14,7 @@ module RASN1::Types
 
     describe '#initialize' do
       it 'creates an Enumerated with default values' do
-        enum = Enumerated.new(:enum, enum: enumerated)
+        enum = Enumerated.new(enum: enumerated)
         expect(enum).to be_primitive
         expect(enum).to_not be_optional
         expect(enum.asn1_class).to eq(:universal)
@@ -27,27 +27,27 @@ module RASN1::Types
       end
 
       it 'raises on unknown default value' do
-        expect { Enumerated.new(:enum, enum: enumerated, default: 53)}.
+        expect { Enumerated.new(enum: enumerated, default: 53)}.
           to raise_error(RASN1::EnumeratedError, /default value/)
-        expect { Enumerated.new(:enum, enum: enumerated, default: :e)}.
+        expect { Enumerated.new(enum: enumerated, default: :e)}.
           to raise_error(RASN1::EnumeratedError, /default value/)
-        expect { Enumerated.new(:enum, enum: enumerated, default: Object.new)}.
+        expect { Enumerated.new(enum: enumerated, default: Object.new)}.
           to raise_error(TypeError, /default value/)
       end
 
       it 'records integer default value as name' do
-        enum = Enumerated.new(:enum, enum: enumerated, default: 0)
+        enum = Enumerated.new(enum: enumerated, default: 0)
         expect(enum.default).to eq(:a)
       end
 
       it 'records named default value as name' do
-        enum = Enumerated.new(:enum, enum: enumerated, default: :b)
+        enum = Enumerated.new(enum: enumerated, default: :b)
         expect(enum.default).to eq(:b)
       end
     end
 
     describe '#value=' do
-      let(:enum) { Enumerated.new(:enum, enum: enumerated) }
+      let(:enum) { Enumerated.new(enum: enumerated) }
 
       it 'sets known integer' do
         expect { enum.value = 1 }.to_not raise_error
@@ -83,26 +83,26 @@ module RASN1::Types
 
     describe '#to_i' do
       it 'gets ruby integer object' do
-        enum = Enumerated.new(:enum, enum: enumerated)
+        enum = Enumerated.new(enum: enumerated)
         enum.value = 1
         expect(enum.to_i).to eq(1)
       end
 
       it 'gets default value if one is defined and not value was set' do
-        enum = Enumerated.new(:enum, enum: enumerated, default: :c)
+        enum = Enumerated.new(enum: enumerated, default: :c)
         expect(enum.to_i).to eq(2)
         enum.value = :a
         expect(enum.to_i).to eq(0)
       end
 
       it 'returns 0 if no default value nor value were set' do
-        expect(Enumerated.new(:enum, enum: enumerated).to_i).to eq(0)
+        expect(Enumerated.new(enum: enumerated).to_i).to eq(0)
       end
     end
 
     describe '#to_der' do
       it 'generates a DER string' do
-        enum = Enumerated.new(:enum, enum: enumerated)
+        enum = Enumerated.new(enum: enumerated)
         enum.to_h.each do |name, int|
           enum.value = name
           expect(enum.to_der).to eq([2, 1, int].pack('C3'))
@@ -110,13 +110,13 @@ module RASN1::Types
       end
 
       it 'generates a DER string according to ASN.1 class' do
-        enum = Enumerated.new(:enum, enum: enumerated, class: :application)
+        enum = Enumerated.new(enum: enumerated, class: :application)
         enum.value = :a
         expect(enum.to_der).to eq(binary("\x42\x01\x00"))
       end
 
       it 'generates a DER string according to default' do
-        enum = Enumerated.new(:enum, enum: enumerated, default: :a)
+        enum = Enumerated.new(enum: enumerated, default: :a)
         enum.value = :a
         expect(enum.to_der).to eq('')
         enum.value = :b
@@ -124,7 +124,7 @@ module RASN1::Types
       end
 
       it 'generates a DER string according to optional' do
-        enum = Enumerated.new(:enum, enum: enumerated, optional: true)
+        enum = Enumerated.new(enum: enumerated, optional: true)
         enum.value = nil
         expect(enum.to_der).to eq('')
         enum.value = :c
@@ -133,7 +133,7 @@ module RASN1::Types
     end
 
    describe '#parse!' do
-     let(:enum) { Enumerated.new(:enum, enum: enumerated) }
+     let(:enum) { Enumerated.new(enum: enumerated) }
 
      it 'parses a DER ENUMERATED string' do
        enum.to_h.each do |name, int|
@@ -144,5 +144,3 @@ module RASN1::Types
    end
   end
 end
-
-

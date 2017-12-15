@@ -21,20 +21,24 @@ module RASN1
       # @return [Hash]
       attr_reader :enum
 
-      # @param [Symbol, String] name name for this tag in grammar
-      # @param [Hash] options
-      # @option options [Symbol] :class ASN.1 tag class. Default value is +:universal+
-      # @option options [::Boolean] :optional define this tag as optional. Default
-      #   is +false+
-      # @option options [Object] :default default value for DEFAULT tag
-      # @option options [Hash] :enum enumeration hash. Keys are names, and values
-      #   are integers. This key is mandatory.
-      # @raise [EnumeratedError] +:enum+ key is not present
-      # @raise [EnumeratedError] +:default+ value is unknown
-      def initialize(name, options={})
+      # @overload initialize(options={})
+      #   @option options [Hash] :enum enumeration hash. Keys are names, and values
+      #     are integers. This key is mandatory.
+      #   @raise [EnumeratedError] +:enum+ key is not present
+      #   @raise [EnumeratedError] +:default+ value is unknown
+      # @overload initialize(value, options={})
+      #   @param [Object] value value to set for this ASN.1 object
+      #   @option options [Hash] :enum enumeration hash. Keys are names, and values
+      #     are integers. This key is mandatory.
+      #   @raise [EnumeratedError] +:enum+ key is not present
+      #   @raise [EnumeratedError] +:default+ value is unknown
+      # @see Base#initialize common options to all ASN.1 types
+      def initialize(value_or_options={}, options={})
         super
-        raise EnumeratedError, 'no enumeration given' unless options.has_key? :enum
-        @enum = options[:enum]
+        opts = value_or_options.is_a?(Hash) ? value_or_options : options
+
+        raise EnumeratedError, 'no enumeration given' unless opts.has_key? :enum
+        @enum = opts[:enum]
 
         case @default
         when String,Symbol

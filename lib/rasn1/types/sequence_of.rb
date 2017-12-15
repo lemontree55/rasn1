@@ -53,8 +53,8 @@ module RASN1
       # @param [Symbol, String] name name for this tag in grammar
       # @param [Class, Base] of_type base type for sequence of
       # @see Base#initialize
-      def initialize(name, of_type, options={})
-        super(name, options)
+      def initialize(of_type, options={})
+        super(options)
         @of_type = of_type
         @value = []
       end
@@ -70,10 +70,10 @@ module RASN1
       def <<(obj)
         if of_type_class < Primitive
           raise ASN1Error, 'object to add should be an Array' unless obj.is_a?(Array)
-          @value += obj.map { |item| @of_type.new(nil, value: item) }
+          @value += obj.map { |item| @of_type.new(item) }
         elsif composed_of_type?
           raise ASN1Error, 'object to add should be an Array' unless obj.is_a?(Array)
-          new_value = of_type_class.new(@of_type.name, value: [])
+          new_value = of_type_class.new
           @of_type.value.each_with_index do |type, i|
             type2 = type.dup
             type2.value = obj[i]
@@ -161,7 +161,7 @@ module RASN1
       end
 
       def explicit_type
-        self.class.new(@name, self.of_type)
+        self.class.new(self.of_type)
       end
     end
   end

@@ -12,7 +12,7 @@ module RASN1::Types
 
     describe '#initialize' do
       it 'creates a PrintableString with default values' do
-        printable = PrintableString.new(:printable)
+        printable = PrintableString.new
         expect(printable).to be_primitive
         expect(printable).to_not be_optional
         expect(printable.asn1_class).to eq(:universal)
@@ -22,19 +22,19 @@ module RASN1::Types
     
     describe '#to_der' do
       it 'generates a DER string' do
-        printable = PrintableString.new(:printable)
+        printable = PrintableString.new
         printable.value = 'azerty'
         expect(printable.to_der).to eq(binary("\x13\x06azerty"))
       end
 
       it 'generates a DER string according to ASN.1 class' do
-        printable = PrintableString.new(:printable, class: :context)
+        printable = PrintableString.new(class: :context)
         printable.value = 'a'
         expect(printable.to_der).to eq(binary("\x93\x01a"))
       end
 
       it 'generates a DER string according to default' do
-        printable = PrintableString.new(:printable, default: 'NOP')
+        printable = PrintableString.new(default: 'NOP')
         printable.value = 'NOP'
         expect(printable.to_der).to eq('')
         printable.value = 'N'
@@ -42,7 +42,7 @@ module RASN1::Types
       end
 
       it 'generates a DER string according to optional' do
-        printable = PrintableString.new(:printable, optional: true)
+        printable = PrintableString.new(optional: true)
         printable.value = nil
         expect(printable.to_der).to eq('')
         printable.value = 'abc'
@@ -50,14 +50,14 @@ module RASN1::Types
       end
 
       it 'raises on illegal character' do
-        printable = PrintableString.new(:printable)
+        printable = PrintableString.new
         printable.value = ';'
         expect {printable.to_der }.to raise_error(RASN1::ASN1Error, /invalid char.*';'$/)
       end
     end
 
     describe '#parse!' do
-      let(:printable) { PrintableString.new(:printable) }
+      let(:printable) { PrintableString.new }
 
       it 'parses a DER PRINTABLE STRING' do
         printable.parse!(binary("\x13\x031a="))

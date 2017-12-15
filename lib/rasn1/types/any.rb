@@ -13,7 +13,7 @@ module RASN1
         when Base, Model
           @value.to_der
         when nil
-          Null.new(@name).to_der
+          Null.new.to_der
         else
           @value.to_s
         end
@@ -33,14 +33,15 @@ module RASN1
       def inspect(level=0)
         str = ''
         str << '  ' * level if level > 0
+        str << "#{@name} " unless @name.nil?
         if @value.nil?
-          str << "#{name} (ANY) NULL"
+          str << "(ANY) NULL"
         elsif @value.is_a?(OctetString)
-          str << "#{name} (ANY) #{@value.type}: #{value.value.inspect}"
+          str << "(ANY) #{@value.type}: #{value.value.inspect}"
         elsif @value.class < Base
-          str << "#{name} (ANY) #{@value.type}: #{value.value}"
+          str << "(ANY) #{@value.type}: #{value.value}"
         else
-          str << "#{name} (ANY) #{value.to_s.inspect}"
+          str << "(ANY) #{value.to_s.inspect}"
         end
       end
     end

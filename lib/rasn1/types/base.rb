@@ -33,15 +33,15 @@ module RASN1
     #  -- private tag
     #  PType ::= [PRIVATE 2] EXPLICIT INTEGER
     # These types may be defined as:
-    #  ctype = RASN1::Types::Integer.new(:ctype, explicit: 0)                      # with explicit, default #asn1_class is :context
-    #  atype = RASN1::Types::Integer.new(:atype, explicit: 1, class: :application)
-    #  ptype = RASN1::Types::Integer.new(:ptype, explicit: 2, class: :private)
+    #  ctype = RASN1::Types::Integer.new(explicit: 0)                      # with explicit, default #asn1_class is :context
+    #  atype = RASN1::Types::Integer.new(explicit: 1, class: :application)
+    #  ptype = RASN1::Types::Integer.new(explicit: 2, class: :private)
     # Sometimes, an EXPLICIT type should be CONSTRUCTED. To do that, use +:constructed+
     # option:
-    #  ptype = RASN1::Types::Integer.new(:ptype, explicit: 2, class: :private, constructed: true)
+    #  ptype = RASN1::Types::Integer.new(explicit: 2, class: :private, constructed: true)
     #
     # Implicit tagged values may also be defined:
-    #  ctype_implicit = RASN1::Types::Integer.new(:ctype, implicit: 0)
+    #  ctype_implicit = RASN1::Types::Integer.new(implicit: 0)
     # @author Sylvain Daubert
     class Base
       # Allowed ASN.1 tag classes
@@ -58,8 +58,8 @@ module RASN1
       # Length value for indefinite length
       INDEFINITE_LENGTH = 0x80
 
-      # @return [Symbol, String]
-      attr_accessor :name
+      # @return [String,nil]
+      attr_reader :name
       # @return [Symbol]
       attr_reader :asn1_class
       # @return [Object,nil] default value, if defined
@@ -75,23 +75,40 @@ module RASN1
       end
 
 
-      # @param [Symbol, String] name name for this tag in grammar
-      # @param [Hash] options
-      # @option options [Symbol] :class ASN.1 tag class. Default value is +:universal+.
-      #  If +:explicit+ or +:implicit:+ is defined, default value is +:context+.
-      # @option options [::Boolean] :optional define this tag as optional. Default
-      #   is +false+
-      # @option options [Object] :default default value for DEFAULT tag
-      # @option options [Object] :value value to set
-      # @option options [::Integer] :implicit define an IMPLICIT tagged type
-      # @option options [::Integer] :explicit define an EXPLICIT tagged type
-      # @option options [::Boolean] :constructed if +true+, set type as constructed.
-      #  May only be used when +:explicit+ is defined, else it is discarded.
-      def initialize(name, options={})
-        @name = name
+      # @overload initialize(options={})
+      #   @param [Hash] options
+      #   @option options [Symbol] :class ASN.1 tag class. Default value is +:universal+.
+      #    If +:explicit+ or +:implicit:+ is defined, default value is +:context+.
+      #   @option options [::Boolean] :optional define this tag as optional. Default
+      #     is +false+
+      #   @option options [Object] :default default value for DEFAULT tag
+      #   @option options [Object] :value value to set
+      #   @option options [::Integer] :implicit define an IMPLICIT tagged type
+      #   @option options [::Integer] :explicit define an EXPLICIT tagged type
+      #   @option options [::Boolean] :constructed if +true+, set type as constructed.
+      #    May only be used when +:explicit+ is defined, else it is discarded.
+      #   @option options [::String] :name name for this node
+      # @overload initialize(value, options={})
+      #   @param [Object] value value to set for this ASN.1 object
+      #   @param [Hash] options
+      #   @option options [Symbol] :class ASN.1 tag class. Default value is +:universal+.
+      #    If +:explicit+ or +:implicit:+ is defined, default value is +:context+.
+      #   @option options [::Boolean] :optional define this tag as optional. Default
+      #     is +false+
+      #   @option options [Object] :default default value for DEFAULT tag
+      #   @option options [::Integer] :implicit define an IMPLICIT tagged type
+      #   @option options [::Integer] :explicit define an EXPLICIT tagged type
+      #   @option options [::Boolean] :constructed if +true+, set type as constructed.
+      #    May only be used when +:explicit+ is defined, else it is discarded.
+      #   @option options [::String] :name name for this node
+      def initialize(value_or_options={}, options={})
         @constructed = nil
-
-        set_options options
+        if value_or_options.is_a? Hash
+          set_options value_or_options
+        else
+          set_options options
+          @value = value_or_options
+        end
       end
 
       # Used by +#dup+ and +#clone+. Deep copy @value.
@@ -208,7 +225,8 @@ module RASN1
       def inspect(level=0)
         str = ''
         str << '  ' * level if level > 0
-        str << "#{name} #{type}: #{value}"
+        str << "#{@name} " unless @name.nil?
+        str << "#{type}: #{value}"
       end
 
       # Objects are equal if they have same class AND same DER
@@ -226,6 +244,7 @@ module RASN1
         set_default options[:default]
         set_tag options
         @value = options[:value]
+        @name = options[:name]
       end
 
       def set_class(asn1_class)
@@ -330,14 +349,14 @@ module RASN1
 
         if length == INDEFINITE_LENGTH
           if primitive?
-            raise ASN1Error, "malformed #{type} TAG (#@name): indefinite length " \
+            raise ASN1Error, "malformed #{type} TAG: indefinite length " \
               "forbidden for primitive types"
           else
             if ber
-              raise NotImplementedError, "TAG #@name: indefinite length not " \
+              raise NotImplementedError, "TAG: indefinite length not " \
                 "supported yet"
             else
-              raise ASN1Error, "TAG #@name: indefinite length forbidden in DER " \
+              raise ASN1Error, "TAG: indefinite length forbidden in DER " \
                 "encoding"
             end
           end
@@ -357,12 +376,11 @@ module RASN1
       end
 
       def explicit_type
-        self.class.new(@name)
+        self.class.new
       end
 
       def raise_tag_error(expected_tag, tag)
         msg = "Expected #{tag2name(expected_tag)} but get #{tag2name(tag)}"
-        msg << " for #@name"
         raise ASN1Error, msg
       end
 

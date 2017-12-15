@@ -5,10 +5,10 @@ module RASN1
 
     describe Sequence do
         before(:each) do
-          @seq = Sequence.new(:seq)
-          @bool = Boolean.new(:bool, default: true)
-          @int = Integer.new(:int)
-          @bs = BitString.new(:bs)
+          @seq = Sequence.new
+          @bool = Boolean.new(default: true)
+          @int = Integer.new
+          @bs = BitString.new
           @seq.value = [@bool, @int, @bs]
 
           @no_bool_der = binary("\x30\x09\x02\x01\x2A\x03\x04\x01\x01\x04\x06")
@@ -23,7 +23,7 @@ module RASN1
 
       describe '#initialize' do
         it 'creates an Sequence with default values' do
-          seq = Sequence.new(:seq)
+          seq = Sequence.new
           expect(seq).to be_constructed
           expect(seq).to_not be_optional
           expect(seq.asn1_class).to eq(:universal)
@@ -43,7 +43,7 @@ module RASN1
         end
 
         it 'generates a DER string from a DER-valued SEQUENCE' do
-          seq2 = Sequence.new(:seq2)
+          seq2 = Sequence.new
           seq2.value = @no_bool_der[2, @no_bool_der.length]
           expect(seq2.to_der).to eq(@no_bool_der)
         end
@@ -65,7 +65,7 @@ module RASN1
         end
 
         it 'parses a DER string without parsing SEQUENCE content' do
-          seq2 = Sequence.new(:seq2)
+          seq2 = Sequence.new
           seq2.parse!(@der)
           expect(seq2.value).to eq(@der[2, @der.length])
         end

@@ -14,9 +14,9 @@ module RASN1
     # do:
     #  seq = RASN1::Types::Sequence.new(:record)
     #  seq.value = [
-    #               RASN1::Types::Integer(:id),
-    #               RASN1::Types::Integer(:id, explicit: 0, optional: true),
-    #               RASN1::Types::Integer(:id, implicit: 1, default: 0)
+    #               RASN1::Types::Integer.new(:id),
+    #               RASN1::Types::Integer.new(:room, explicit: 0, optional: true),
+    #               RASN1::Types::Integer.new(:house, implicit: 1, default: 0)
     #              ]
     #
     # A sequence may also be used without value to not parse sequence content:
@@ -27,20 +27,10 @@ module RASN1
     class Sequence < Constructed
       TAG = 0x10
 
-      # @param [Symbol, String] name name for this tag in grammar
-      # @param [Hash] options
-      # @option options [Symbol] :class ASN.1 tag class. Default value is +:universal+.
-      #  If +:explicit+ or +:implicit:+ is defined, default value is +:context+.
-      # @option options [::Boolean] :optional define this tag as optional. Default
-      #   is +false+
-      # @option options [Object] :default default value for DEFAULT tag
-      # @option options [Object] :value value to set (default is +[]+)
-      # @option options [::Integer] :implicit define an IMPLICIT tagged type
-      # @option options [::Integer] :explicit define an EXPLICIT tagged type
-      # @option options [::Boolean] :constructed if +true+, set type as constructed.
-      #  May only be used when +:explicit+ is defined, else it is discarded.
-      def initialize(name, options={})
-        super(name, { value: [] }.merge(options))
+      # @see Base#initialize
+      def initialize(value_or_options={}, options={})
+        super
+        @value ||= []
       end
 
       def initialize_copy(other)

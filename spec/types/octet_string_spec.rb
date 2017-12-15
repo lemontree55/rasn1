@@ -11,7 +11,7 @@ module RASN1::Types
 
     describe '#initialize' do
       it 'creates a OctetString with default values' do
-        os = OctetString.new(:os)
+        os = OctetString.new
         expect(os).to be_primitive
         expect(os).to_not be_optional
         expect(os.asn1_class).to eq(:universal)
@@ -21,19 +21,19 @@ module RASN1::Types
     
     describe '#to_der' do
       it 'generates a DER string' do
-        os = OctetString.new(:os)
+        os = OctetString.new
         os.value = 'NOP'
         expect(os.to_der).to eq(binary("\x04\x03NOP"))
       end
 
       it 'generates a DER string according to ASN.1 class' do
-        os = OctetString.new(:os, class: :context)
+        os = OctetString.new(class: :context)
         os.value = 'a'
         expect(os.to_der).to eq(binary("\x84\x01a"))
       end
 
       it 'generates a DER string according to default' do
-        os = OctetString.new(:os, default: 'NOP')
+        os = OctetString.new(default: 'NOP')
         os.value = 'NOP'
         expect(os.to_der).to eq('')
         os.value = 'N'
@@ -41,7 +41,7 @@ module RASN1::Types
       end
 
       it 'generates a DER string according to optional' do
-        os = OctetString.new(:os, optional: true)
+        os = OctetString.new(optional: true)
         os.value = nil
         expect(os.to_der).to eq('')
         os.value = 'abc'
@@ -49,7 +49,7 @@ module RASN1::Types
       end
 
       it 'serializes a Types::Base object when set as value' do
-        os = OctetString.new(:os)
+        os = OctetString.new
         int = Integer.new(:int)
         int.value = 12
         os.value = int
@@ -58,7 +58,7 @@ module RASN1::Types
     end
 
     describe '#parse!' do
-      let(:os) { OctetString.new(:os) }
+      let(:os) { OctetString.new }
 
       it 'parses a DER OCTET STRING' do
         os.parse!(binary("\x04\x02\x01\x02"))

@@ -10,7 +10,7 @@ module RASN1::Types
     end
 
     describe '#chosen' do
-      let(:choice) { Choice.new(:choice) }
+      let(:choice) { Choice.new }
 
       it 'sets chosen type' do
         choice.chosen = 42
@@ -20,8 +20,8 @@ module RASN1::Types
 
     context '(chosen value)' do
       before(:each) do
-        @choice = Choice.new(:choice)
-        @choice.value = [Integer.new(:int), OctetString.new(:os)]
+        @choice = Choice.new
+        @choice.value = [Integer.new, OctetString.new]
       end
 
       describe '#set_chosen_value' do
@@ -75,8 +75,8 @@ module RASN1::Types
 
     describe '#parse!' do
       before(:each) do
-        @choice = Choice.new(:choice)
-        @choice.value = [Integer.new(:int), OctetString.new(:os)]
+        @choice = Choice.new
+        @choice.value = [Integer.new, OctetString.new]
       end
 
       it 'parses a DER string containing a type from CHOICE' do
@@ -92,7 +92,7 @@ module RASN1::Types
       end
 
       it 'raises when parsin a DER string which does not contain any type from CHOICE' do
-        str = Boolean.new(:bool, value: false).to_der
+        str = Boolean.new(false).to_der
         expect { @choice.parse! str }.to raise_error(RASN1::ASN1Error, /no type matching/)
       end
     end

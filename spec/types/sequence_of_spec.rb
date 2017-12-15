@@ -10,18 +10,18 @@ module RASN1
 
     describe SequenceOf do
       before(:each) do
-        @seq = Sequence.new(:seq)
-        @bool = Boolean.new(:bool, default: true)
-        @int = Integer.new(:int)
-        @os = OctetString.new(:os)
+        @seq = Sequence.new
+        @bool = Boolean.new(default: true)
+        @int = Integer.new
+        @os = OctetString.new
         @seq.value = [@bool, @int, @os]
-        @seqof = SequenceOf.new(:seqof, @seq)
+        @seqof = SequenceOf.new(@seq)
 
         @composed_der = binary("\x30\x1a" +
                                "\x30\x09\x02\x01\x0c\x04\x04abcd" + 
                                "\x30\x0d\x01\x01\x00\x02\x03\x00\xff\xfe\x04\x03nop")
         @integer_der = binary("\x30\x18" +
-                              (0..7).map { |v| Integer.new(:i, value: v).to_der }.join)
+                              (0..7).map { |v| Integer.new(v).to_der }.join)
         end
         
       describe '.type' do
@@ -32,7 +32,7 @@ module RASN1
 
       describe '#initialize' do
         it 'creates an SequenceOf with default values' do
-          seqof = SequenceOf.new(:seqof, Types::Integer)
+          seqof = SequenceOf.new(Types::Integer)
           expect(seqof).to be_constructed
           expect(seqof).to_not be_optional
           expect(seqof.asn1_class).to eq(:universal)
@@ -41,17 +41,17 @@ module RASN1
         end
 
         it 'accepts a Model as type' do
-          expect { SequenceOf.new(:seqof, SimpleModel) }.to_not raise_error
+          expect { SequenceOf.new(SimpleModel) }.to_not raise_error
         end
 
         it 'raises if no type is given' do
-          expect { SequenceOf.new(:seqof) }.to raise_error(ArgumentError)
+          expect { SequenceOf.new }.to raise_error(ArgumentError)
         end
       end
 
       describe '#to_der' do
         it 'generates a DER string for a primitive type' do
-          seqof = SequenceOf.new(:seqof, Integer)
+          seqof = SequenceOf.new(Integer)
           seqof << (0..7).to_a
           expect(seqof.to_der).to eq(@integer_der)
         end
@@ -66,7 +66,7 @@ module RASN1
         end
 
         it 'generates a DER string for a model type' do
-          seqof = SequenceOf.new(:seqof, SimpleModel)
+          seqof = SequenceOf.new(SimpleModel)
           seqof << { bool: true, int: 12 }
           seqof << { bool: false, int: 65535 }
           expected_der = binary("\x30\x12" \
@@ -78,25 +78,25 @@ module RASN1
 
       describe '#parse!' do
         it 'parses DER string for a primitive type' do
-          seqof = SequenceOf.new(:seqof, Integer)
+          seqof = SequenceOf.new(Integer)
           seqof.parse!(@integer_der)
-          expect(seqof.value).to eq((0..7).to_a.map { |v| Integer.new(:t, value: v) })
+          expect(seqof.value).to eq((0..7).to_a.map { |v| Integer.new(v) })
         end
 
         it 'parses DER string for a composed type' do
           @seqof.parse!(@composed_der)
           golden = []
-          golden << Sequence.new(nil, value: [Boolean.new(:bool, default: true),
-                                              Integer.new(:int, value: 12),
-                                              OctetString.new(:os, value: 'abcd')])
-          golden << Sequence.new(nil, value: [Boolean.new(:bool, value: false),
-                                              Integer.new(:int, value: 65534),
-                                              OctetString.new(:os, value: 'nop')])
+          golden << Sequence.new([Boolean.new(default: true),
+                                  Integer.new(12),
+                                  OctetString.new('abcd')])
+          golden << Sequence.new([Boolean.new(false),
+                                  Integer.new(65534),
+                                  OctetString.new('nop')])
           expect(@seqof.value).to eq(golden)
         end
 
         it 'parses DER string for a model type' do
-          seqof = SequenceOf.new(:seqof, SimpleModel)
+          seqof = SequenceOf.new(SimpleModel)
           der = binary("\x30\x11" \
                        "\x30\x06\x01\x01\xff\x02\x01\x7f" \
                        "\x30\x07\x01\x01\x00\x02\x02\x7f\xff")
@@ -108,9 +108,9 @@ module RASN1
         end
 
         it 'parses DER string with explicit option' do
-          seqof = SequenceOf.new(:seqof, Integer, explicit: 3)
+          seqof = SequenceOf.new(Integer, explicit: 3)
           seqof.parse!(binary("\xa3\x1a" + @integer_der))
-          expect(seqof.value).to eq((0..7).to_a.map { |v| Integer.new(nil, value: v)})
+          expect(seqof.value).to eq((0..7).to_a.map { |v| Integer.new(v)})
         end
       end
     end
