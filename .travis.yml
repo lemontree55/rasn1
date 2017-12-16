@@ -4,6 +4,6 @@ rvm:
   - 2.3.4
   - 2.4.1
 install:
-  - bundler install --path vendor/bundle --jobs=3 --retry=3
+  - bundle install --path vendor/bundle --jobs=3 --retry=3
 script:
-  - bundler exec rake
+  - bundle exec rake
