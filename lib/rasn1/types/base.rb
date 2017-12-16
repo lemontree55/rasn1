@@ -159,11 +159,7 @@ module RASN1
       #   SHOULD respond to +#value_to_der+.
       # @return [String] DER-formated string
       def to_der
-        if self.class.const_defined?('TAG')
-          build_tag
-        else
-          raise NotImplementedError, 'should be implemented by subclasses'
-        end
+        build_tag
       end
 
       # @return [::Boolean] +true+ if this is a primitive type
@@ -185,10 +181,12 @@ module RASN1
       # Get tag value
       # @return [Integer]
       def tag
-        pc = if  @constructed.nil?
+        pc = if @constructed.nil?
                self.class::ASN1_PC
-             else
+             elsif @constructed   # true
                Constructed::ASN1_PC
+             else    # false
+               0
              end
         (@tag_value || self.class::TAG) | CLASSES[@asn1_class] | pc
       end
@@ -226,7 +224,16 @@ module RASN1
         str = ''
         str << '  ' * level if level > 0
         str << "#{@name} " unless @name.nil?
-        str << "#{type}: #{value}"
+        if self.class == Base
+          str << "#{type} (0x#{'%02x' % tag}): "
+          if @value.is_a?(Base)
+            str << value.inspect(level+1)
+          else
+            str << value.inspect
+          end
+        else
+          str << "#{type}: #{value.inspect}"
+        end
       end
 
       # Objects are equal if they have same class AND same DER
@@ -237,6 +244,19 @@ module RASN1
       end
 
       private
+
+      def value_to_der
+        case @value
+        when Base
+          @value.to_der
+        else
+          @value.to_s
+        end
+      end
+
+      def der_to_value(der, ber:false)
+        @value = der
+      end
 
       def set_options(options)
         set_class options[:class]
@@ -270,6 +290,8 @@ module RASN1
         @default = default
       end
 
+      # handle undocumented option +:tag_value+, used internally by
+      # {RASN1.parse} to parse non-universal class tags.
       def set_tag(options)
         if options[:explicit]
           @tag = :explicit
@@ -278,6 +300,10 @@ module RASN1
         elsif options[:implicit]
           @tag = :implicit
           @tag_value = options[:implicit]
+          @constructed = options[:constructed]
+        elsif options[:tag_value]
+          @tag_value = options[:tag_value]
+          @constructed = options[:constructed]
         end
 
         @asn1_class = :context if @tag and @asn1_class == :universal
