@@ -33,7 +33,8 @@ module RASN1
       def inspect(level=0)
         str = ''
         str << '  ' * level if level > 0
-        str << "#{name} #{type}: #{value.inspect} (bit length: #{bit_length})"
+        str << "#{name} " unless @name.nil?
+        str << "#{type}: #{value.inspect} (bit length: #{bit_length})"
       end
 
       private
