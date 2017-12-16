@@ -6,15 +6,15 @@ module RASN1
     # Give all primitive types
     # @return [Array<Types::Primitive>]
     def self.primitives
-      self.constants.map { |c| Types.const_get(c) }.
-          select { |klass| klass < Primitive }
+      @primitives ||= self.constants.map { |c| Types.const_get(c) }.
+                           select { |klass| klass < Primitive }
     end
 
     # Give all constructed types
     # @return [Array<Types::Constructed>]
     def self.constructed
-      self.constants.map { |c| Types.const_get(c) }.
-          select { |klass| klass < Constructed }
+      @constructed ||= self.constants.map { |c| Types.const_get(c) }.
+                            select { |klass| klass < Constructed }
     end
   end
 end
