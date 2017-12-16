@@ -129,6 +129,49 @@ describe RASN1 do
         expect(obj.constructed?).to be(true)
         expect(obj.value).to eq(RASN1::Types::Sequence.new([@bool, @int]).to_der)
       end
+
+      context "(complex example)" do
+        it 'decodes a complex example' do
+          der = File.read(File.join(__dir__, 'cert_example.der'))
+          der.force_encoding('BINARY')
+          cert = RASN1.parse(der)
+          expect(cert).to be_a(RASN1::Types::Sequence)
+          expect(cert.value.size).to eq(3)
+          expect(cert.value[0]).to be_a(RASN1::Types::Sequence)
+          expect(cert.value[1]).to be_a(RASN1::Types::Sequence)
+          expect(cert.value[2]).to be_a(RASN1::Types::BitString)
+
+          expected_str = "\x4d\x52\xbf\xb1\x08\xe6\xc2\xb0".force_encoding('BINARY')
+          expect(cert.value[2].value[0..7]).to eq(expected_str)
+          expect(cert.value[2].bit_length).to eq(1024)
+
+          expect(cert.value[1].value.size).to eq(2)
+          expect(cert.value[1].value[0]).to be_a(RASN1::Types::ObjectId)
+          expect(cert.value[1].value[0].value).to eq('1.2.840.113549.1.1.11')
+          expect(cert.value[1].value[1]).to be_a(RASN1::Types::Null)
+
+          expect(cert.value[0].value.size).to eq(8)
+          expect(cert.value[0].value[0]).to be_instance_of(RASN1::Types::Base)
+          expect(cert.value[0].value[0].tag).to eq(0xa0)
+          expected_str = RASN1::Types::Integer.new(2).to_der
+          expect(cert.value[0].value[0].value).to eq(expected_str)
+          expect(cert.value[0].value[1]).to be_instance_of(RASN1::Types::Integer)
+          expect(cert.value[0].value[1].value).to eq(0x123456789123456789)
+          expect(cert.value[0].value[3]).to be_instance_of(RASN1::Types::Sequence)
+          dn = %w(org example www)
+          cert.value[0].value[3].value.each_with_index do |obj, i|
+            expect(obj).to be_a(RASN1::Types::Set)
+            expect(obj.value.size).to eq(1)
+            expect(obj.value[0]).to be_a(RASN1::Types::Sequence)
+            expect(obj.value[0].value.size).to eq(2)
+            expect(obj.value[0].value[0]).to be_a(RASN1::Types::ObjectId)
+            expect(obj.value[0].value[1]).to be_a(RASN1::Types::PrintableString)
+            expect(obj.value[0].value[1].value).to eq(dn[i])
+          end
+          expect(cert.value[0].value[7]).to be_instance_of(RASN1::Types::Base)
+          expect(cert.value[0].value[7].tag).to eq(0xa3)
+        end
+      end
     end
   end
 end
