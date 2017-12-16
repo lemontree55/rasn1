@@ -16,6 +16,33 @@ module RASN1
       @constructed ||= self.constants.map { |c| Types.const_get(c) }.
                             select { |klass| klass < Constructed }
     end
+
+    # Give ASN.1 type from an integer. If +tag+ is unknown, return a {Types::Base}
+    # object.
+    # @param [Integer] tag
+    # @return [Types::Base]
+    # @raise [ASN1Error] +tag+ is out of range
+    def self.tag2type(tag)
+      raise ASN1Error, "tag is out of range" if tag > 0xff
+
+      if !defined? @tag2types
+        constructed = self.constructed - [Types::SequenceOf, Types::SetOf]
+        primitives = self.primitives - [Types::Enumerated]
+        ary = [primitives, constructed].flatten.map do |type|
+          next unless type.const_defined? :TAG
+          [type::TAG, type]
+        end
+        @tag2types = Hash[ary]
+        @tag2types.default = Types::Base
+      end
+
+      klass = @tag2types[tag & 0xdf] # Remove CONSTRUCTED bit
+      is_constructed = (tag & 0x20) == 0x20
+      asn1class = Types::Base::CLASSES.key(tag & 0xc0)
+      options = { class: asn1class, constructed: is_constructed }
+      options[:tag_value] = (tag & 0x1f) if klass == Types::Base
+      klass.new(options)
+    end
   end
 end
 
