@@ -251,5 +251,26 @@ module RASN1::Types
         end
       end
     end
+
+    describe '.parse' do
+      it 'creates a new object and parse string' do
+        int = Integer.parse("\x02\x01\x7f")
+        expect(int).to be_a(Integer)
+        expect(int.value).to eq(127)
+      end
+
+      it 'accepts constructor options' do
+        os = OctetString.parse("\x42\x04abcd", implicit: 2, class: :application)
+        expect(os).to be_a(OctetString)
+        expect(os.value).to eq('abcd')
+        expect(os.tag).to eq(0x42)
+      end
+
+      it 'accepts ber option' do
+        bool = Boolean.parse("\x01\x01\x01", ber: true)
+        expect(bool).to be_a(Boolean)
+        expect(bool.value).to be(true)
+      end
+    end
   end
 end

@@ -74,6 +74,17 @@ module RASN1
         @type = self.to_s.gsub(/.*::/, '').gsub(/([a-z0-9])([A-Z])/, '\1 \2').upcase
       end
 
+      # Parse a DER or BER string
+      # @param [String] der_or_ber string to parse
+      # @param [Hash] options
+      # @option options [Boolean] :ber if +true+, parse a BER string, else a DER one
+      # @note More options are supported. See {Base#initialize}.
+      def self.parse(der_or_ber, options={})
+        obj = self.new(options)
+        obj.parse!(der_or_ber, ber: options[:ber])
+        obj
+      end
+
 
       # @overload initialize(options={})
       #   @param [Hash] options
@@ -113,12 +124,18 @@ module RASN1
 
       # Used by +#dup+ and +#clone+. Deep copy @value.
       def initialize_copy(other)
-        @value = @value.nil? ? nil : @value.dup
-        begin
-          @default = @default.dup
-        rescue TypeError => ex
-          raise unless ex.message =~ /can't (dup|clone)/
-        end
+        @value = case
+                 when NilClass, TrueClass, FalseClass, Integer
+                   @value
+                 else
+                   @value.dup
+                 end
+        @default = case
+                 when NilClass, TrueClass, FalseClass, Integer
+                   @value
+                 else
+                   @default.dup
+                 end
       end
 
       # Get value or default value
