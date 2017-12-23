@@ -250,6 +250,9 @@ module RASN1
           end
         else
           str << "#{type}: #{value.inspect}"
+          str << " OPTIONAL" if optional?
+          str << " DEFAULT #{@default}" unless @default.nil?
+          str
         end
       end
 
