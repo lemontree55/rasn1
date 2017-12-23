@@ -9,7 +9,7 @@ module RASN1
       # Get ASN.1 type
       # @return [String]
       def self.type
-        self.to_s.gsub(/.*::/, '')
+        'IA5String'
       end
 
       private
