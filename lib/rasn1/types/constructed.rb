@@ -23,7 +23,6 @@ module RASN1
             when Base, Model
               next if item.optional? and item.value.nil?
               str << '  ' * level
-              str << "#{item.name} " unless item.name.nil?
               str << "#{item.inspect(level)}\n"
             else
               str << item.inspect
