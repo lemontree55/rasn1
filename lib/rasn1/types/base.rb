@@ -132,7 +132,7 @@ module RASN1
                  end
         @default = case
                  when NilClass, TrueClass, FalseClass, Integer
-                   @value
+                   @default
                  else
                    @default.dup
                  end

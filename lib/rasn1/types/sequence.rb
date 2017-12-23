@@ -35,7 +35,7 @@ module RASN1
 
       def initialize_copy(other)
         super
-        @value.map! { |v| v.dup }
+        @value = @value.map { |v| v.dup }
       end
 
       private

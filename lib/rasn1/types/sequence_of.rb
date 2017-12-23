@@ -62,7 +62,7 @@ module RASN1
       def initialize_copy(other)
         super
         @of_type = @of_type.dup
-        @value.map! { |v| v.dup }
+        @value = @value.map { |v| v.dup }
       end
 
       # Add an item to SEQUENCE OF
@@ -148,16 +148,8 @@ module RASN1
                    of_type_class.new(:t)
                  end
           nb_bytes += type.parse!(der[nb_bytes, der.length])
-          #value = if composed_of_type?
-          #          type.value.map { |obj| obj.value }
-          #        elsif of_type_class < Model
-          #          type.to_h[type.to_h.keys.first]
-          #        else
-          #          type.value
-          #        end
           @value << type
         end
-        #puts "#{name}: #{@value.inspect}"
       end
 
       def explicit_type
