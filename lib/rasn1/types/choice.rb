@@ -5,10 +5,10 @@ module RASN1
     #
     # == Create a CHOICE
     # A CHOICE is defined this way:
-    #   choice = Choice.new(:a_choice)
-    #   choice.value = [Integer.new(:int1, implicit: 0, class: :context),
-    #                   Integer.new(:int2, implicit: 1, class: :context),
-    #                   OctetString.new(:os, implicit: 2, class: :context)]
+    #   choice = Choice.new
+    #   choice.value = [Integer.new(implicit: 0, class: :context),
+    #                   Integer.new(implicit: 1, class: :context),
+    #                   OctetString.new(implicit: 2, class: :context)]
     # The chosen type may be set this way:
     #   choice.chosen = 0   # choose :int1
     # The chosen value may be set these ways:

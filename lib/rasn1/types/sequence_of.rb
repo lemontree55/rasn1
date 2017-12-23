@@ -10,16 +10,16 @@ module RASN1
     #  Integers ::= SEQUENCE OF INTEGER
     # do:
     #  # Create a SEQUENCE OF INTEGER
-    #  seqof = RASN1::Types::SequenceOf.new(:record, RASN1::Types::Integer)
+    #  seqof = RASN1::Types::SequenceOf.new(RASN1::Types::Integer)
     #  # Set integer values
-    #  seqof.value << [1, 2, 3, 4]
+    #  seqof.value = [1, 2, 3, 4]
     #
     # == Use with {Constructed} types
     # SEQUENCE OF may be used to create sequence of composed types. For example:
-    #  composed_type = RASN1::Sequence.new(:comp)
-    #  commposed_type.value = [RASN1::Types::Integer(:id),
-    #                          RASN1::Types::OctetString(:data)]
-    #  seqof = RASN1::SequenceOf.new(:comp, composed_type)
+    #  composed_type = RASN1::Types::Sequence.new
+    #  commposed_type.value = [RASN1::Types::Integer,
+    #                          RASN1::Types::OctetString]
+    #  seqof = RASN1::Types::SequenceOf.new(composed_type)
     #  seqof << [0, 'data0']
     #  seqof << [1, 'data1']
     #

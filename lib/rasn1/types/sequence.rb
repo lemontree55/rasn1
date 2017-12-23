@@ -12,11 +12,11 @@ module RASN1
     #    house [1] IMPLICIT INTEGER DEFAULT 0
     #  }
     # do:
-    #  seq = RASN1::Types::Sequence.new(:record)
+    #  seq = RASN1::Types::Sequence.new
     #  seq.value = [
-    #               RASN1::Types::Integer.new(:id),
-    #               RASN1::Types::Integer.new(:room, explicit: 0, optional: true),
-    #               RASN1::Types::Integer.new(:house, implicit: 1, default: 0)
+    #               RASN1::Types::Integer.new
+    #               RASN1::Types::Integer.new(explicit: 0, optional: true),
+    #               RASN1::Types::Integer.new(implicit: 1, default: 0)
     #              ]
     #
     # A sequence may also be used without value to not parse sequence content:

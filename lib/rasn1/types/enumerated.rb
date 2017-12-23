@@ -5,8 +5,8 @@ module RASN1
     #
     # An enumerated type permits to assign names to integer values. It may be defined
     # different ways:
-    #  enum = RASN1::Types::Enumerated.new(:name, enum: { 'a' => 0, 'b' => 1, 'c' => 2 })
-    #  enum = RASN1::Types::Enumerated.new(:name, enum: { a: 0, b: 1, c: 2 })
+    #  enum = RASN1::Types::Enumerated.new(enum: { 'a' => 0, 'b' => 1, 'c' => 2 })
+    #  enum = RASN1::Types::Enumerated.new(enum: { a: 0, b: 1, c: 2 })
     # Its value should be setting as an Integer or a String/symbol:
     #  enum.value = :b
     #  enum.value = 1   # equivalent to :b

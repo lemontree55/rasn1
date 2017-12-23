@@ -4,8 +4,8 @@ module RASN1
     # ASN.1 Octet String
     #
     # An OCTET STRINT may contain another primtive object:
-    #  os = OctetString.new(:os)
-    #  int = Integer.new(:int)
+    #  os = OctetString.new
+    #  int = Integer.new
     #  int.value = 12
     #  os.value = int
     #  os.to_der   # => DER string with INTEGER in OCTET STRING
