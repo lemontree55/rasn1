@@ -167,9 +167,26 @@ module RASN1
       #  @param [Symbol,String] name name of object in model
       #  @param [Hash] options
       #  @see Types::Utf8String#initialize
+      # @method numeric_string(name, options)
+      #  @param [Symbol,String] name name of object in model
+      #  @param [Hash] options
+      #  @see Types::NumericString#initialize
+      # @method printable_string(name, options)
+      #  @param [Symbol,String] name name of object in model
+      #  @param [Hash] options
+      #  @see Types::PrintableString#initialize
+      # @method visible_string(name, options)
+      #  @param [Symbol,String] name name of object in model
+      #  @param [Hash] options
+      #  @see Types::VisibleString#initialize
+      # @method ia5_string(name, options)
+      #  @param [Symbol,String] name name of object in model
+      #  @param [Hash] options
+      #  @see Types::IA5String#initialize
       Types.primitives.each do |prim|
         next if prim == Types::ObjectId
-        class_eval "def #{prim.type.downcase.gsub(/\s+/, '_')}(name, options={})\n" \
+        method_name = prim.type.gsub(/([a-z0-9])([A-Z])/, '\1_\2').downcase.gsub(/\s+/, '_')
+        class_eval "def #{method_name}(name, options={})\n" \
                    "  options.merge!(name: name)\n" \
                    "  proc = Proc.new do |opts|\n" \
                    "    #{prim.to_s}.new(options.merge(opts))\n" \
