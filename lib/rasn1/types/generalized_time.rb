@@ -43,6 +43,8 @@ module RASN1
         date_hour, fraction = der.split('.')
         if fraction.nil?
           if date_hour[-1] != 'Z' and date_hour !~ /[+-]\d+$/
+            # If not UTC, have to add difference with UTC to force
+            # DateTime#strptime to generate a local time
             date_hour << Time.now.strftime('%z')
           end
         else
@@ -52,9 +54,13 @@ module RASN1
           else
             match = fraction.match(/(\d+)([+-]\d+)/)
             if match
+              # fraction contains fraction and timezone info. Split them
               fraction = match[1]
               date_hour << match[2]
             else
+              # fraction only contains fraction
+              # Have to add difference with UTC to force
+              # DateTime#strptime to generate a local time
               date_hour << Time.now.strftime('%z')
             end
           end
