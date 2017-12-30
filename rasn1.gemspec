@@ -11,7 +11,10 @@ Gem::Specification.new do |spec|
   spec.email         = ['sylvain.daubert@laposte.net']
 
   spec.summary       = %q{Ruby ASN.1 library}
-  #spec.description   = %q{TODO: Write a longer description or delete this line.}
+  spec.description   = %q{
+  RASN1 is a pure ruby ASN.1 library. It may encode and decode DER and BER
+  encodings.
+}
   spec.homepage      = 'https://github.com/sdaubert/rasn1'
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
