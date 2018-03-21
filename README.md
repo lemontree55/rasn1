@@ -3,7 +3,7 @@
 
 # Rasn1
 
-Rasn1 will be a ruby ASN.1 library to encode, parse and decode ASN.1 data in DER format.
+Rasn1 is a ruby ASN.1 library to encode, parse and decode ASN.1 data in DER format.
 
 ## Installation
 
