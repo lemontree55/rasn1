@@ -41,11 +41,14 @@ module RASN1
       
       def der_to_value(der, ber: false)
         date_hour, fraction = der.split('.')
+        utc_offset_forced = false
         if fraction.nil?
           if date_hour[-1] != 'Z' and date_hour !~ /[+-]\d+$/
-            # If not UTC, have to add difference with UTC to force
-            # DateTime#strptime to generate a local time
+            # If not UTC, have to add offset with UTC to force
+            # DateTime#strptime to generate a local time. But this difference
+            # may be errored because of DST.
             date_hour << Time.now.strftime('%z')
+            utc_offset_forced = true
           end
         else
           if fraction[-1] == 'Z'
@@ -58,10 +61,12 @@ module RASN1
               fraction = match[1]
               date_hour << match[2]
             else
-              # fraction only contains fraction
-              # Have to add difference with UTC to force
-              # DateTime#strptime to generate a local time
+              # fraction only contains fraction.
+              # Have to add offset with UTC to force DateTime#strptime to
+              # generate a local time. But this difference may be errored
+              # because of DST.
               date_hour << Time.now.strftime('%z')
+              utc_offset_forced = true
             end
           end
         end
@@ -91,6 +96,14 @@ module RASN1
                    raise ASN1Error, "#{prefix}: unrecognized format: #{der}"
                  end
         @value = DateTime.strptime(date_hour, format).to_time
+        # local time format.
+        # Check DST. There may be a shift of one hour...
+        if utc_offset_forced
+          compare_time = Time.new(*@value.to_a[0..5].reverse)
+          if compare_time.utc_offset != @value.utc_offset
+            @value = compare_time
+          end
+        end
         @value += ".#{fraction}".to_r * frac_base unless fraction.nil?
       end
     end
