@@ -99,6 +99,12 @@ module RASN1
         @value[idx]
       end
 
+      # Get length of SEQUENCE OF (ie number of elements)
+      # @return [Integer]
+      def length
+        @value.length
+      end
+
       def inspect(level=0)
         str = ''
         str << '  ' * level if level > 0

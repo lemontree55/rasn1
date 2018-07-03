@@ -320,7 +320,7 @@ module RASN1
     # Objects are equal if they have same class AND same DER
     # @param [Base] other
     # @return [Boolean]
-    def==(other)
+    def ==(other)
       (other.class == self.class) && (other.to_der == self.to_der)
     end
 
@@ -372,6 +372,21 @@ module RASN1
               initialize_elements obj[name], value
             else
               raise ArgumentError, "element #{name}: may only pass a Hash for Model elements"
+            end
+          elsif value.is_a? Array
+            composed = if obj[name].is_a? Model
+                         obj[name].root
+                       else
+                         obj[name]
+                       end
+            if composed.of_type.is_a? Model
+              value.each do |el|
+                composed << initialize_elements(composed.of_type.class.new, el)
+              end
+            else
+              value.each do |el|
+                obj[name] << el
+              end
             end
           else
             obj[name].value = value

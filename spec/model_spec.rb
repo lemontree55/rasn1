@@ -23,6 +23,11 @@ module RASN1
     sequence_of :seqof, ModelTest
   end
 
+  class SuperOfModel < Model
+    sequence :super,
+             content: [model(:of, OfModel)]
+  end
+
   class VoidSeq < Model
     sequence :voidseq
   end
@@ -62,6 +67,19 @@ module RASN1
     describe '#initialize' do
       it 'creates a class from a Model' do
         expect { ModelTest.new }.to_not raise_error
+      end
+
+      it 'initializes a model from a parameter hash' do
+        model = SuperOfModel.new(of: [{id: 1234}, {id: 4567, room: 43, house: 21}])
+        expect(model[:of][:seqof].length).to eq(2)
+        expect(model[:of][:seqof][0]).to be_a(ModelTest)
+        expect(model[:of][:seqof][0][:id].to_i).to eq(1234)
+        expect(model[:of][:seqof][0][:room].value).to be_nil
+        expect(model[:of][:seqof][0][:house].to_i).to eq(0)
+        expect(model[:of][:seqof][1]).to be_a(ModelTest)
+        expect(model[:of][:seqof][1][:id].to_i).to eq(4567)
+        expect(model[:of][:seqof][1][:room].value).to eq(43)
+        expect(model[:of][:seqof][1][:house].to_i).to eq(21)
       end
     end
 
