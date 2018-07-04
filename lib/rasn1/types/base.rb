@@ -237,23 +237,16 @@ module RASN1
         value_to_der.size
       end
 
+      # @param [Integer] level
+      # @return [String]
       def inspect(level=0)
         str = ''
         str << '  ' * level if level > 0
         str << "#{@name} " unless @name.nil?
-        if self.class == Base
-          str << "#{type} (0x#{'%02x' % tag}): "
-          if @value.is_a?(Base)
-            str << value.inspect(level+1)
-          else
-            str << value.inspect
-          end
-        else
-          str << "#{type}: #{value.inspect}"
-          str << " OPTIONAL" if optional?
-          str << " DEFAULT #{@default}" unless @default.nil?
-          str
-        end
+        str << "#{type}: #{value.inspect}"
+        str << " OPTIONAL" if optional?
+        str << " DEFAULT #{@default}" unless @default.nil?
+        str
       end
 
       # Objects are equal if they have same class AND same DER

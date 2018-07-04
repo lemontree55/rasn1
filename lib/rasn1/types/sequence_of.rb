@@ -108,6 +108,7 @@ module RASN1
       def inspect(level=0)
         str = ''
         str << '  ' * level if level > 0
+        str << "#{@name} " unless @name.nil?
         level = level.abs
         str << "#{type}:\n"
         level += 1
@@ -115,11 +116,8 @@ module RASN1
           case item
           when Base, Model
             next if item.optional? and item.value.nil?
-            str << '  ' * level + "#{item.inspect(level)}"
-            str << "\n" unless item.is_a?(Model)
-          when Hash
-            type = of_type_class.new(item)
-            str << '  ' * level + "#{type.inspect(level)}"
+            str << "#{item.inspect(level)}"
+            str << "\n" unless str.end_with?("\n")
           else
             str << '  ' * level + "#{item.inspect}\n"
           end

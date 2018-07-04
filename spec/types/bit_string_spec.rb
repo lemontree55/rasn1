@@ -100,5 +100,17 @@ module RASN1::Types
         expect(bs.bit_length).to eq(9)
       end
     end
+
+    describe '#inspect' do
+      it 'gets inspect string' do
+        bs = BitString.new('abcd', bit_length: 30)
+        expect(bs.inspect).to eq('BIT STRING: "abcd" (bit length: 30)')
+      end
+
+      it 'gets inspect string with name' do
+        bs = BitString.new('abcd', name: :bs, bit_length: 30)
+        expect(bs.inspect).to eq('bs BIT STRING: "abcd" (bit length: 30)')
+      end
+    end
   end
 end

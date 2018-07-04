@@ -93,11 +93,12 @@ module RASN1
       def inspect(level=0)
         str = ''
         str << '  ' * level if level > 0
-        str << "#{name} #{type}: "
+        str << "#{name} " if name
+        str << "#{type}:"
         if @chosen.nil?
-          str << 'not chosen!'
+          str << ' not chosen!'
         else
-          str << @value[@chosen].inspect(level)
+          str << "\n#{@value[@chosen].inspect(level+1)}"
         end
       end
 

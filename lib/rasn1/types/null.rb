@@ -6,6 +6,18 @@ module RASN1
     class Null < Primitive
       TAG = 0x05
 
+      # @return [String]
+      def inspect(level=0)
+        str = ''
+        str << '  ' * level if level > 0
+        str << "#{@name} " unless @name.nil?
+        str << "#{type}"
+        str << " OPTIONAL" if optional?
+        str
+      end
+
+      private
+
       def value_to_der
         ''
       end

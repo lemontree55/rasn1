@@ -272,5 +272,33 @@ module RASN1::Types
         expect(bool.value).to be(true)
       end
     end
+
+    describe '#inspect' do
+      it 'returns TYPE: VALUE for child classes' do
+        expect(Integer.new.inspect).to eq("INTEGER: nil")
+        expect(Integer.new(value: 0).inspect).to eq("INTEGER: 0")
+      end
+
+      it 'prints name is object has a name' do
+        expect(Integer.new(name: :int, value: 0).inspect).to eq("int INTEGER: 0")
+      end
+
+      it 'gives OPTIONAL information' do
+        expect(Integer.new(value: 0, optional: true).inspect).to eq("INTEGER: 0 OPTIONAL")
+      end
+
+      it 'gives DEFAULT information' do
+        expect(Integer.new(value: 0, default: 0).inspect).to eq("INTEGER: 0 DEFAULT 0")
+        expect(Integer.new(value: 1, default: 0).inspect).to eq("INTEGER: 1 DEFAULT 0")
+      end
+    end
+
+    describe '#value_size' do
+      it 'gives size in octets of encoded value' do
+        expect(Integer.new(value: 0).value_size).to eq(1)
+        expect(Integer.new(value: 128).value_size).to eq(2)
+        expect(OctetString.new(value: '1234').value_size).to eq(4)
+      end
+    end
   end
 end

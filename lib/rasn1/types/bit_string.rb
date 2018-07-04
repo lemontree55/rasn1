@@ -6,8 +6,9 @@ module RASN1
     class BitString < Primitive
       TAG = 0x03
 
-      # @return [Integer] bit length of bit string
-      attr_accessor :bit_length
+      # @param [Integer] bit_length
+      # @return [Integer]
+      attr_writer :bit_length
 
       # @overload initialize(options={})
       #   @param [Hash] options
@@ -28,8 +29,20 @@ module RASN1
           end
           @default_bit_length = opts[:bit_length]
         end
+        @bit_length = opts[:bit_length]
       end
 
+      # Get bit length
+      def bit_length
+        if @value.nil?
+          @default_bit_length
+        else
+          @bit_length
+        end
+      end
+
+      # @param [Integer] level
+      # @return [String]
       def inspect(level=0)
         str = ''
         str << '  ' * level if level > 0
@@ -46,7 +59,7 @@ module RASN1
       end
 
       def value_to_der
-        raise ASN1Error, "TAG #@name: bit length is not set" if @bit_length.nil?
+        raise ASN1Error, "TAG #@name: bit length is not set" if bit_length.nil?
 
         while @value.length * 8 < @bit_length
           @value << "\x00"

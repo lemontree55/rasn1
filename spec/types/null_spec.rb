@@ -41,5 +41,13 @@ module RASN1::Types
         expect { null.parse!(der) }.to raise_error(RASN1::ASN1Error, /not have content/)
       end
     end
+
+    describe '#inspect' do
+      it 'returns inspect string' do
+        expect(Null.new.inspect).to eq('NULL')
+        expect(Null.new(name: :data).inspect).to eq('data NULL')
+        expect(Null.new(optional: true).inspect).to eq('NULL OPTIONAL')
+      end
+    end
   end
 end

@@ -2,7 +2,7 @@ require_relative '../spec_helper'
 
 module RASN1::Types
 
-  describe Integer do
+  describe Choice do
     describe '.type' do
       it 'gets ASN.1 type' do
         expect(Choice.type).to eq('CHOICE')
@@ -94,6 +94,26 @@ module RASN1::Types
       it 'raises when parsin a DER string which does not contain any type from CHOICE' do
         str = Boolean.new(false).to_der
         expect { @choice.parse! str }.to raise_error(RASN1::ASN1Error, /no type matching/)
+      end
+    end
+
+    describe '#inspect' do
+      before(:each) do
+        @choice = Choice.new
+        @choice.value = [Integer.new, OctetString.new]
+      end
+
+      it 'gets inspect string' do
+        expect(@choice.inspect).to eq('CHOICE: not chosen!')
+        @choice.chosen = 0
+        expect(@choice.inspect).to eq("CHOICE:\n  #{@choice.value[0].inspect}")
+      end
+
+      it 'gets inspect string with name' do
+        @choice.instance_eval { @name = :ch }
+        expect(@choice.inspect).to eq('ch CHOICE: not chosen!')
+        @choice.chosen = 0
+        expect(@choice.inspect).to eq("ch CHOICE:\n  #{@choice.value[0].inspect}")
       end
     end
   end

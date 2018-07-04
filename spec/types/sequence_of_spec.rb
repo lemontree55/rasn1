@@ -113,6 +113,39 @@ module RASN1
           expect(seqof.value).to eq((0..7).to_a.map { |v| Integer.new(v)})
         end
       end
+
+      describe '#inspect' do
+        it 'gets inspect string' do
+          @seqof << [true, 12, 'abcd']
+          @seqof << [false, 65534, 'nop']
+          expect(@seqof.inspect).to eq(<<EOSeqOf
+SEQUENCE OF:
+  SEQUENCE:
+    BOOLEAN: true DEFAULT true
+    INTEGER: 12
+    OCTET STRING: "abcd"
+  SEQUENCE:
+    BOOLEAN: false DEFAULT true
+    INTEGER: 65534
+    OCTET STRING: "nop"
+EOSeqOf
+)
+
+          seqof = SequenceOf.new(SimpleModel, name: :seqof)
+          seqof << SimpleModel.new(bool: true, int: 1)
+          seqof << SimpleModel.new(bool: false, int: 2)
+          expect(seqof.inspect).to eq(<<EOSeqOf
+seqof SEQUENCE OF:
+  (SimpleModel) seq SEQUENCE:
+    bool BOOLEAN: true
+    int INTEGER: 1
+  (SimpleModel) seq SEQUENCE:
+    bool BOOLEAN: false
+    int INTEGER: 2
+EOSeqOf
+)
+        end
+      end
     end
   end
 end

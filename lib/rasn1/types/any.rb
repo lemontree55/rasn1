@@ -36,12 +36,12 @@ module RASN1
         str << "#{@name} " unless @name.nil?
         if @value.nil?
           str << "(ANY) NULL"
-        elsif @value.is_a?(OctetString)
+        elsif @value.is_a?(OctetString) or @value.is_a?(BitString)
           str << "(ANY) #{@value.type}: #{value.value.inspect}"
         elsif @value.class < Base
           str << "(ANY) #{@value.type}: #{value.value}"
         else
-          str << "(ANY) #{value.to_s.inspect}"
+          str << "ANY: #{value.to_s.inspect}"
         end
       end
     end

@@ -22,10 +22,9 @@ module RASN1
             case item
             when Base, Model
               next if item.optional? and item.value.nil?
-              str << '  ' * level
               str << "#{item.inspect(level)}\n"
             else
-              str << item.inspect
+              str <<  '  ' * level + item.inspect + "\n"
             end
           end
           str

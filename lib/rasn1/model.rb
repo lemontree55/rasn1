@@ -314,7 +314,7 @@ module RASN1
 
     # @return [String]
     def inspect(level=0)
-      '  ' * level + "#{@root} (#{type}) #{root.inspect(-level)}"
+      '  ' * level + "(#{type}) #{root.inspect(-level)}"
     end
 
     # Objects are equal if they have same class AND same DER

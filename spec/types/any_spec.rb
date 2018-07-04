@@ -67,6 +67,15 @@ module RASN1::Types
       it 'gets a String with real type' do
         any.value = OctetString.new('1234')
         expect(any.inspect).to eq('(ANY) OCTET STRING: "1234"')
+        any.value = BitString.new('1235', bit_length: 30)
+        expect(any.inspect).to eq('(ANY) BIT STRING: "1235"')
+        any.value = Integer.new(45)
+        expect(any.inspect).to eq('(ANY) INTEGER: 45')
+      end
+
+      it 'gets a String with an unknown type' do
+        any.value = OctetString.new('1234').to_der
+        expect(any.inspect).to eq("ANY: #{any.value.inspect}")
       end
     end
   end
