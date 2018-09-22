@@ -55,8 +55,8 @@ More comple classes may be designed by nesting simple classes. For example:
 class ComplexRecord < RASN1::Model
   sequence :cplx_record,
            content: [boolean(:bool),
-	                 octet_string(:data, explicit: 0),
-		             model(:a_record, Record)]
+                     octet_string(:data, explicit: 0),
+                     model(:a_record, Record)]
 end
 ```
 
