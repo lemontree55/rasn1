@@ -375,7 +375,7 @@ module RASN1
           elsif !@default.nil?
             @value = @default
           else
-            raise_tag_error(encode_tag, tag)
+            raise_tag_error(tag)
           end
           false
         else
@@ -419,9 +419,19 @@ module RASN1
         self.class.new
       end
 
-      def raise_tag_error(expected_tag, tag)
-        msg = "Expected #{tag2name(expected_tag)} but get #{tag2name(tag)}"
+      def raise_tag_error(tag)
+        msg = "Expected #{self2name} but get #{tag2name(tag)}"
         raise ASN1Error, msg
+      end
+
+      def self2name
+        name = CLASSES.key(tag & 0xc0).to_s.upcase
+        name << " #{tag & Constructed::ASN1_PC > 0 ? 'CONSTRUCTED' : 'PRIMITIVE'}"
+        if implicit? || explicit?
+          name << ' 0x%02X' % (tag & 0x1f)
+        else
+          name << ' ' << self.class.type
+        end
       end
 
       def tag2name(tag)
