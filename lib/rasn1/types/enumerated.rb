@@ -23,8 +23,8 @@ module RASN1
 
       # An ENUMERATED is encoded as an INTEGER.
       # @return ['INTEGER']
-      def self.encoded_type
-        Integer.encoded_type
+      def self.encode_type
+        Integer.encode_type
       end
 
       # @overload initialize(options={})
