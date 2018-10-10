@@ -74,6 +74,12 @@ module RASN1
         @type = self.to_s.gsub(/.*::/, '').gsub(/([a-z0-9])([A-Z])/, '\1 \2').upcase
       end
 
+      # Get ASN.1 type used to encode this one
+      # @return [String]
+      def self.encode_type
+        type
+      end
+
       # Parse a DER or BER string
       # @param [String] der_or_ber string to parse
       # @param [Hash] options
@@ -443,7 +449,7 @@ module RASN1
         type =  Types.constants.map { |c| Types.const_get(c) }.
                   select { |klass| klass < Primitive || klass < Constructed }.
                   find { |klass| klass::TAG == itag & 0x1f }
-        name << " #{type.nil? ? "0x%02X" % (itag & 0x1f) : type.type }"
+        name << " #{type.nil? ? "0x%02X" % (itag & 0x1f) : type.encode_type }"
       end
     end
   end

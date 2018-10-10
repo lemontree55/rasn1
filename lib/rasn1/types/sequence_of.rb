@@ -36,7 +36,7 @@ module RASN1
     #  seqof << { bool: false, int: 65535 }
     #  # Generate DER string
     #  der = seqof.to_der    # => String
-    #  # parse 
+    #  # parse
     #  seqof.parse! der
     #
     # After parsing, a SEQUENCE OF may be accessed as an Array:
@@ -49,6 +49,12 @@ module RASN1
 
       # @return [Class, Base]
       attr_reader :of_type
+
+      # A SEQUENCE OF is encoded as a SEQUENCE.
+      # @return ['SEQUENCE']
+      def self.encoded_type
+        Sequence.encoded_type
+      end
 
       # @param [Symbol, String] name name for this tag in grammar
       # @param [Class, Base] of_type base type for sequence of

@@ -21,6 +21,12 @@ module RASN1
       # @return [Hash]
       attr_reader :enum
 
+      # An ENUMERATED is encoded as an INTEGER.
+      # @return ['INTEGER']
+      def self.encoded_type
+        Integer.encoded_type
+      end
+
       # @overload initialize(options={})
       #   @option options [Hash] :enum enumeration hash. Keys are names, and values
       #     are integers. This key is mandatory.
