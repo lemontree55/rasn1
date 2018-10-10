@@ -43,6 +43,11 @@ module RASN1
                      model(:a_record, ModelTest)]
   end
 
+  class ExplicitTaggedSeq < Model
+    sequence :seq, explicit: 0, class: :application,
+             content: [integer(:id), integer(:extern_id)]
+  end
+
   SIMPLE_VALUE = "\x30\x0e\x02\x03\x01\x00\x01\x80\x01\x2b\x81\x04\x02\x02\x12\x34".force_encoding('BINARY')
   OPTIONAL_VALUE = "\x30\x0b\x02\x03\x01\x00\x01\x81\x04\x02\x02\x12\x34".force_encoding('BINARY')
   DEFAULT_VALUE = "\x30\x08\x02\x03\x01\x00\x01\x80\x01\x2b".force_encoding('BINARY')
@@ -199,6 +204,17 @@ module RASN1
 
         voidseq2 = VoidSeq2.parse(NESTED_VALUE)
         expect(voidseq2[:seq].value).to eq(NESTED_VALUE[7..-1])
+      end
+
+      it 'parses a DER string with an explicit tagged model (issue #5)' do
+        exp = ExplicitTaggedSeq.parse("\x60\x08\x30\x06\x02\x01\x01\x02\x01\x10")
+        expect(exp.root.value).to_not be_a(String)
+        expect(exp.root.value[0]).to be_a(Types::Integer)
+        expect(exp.root.value[1]).to be_a(Types::Integer)
+        expect(exp[:id]).to be_a(Types::Integer)
+        expect(exp[:extern_id]).to be_a(Types::Integer)
+        expect(exp[:id].value).to eq(1)
+        expect(exp[:extern_id].value).to eq(0x10)
       end
     end
 

@@ -2,7 +2,7 @@ module RASN1
   module Types
 
     # @abstract This is base class for all ASN.1 types.
-    #   
+    #
     #   Subclasses SHOULD define:
     #   * a TAG constant defining ASN.1 tag number,
     #   * a private method {#value_to_der} converting its {#value} to DER,
@@ -222,6 +222,7 @@ module RASN1
         if explicit?
           # Delegate to #explicit type to generate sub-tag
           type = explicit_type
+          type.value = @value
           type.parse!(data)
           @value = type.value
         else
