@@ -69,7 +69,7 @@ module RASN1::Types
         expect(Base.new.primitive?).to be(false)
       end
     end
-    
+
     describe '#constructed?' do
       it 'returns false' do
         expect(Base.new.constructed?).to be(false)
@@ -238,7 +238,7 @@ module RASN1::Types
           type = Enumerated.new(explicit: 0, constructed: true,
                                 enum: { 'v1' => 0, 'v2' => 1, 'v3' => 2 },
                                 default: 0)
-          type.parse!(binary("\xa0\x03\x02\x01\x02"))
+          type.parse!(binary("\xa0\x03\x0a\x01\x02"))
           expect(type.value).to eq('v3')
           type.parse!('')
           expect(type.value).to eq('v1')

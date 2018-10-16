@@ -105,14 +105,14 @@ module RASN1::Types
         enum = Enumerated.new(enum: enumerated)
         enum.to_h.each do |name, int|
           enum.value = name
-          expect(enum.to_der).to eq([2, 1, int].pack('C3'))
+          expect(enum.to_der).to eq([10, 1, int].pack('C3'))
         end
       end
 
       it 'generates a DER string according to ASN.1 class' do
         enum = Enumerated.new(enum: enumerated, class: :application)
         enum.value = :a
-        expect(enum.to_der).to eq(binary("\x42\x01\x00"))
+        expect(enum.to_der).to eq(binary("\x4a\x01\x00"))
       end
 
       it 'generates a DER string according to default' do
@@ -120,7 +120,7 @@ module RASN1::Types
         enum.value = :a
         expect(enum.to_der).to eq('')
         enum.value = :b
-        expect(enum.to_der).to eq(binary("\x02\x01\x01"))
+        expect(enum.to_der).to eq(binary("\x0a\x01\x01"))
       end
 
       it 'generates a DER string according to optional' do
@@ -128,7 +128,7 @@ module RASN1::Types
         enum.value = nil
         expect(enum.to_der).to eq('')
         enum.value = :c
-        expect(enum.to_der).to eq(binary("\x02\x01\x02"))
+        expect(enum.to_der).to eq(binary("\x0a\x01\x02"))
       end
     end
 
@@ -137,7 +137,7 @@ module RASN1::Types
 
      it 'parses a DER ENUMERATED string' do
        enum.to_h.each do |name, int|
-         enum.parse!([2, 1, int].pack('C3'))
+         enum.parse!([10, 1, int].pack('C3'))
          expect(enum.value).to eq(name)
        end
      end
