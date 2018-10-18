@@ -130,7 +130,7 @@ module RASN1
       end
 
       def explicit_type
-        @enum.nil? ? self.class.new(@name) : self.class.new(@name, enum: @enum)
+        self.class.new(name: @name, enum: @enum)
       end
     end
   end
