@@ -262,7 +262,7 @@ module RASN1
       class TBSCertificate < Model
         sequence :tbsCertificate,
                  content: [integer(:version, explicit: 0, constructed: true,
-                                   default: 0),
+                                   default: 0, enum: { v1: 0, v2: 1, v3: 2 }),
                            integer(:serialNumber),
                            model(:signature, AlgorithmIdentifier),
                            model(:issuer, X509Name),
@@ -285,7 +285,7 @@ module RASN1
       it 'may parse a X.509 certificate' do
         der = binary(File.read(File.join(__dir__, 'cert_example.der')))
         cert = X509Certificate.parse(der)
-        expect(cert[:tbsCertificate][:version].value).to eq(2)
+        expect(cert[:tbsCertificate][:version].value).to eq(:v3)
         expect(cert[:tbsCertificate][:serialNumber].value).to eq(0x123456789123456789)
         validity = [0x17, 0x0d, 0x31, 0x37, 0x30, 0x38, 0x30, 0x37, 0x31, 0x33, 0x30,
                     0x36, 0x30, 0x30, 0x5a, 0x17, 0x0d, 0x31, 0x38, 0x30, 0x38, 0x30,
