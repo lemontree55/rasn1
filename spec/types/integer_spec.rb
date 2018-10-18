@@ -3,6 +3,8 @@ require_relative '../spec_helper'
 module RASN1::Types
 
   describe Integer do
+    let(:hsh) { { one: 1, two: 2 } }
+
     describe '.type' do
       it 'gets ASN.1 type' do
         expect(Integer.type).to eq('INTEGER')
@@ -16,6 +18,25 @@ module RASN1::Types
         expect(int).to_not be_optional
         expect(int.asn1_class).to eq(:universal)
         expect(int.default).to eq(nil)
+      end
+
+      it 'accepts an :enum key' do
+        int = Integer.new(enum: hsh)
+        expect(int.enum).to eq(hsh)
+
+        int.value = 1
+        expect(int.value).to eq(:one)
+        int.value = :two
+        expect(int.value).to eq(:two)
+      end
+
+      it 'raises when default value is not in enum' do
+        expect { Integer.new(default: :three, enum: hsh) }.
+          to raise_error(RASN1::EnumeratedError, /default value/)
+        expect { Integer.new(default: 3, enum: hsh) }.
+          to raise_error(RASN1::EnumeratedError, /default value/)
+        expect { Integer.new(default: Object.new, enum: hsh) }.
+          to raise_error(TypeError, /default value/)
       end
     end
 
@@ -35,6 +56,11 @@ module RASN1::Types
       it 'returns 0 if no default value nor value were set' do
         expect(Integer.new.to_i).to eq(0)
       end
+
+      it 'returns integer even when was build with an :enum key' do
+        expect(Integer.new(enum: hsh).to_i).to eq(0)
+        expect(Integer.new(:one, enum: hsh).to_i).to eq(1)
+      end
     end
 
     describe '#to_der' do
@@ -50,6 +76,11 @@ module RASN1::Types
         expect(int.to_der).to eq(binary("\x02\x01\xff"))
         int.value = -543210
         expect(int.to_der).to eq(binary("\x02\x03\xf7\xb6\x16"))
+      end
+
+      it 'generates a DER string with enum' do
+        int = Integer.new(:two, enum: hsh)
+        expect(int.to_der).to eq(binary("\x02\x01\x02"))
       end
 
       it 'generates a DER string according to ASN.1 class' do
