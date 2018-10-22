@@ -60,6 +60,8 @@ module RASN1
   class Model
 
     class << self
+      # @return [Hash]
+      attr_reader :options
 
       # Use another model in this model
       # @param [String,Symbol] name
@@ -90,7 +92,7 @@ module RASN1
       # @return [void]
       def inherited(klass)
         super
-        root = @root
+        root = defined?(@root )? @root : nil
         klass.class_eval { @root = root }
       end
 
@@ -218,7 +220,7 @@ module RASN1
       # Give type name (aka class name)
       # @return [String]
       def type
-        return @type if @type
+        return @type if defined? @type
         @type = self.to_s.gsub(/.*::/, '')
       end
 
@@ -347,7 +349,7 @@ module RASN1
       root = self.class.class_eval { @root }
       @root = root[0]
       @elements = {}
-      @elements[@root] = get_type(root[1], self.class.class_eval { @options } || {})
+      @elements[@root] = get_type(root[1], self.class.options || {})
       root
     end
 

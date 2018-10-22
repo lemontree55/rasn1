@@ -70,7 +70,7 @@ module RASN1
       # Get ASN.1 type
       # @return [String]
       def self.type
-        return @type if @type
+        return @type if defined? @type
         @type = self.to_s.gsub(/.*::/, '').gsub(/([a-z0-9])([A-Z])/, '\1 \2').upcase
       end
 
@@ -168,14 +168,14 @@ module RASN1
       # @return [::Boolean,nil] return +nil+ if not tagged, return +true+
       #   if explicit, else +false+
       def explicit?
-        @tag.nil? ? @tag : @tag == :explicit
+        !defined?(@tag) ? nil : @tag == :explicit
       end
 
       # Say if a tagged type is implicit
       # @return [::Boolean,nil] return +nil+ if not tagged, return +true+
       #   if implicit, else +false+
       def implicit?
-        @tag.nil? ? @tag : @tag == :implicit
+        !defined?(@tag) ? nil : @tag == :implicit
       end
 
       # @abstract This method SHOULD be partly implemented by subclasses, which
@@ -211,7 +211,7 @@ module RASN1
              else    # false
                0
              end
-        (@tag_value || self.class::TAG) | CLASSES[@asn1_class] | pc
+        tag_value | CLASSES[@asn1_class] | pc
       end
 
       # @abstract This method SHOULD be partly implemented by subclasses to parse
@@ -326,7 +326,7 @@ module RASN1
           @constructed = options[:constructed]
         end
 
-        @asn1_class = :context if @tag and @asn1_class == :universal
+        @asn1_class = :context if defined?(@tag) && (@asn1_class == :universal)
       end
 
       def build_tag?
@@ -349,8 +349,14 @@ module RASN1
         end
       end
 
+      def tag_value
+        return @tag_value if defined? @tag_value
+
+        self.class::TAG
+      end
+
       def encode_tag
-        if (@tag_value || self.class::TAG) <= MAX_TAG
+        if tag_value <= MAX_TAG
           [tag].pack('C')
         else
           raise ASN1Error, 'multi-byte tag value are not supported'

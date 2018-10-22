@@ -95,7 +95,7 @@ module RASN1
         str << '  ' * level if level > 0
         str << "#{name} " if name
         str << "#{type}:"
-        if @chosen.nil?
+        if !defined? @chosen
           str << ' not chosen!'
         else
           str << "\n#{@value[@chosen].inspect(level+1)}"
@@ -105,10 +105,10 @@ module RASN1
       private
 
       def check_chosen
-        raise ChoiceError if @chosen.nil?
+        raise ChoiceError if !defined?(@chosen) || @chosen.nil?
       end
     end
   end
 end
 
-      
+
