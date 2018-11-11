@@ -6,6 +6,11 @@ class AnyModel < RASN1::Model
            content: [any(:data), objectid(:id)]
 end
 
+class AnyModelOptional < RASN1::Model
+  sequence :seq,
+           content: [any(:data, optional: true), objectid(:id)]
+end
+
 module RASN1::Types
 
 
@@ -14,6 +19,7 @@ module RASN1::Types
     let(:os_der) { binary("\x30\x0a\x04\x03abc\x06\x03\x2a\x03\x04") }
     let(:int_der) { binary("\x30\x09\x02\x02\x00\x80\x06\x03\x2a\x03\x05") }
     let(:null_der) { binary("\x30\x07\x05\x00\x06\x03\x2a\x03\x06") }
+    let(:void_der) { binary("\x30\x05\x06\x03\x2a\x03\x07") }
 
     describe '.type' do
       it 'gets ASN.1 type' do
@@ -22,24 +28,29 @@ module RASN1::Types
     end
 
     describe '#to_der' do
+      let(:anymodel) { AnyModel.new }
+
       it 'generates a DER string with an octet string' do
-        anymodel = AnyModel.new
         anymodel[:id].value = '1.2.3.4'
         anymodel[:data].value = OctetString.new('abc')
         expect(anymodel.to_der).to eq(os_der)
       end
 
       it 'generates a DER string with an integer' do
-        anymodel = AnyModel.new
         anymodel[:id].value = '1.2.3.5'
         anymodel[:data].value = Integer.new(128)
         expect(anymodel.to_der).to eq(int_der)
       end
 
       it 'generates a DER string with a Null object' do
-        anymodel = AnyModel.new
         anymodel[:id].value = '1.2.3.6'
         expect(anymodel.to_der).to eq(null_der)
+      end
+
+      it 'generates a void string with nil value when optional' do
+        anymodelopt = AnyModelOptional.new
+        anymodelopt[:id].value = '1.2.3.7'
+        expect(anymodelopt.to_der).to eq(void_der)
       end
     end
 
@@ -54,6 +65,16 @@ module RASN1::Types
         anymodel = AnyModel.parse(int_der)
         expect(anymodel[:id].value).to eq('1.2.3.5')
         expect(anymodel[:data].value).to eq(binary("\x02\x02\x00\x80"))
+      end
+
+      it 'raises on empty string' do
+        expect { Any.new.parse!(nil) }.to raise_error(RASN1::ASN1Error)
+        expect { Any.new.parse!('') }.to raise_error(RASN1::ASN1Error)
+      end
+
+      it 'returns 0 on empty string when optional' do
+        any = Any.new(optional: true)
+        expect { any.parse!('') }.to_not raise_error
       end
     end
 

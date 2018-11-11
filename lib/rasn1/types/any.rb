@@ -3,7 +3,7 @@ module RASN1
 
     # ASN.1 ANY: accepts any types
     #
-    # If `any#value` is `nil`, `any` will be encoded as a {Null} object.
+    # If `any#value` is `nil` and Any object is not {#optional?}, `any` will be encoded as a {Null} object.
     # @author Sylvain Daubert
     class Any < Base
 
@@ -13,7 +13,7 @@ module RASN1
         when Base, Model
           @value.to_der
         when nil
-          Null.new.to_der
+          optional? ? '' : Null.new.to_der
         else
           @value.to_s
         end
@@ -25,6 +25,12 @@ module RASN1
       # @param [Boolean] ber if +true+, accept BER encoding
       # @return [Integer] total number of parsed bytes
       def parse!(der, ber: false)
+        if der.nil? or der.empty?
+          return 0 if optional?
+
+          raise ASN1Error, "Expected ANY but get nothing"
+        end
+
         total_length,  = get_data(der, ber)
         @value = der[0, total_length]
         total_length
