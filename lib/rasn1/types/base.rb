@@ -432,7 +432,8 @@ module RASN1
       end
 
       def raise_tag_error(tag)
-        msg = "Expected #{self2name} but get #{tag2name(tag)}"
+        msg = name.nil? ? '' : "#{name}: "
+        msg << "Expected #{self2name} but get #{tag2name(tag)}"
         raise ASN1Error, msg
       end
 
@@ -440,7 +441,7 @@ module RASN1
         name = CLASSES.key(tag & 0xc0).to_s.upcase
         name << " #{tag & Constructed::ASN1_PC > 0 ? 'CONSTRUCTED' : 'PRIMITIVE'}"
         if implicit? || explicit?
-          name << ' 0x%02X' % (tag & 0x1f)
+          name << ' 0x%02X (0x%02X)' % [tag & 0x1f, tag]
         else
           name << ' ' << self.class.type
         end
@@ -455,7 +456,7 @@ module RASN1
         type =  Types.constants.map { |c| Types.const_get(c) }.
                   select { |klass| klass < Primitive || klass < Constructed }.
                   find { |klass| klass::TAG == itag & 0x1f }
-        name << " #{type.nil? ? "0x%02X" % (itag & 0x1f) : type.encode_type }"
+        name << " #{type.nil? ? "0x%02X (0x%02X)" % [itag & 0x1f, itag] : type.encode_type }"
       end
     end
   end
