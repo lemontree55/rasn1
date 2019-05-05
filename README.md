@@ -21,7 +21,16 @@ Or install it yourself as:
 
     $ gem install rasn1
 
-## Usage
+## Simple usage
+
+To decode a DER/BER string without checking a model, do:
+
+```ruby
+decoded_der = RASN1.parse(der_string)
+decoded_ber = RASN1.parse(ber_string, ber: true)
+```
+
+## Advanced usage
 All examples below will be based on:
 
 ```
