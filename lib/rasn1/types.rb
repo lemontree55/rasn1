@@ -25,15 +25,17 @@ module RASN1
     def self.tag2type(tag)
       raise ASN1Error, "tag is out of range" if tag > 0xff
 
-      if !defined? @tag2types
+      unless defined? @tag2types
         constructed = self.constructed - [Types::SequenceOf, Types::SetOf]
         primitives = self.primitives - [Types::Enumerated]
-        ary = [primitives, constructed].flatten.map do |type|
+        ary = (primitives + constructed).map do |type|
           next unless type.const_defined? :TAG
+
           [type::TAG, type]
         end
         @tag2types = Hash[ary]
         @tag2types.default = Types::Base
+        @tag2types.freeze
       end
 
       klass = @tag2types[tag & 0xdf] # Remove CONSTRUCTED bit
