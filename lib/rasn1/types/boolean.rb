@@ -8,10 +8,15 @@ module RASN1
       # Boolean tag value
       TAG = 0x01
 
+      # @private
+      DER_TRUE = 0xff
+      # @private
+      DER_FALSE = 0
+
       private
 
       def value_to_der
-        [@value ? 0xff : 0x00].pack('C')
+        [@value ? DER_TRUE : DER_FALSE].pack('C')
       end
 
       def der_to_value(der, ber: false)
@@ -19,9 +24,9 @@ module RASN1
 
         bool = der.unpack('C').first
         case bool
-        when 0
+        when DER_FALSE
           @value = false
-        when 0xff
+        when DER_TRUE
           @value = true
         else
           raise ASN1Error, "tag #{@name}: bad value 0x%02x for BOOLEAN" % bool unless ber
