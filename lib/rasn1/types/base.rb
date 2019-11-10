@@ -53,6 +53,10 @@ module RASN1
         private:     0xc0
       }.freeze
 
+      # Binary mask to get class
+      # @private
+      CLASS_MASK = 0xc0
+
       # Maximum ASN.1 tag number
       MAX_TAG = 0x1e
 
@@ -436,8 +440,12 @@ module RASN1
         raise ASN1Error, msg
       end
 
+      def class_from_numeric_tag(tag)
+        CLASSES.key(tag & CLASS_MASK)
+      end
+
       def self2name
-        name = CLASSES.key(tag & 0xc0).to_s.upcase
+        name = class_from_numeric_tag(tag).to_s.upcase
         name << " #{(tag & Constructed::ASN1_PC).positive? ? 'CONSTRUCTED' : 'PRIMITIVE'}"
         if implicit? || explicit?
           name << ' 0x%02X (0x%02X)' % [tag & 0x1f, tag]
@@ -450,7 +458,7 @@ module RASN1
         return 'no tag' if tag.nil? || tag.empty?
 
         itag = tag.unpack('C').first
-        name = CLASSES.key(itag & 0xc0).to_s.upcase
+        name = class_from_numeric_tag(itag).to_s.upcase
         name << " #{(itag & Constructed::ASN1_PC).positive? ? 'CONSTRUCTED' : 'PRIMITIVE'}"
         type =  Types.constants.map { |c| Types.const_get(c) }
                      .select { |klass| klass < Primitive || klass < Constructed }
