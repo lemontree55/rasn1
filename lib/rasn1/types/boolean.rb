@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RASN1
   module Types
     # ASN.1 Boolean

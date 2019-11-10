@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RASN1
   module Types
     # ASN.1 ANY: accepts any types
@@ -35,8 +37,8 @@ module RASN1
       end
 
       def inspect(level=0)
-        str = ''
-        str << '  ' * level if level.positive?
+        lvl = level >= 0 ? level : 0
+        str = '  ' * lvl
         str << "#{@name} " unless @name.nil?
         str << if @value.nil?
                  '(ANY) NULL'

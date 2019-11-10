@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RASN1
   module Types
     # ASN.1 Octet String
@@ -13,10 +15,8 @@ module RASN1
       TAG = 0x04
 
       def inspect(level=0)
-        str = ''
-        str << '  ' * level if level.positive?
-        str << "#{@name} " unless @name.nil?
-        str << "#{type}: #{value.inspect}"
+        str = common_inspect(level)
+        str << " #{value.inspect}"
       end
     end
   end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rasn1/version'
 require 'rasn1/types'
 require 'rasn1/model'

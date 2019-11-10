@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RASN1
   module Types
     # ASN.1 Null
@@ -7,10 +9,7 @@ module RASN1
 
       # @return [String]
       def inspect(level=0)
-        str = ''
-        str << '  ' * level if level.positive?
-        str << "#{@name} " unless @name.nil?
-        str << type
+        str = common_inspect(level)[0..-2] # remove terminal ':'
         str << ' OPTIONAL' if optional?
         str
       end

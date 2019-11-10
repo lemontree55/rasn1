@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RASN1
   module Types
     # A ASN.1 CHOICE is a choice between different types.
@@ -89,10 +91,7 @@ module RASN1
       end
 
       def inspect(level=0)
-        str = ''
-        str << '  ' * level if level.positive?
-        str << "#{name} " if name
-        str << "#{type}:"
+        str = common_inspect(level)
         str << if !defined? @chosen
                  ' not chosen!'
                else

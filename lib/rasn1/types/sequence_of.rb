@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RASN1
   module Types
     # ASN.1 SEQUENCE OF
@@ -113,12 +115,9 @@ module RASN1
       end
 
       def inspect(level=0)
-        str = ''
-        str << '  ' * level if level.positive?
-        str << "#{@name} " unless @name.nil?
-        level = level.abs
-        str << "#{type}:\n"
-        level += 1
+        str = common_inspect(level)
+        str << "\n"
+        level = level.abs + 1
         @value.each do |item|
           case item
           when Base, Model

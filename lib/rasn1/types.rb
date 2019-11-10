@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RASN1
   # This modules is a namesapce for all ASN.1 type classes.
   # @author Sylvain Daubert

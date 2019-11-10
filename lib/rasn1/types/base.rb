@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RASN1
   module Types
     # @abstract This is base class for all ASN.1 types.
@@ -246,10 +248,8 @@ module RASN1
       # @param [Integer] level
       # @return [String]
       def inspect(level=0)
-        str = ''
-        str << '  ' * level if level.positive?
-        str << "#{@name} " unless @name.nil?
-        str << "#{type}: #{value.inspect}"
+        str = common_inspect(level)
+        str << " #{value.inspect}"
         str << ' OPTIONAL' if optional?
         str << " DEFAULT #{@default}" unless @default.nil?
         str
@@ -263,6 +263,13 @@ module RASN1
       end
 
       private
+
+      def common_inspect(level)
+        lvl = level >= 0 ? level : 0
+        str = '  ' * lvl
+        str << "#{@name} " unless @name.nil?
+        str << "#{type}:"
+      end
 
       def value_to_der
         case @value
@@ -425,7 +432,7 @@ module RASN1
       end
 
       def raise_tag_error(tag)
-        msg = name.nil? ? '' : "#{name}: "
+        msg = name.nil? ? +'' : +"#{name}: "
         msg << "Expected #{self2name} but get #{tag2name(tag)}"
         raise ASN1Error, msg
       end

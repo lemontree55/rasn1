@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RASN1
   module Types
     # ASN.1 Bit String
@@ -43,10 +45,8 @@ module RASN1
       # @param [Integer] level
       # @return [String]
       def inspect(level=0)
-        str = ''
-        str << '  ' * level if level.positive?
-        str << "#{name} " unless @name.nil?
-        str << "#{type}: #{value.inspect} (bit length: #{bit_length})"
+        str = common_inspect(level)
+        str << " #{value.inspect} (bit length: #{bit_length})"
       end
 
       private
