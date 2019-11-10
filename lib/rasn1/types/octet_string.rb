@@ -1,6 +1,5 @@
 module RASN1
   module Types
-
     # ASN.1 Octet String
     #
     # An OCTET STRINT may contain another primtive object:
@@ -15,7 +14,7 @@ module RASN1
 
       def inspect(level=0)
         str = ''
-        str << '  ' * level if level > 0
+        str << '  ' * level if level.positive?
         str << "#{@name} " unless @name.nil?
         str << "#{type}: #{value.inspect}"
       end

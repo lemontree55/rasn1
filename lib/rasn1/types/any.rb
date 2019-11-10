@@ -1,12 +1,10 @@
 module RASN1
   module Types
-
     # ASN.1 ANY: accepts any types
     #
     # If `any#value` is `nil` and Any object is not {#optional?}, `any` will be encoded as a {Null} object.
     # @author Sylvain Daubert
     class Any < Base
-
       # @return [String] DER-formated string
       def to_der
         case @value
@@ -25,30 +23,30 @@ module RASN1
       # @param [Boolean] ber if +true+, accept BER encoding
       # @return [Integer] total number of parsed bytes
       def parse!(der, ber: false)
-        if der.nil? or der.empty?
+        if der.nil? || der.empty?
           return 0 if optional?
 
-          raise ASN1Error, "Expected ANY but get nothing"
+          raise ASN1Error, 'Expected ANY but get nothing'
         end
 
-        total_length,  = get_data(der, ber)
+        total_length, = get_data(der, ber)
         @value = der[0, total_length]
         total_length
       end
 
       def inspect(level=0)
         str = ''
-        str << '  ' * level if level > 0
+        str << '  ' * level if level.positive?
         str << "#{@name} " unless @name.nil?
-        if @value.nil?
-          str << "(ANY) NULL"
-        elsif @value.is_a?(OctetString) or @value.is_a?(BitString)
-          str << "(ANY) #{@value.type}: #{value.value.inspect}"
-        elsif @value.class < Base
-          str << "(ANY) #{@value.type}: #{value.value}"
-        else
-          str << "ANY: #{value.to_s.inspect}"
-        end
+        str << if @value.nil?
+                 '(ANY) NULL'
+               elsif @value.is_a?(OctetString) || @value.is_a?(BitString)
+                 "(ANY) #{@value.type}: #{value.value.inspect}"
+               elsif @value.class < Base
+                 "(ANY) #{@value.type}: #{value.value}"
+               else
+                 "ANY: #{value.to_s.inspect}"
+               end
       end
     end
   end

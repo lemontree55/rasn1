@@ -1,6 +1,5 @@
 module RASN1
   module Types
-
     # ASN.1 Numeric String
     # @author Sylvain Daubert
     class NumericString < OctetString
@@ -13,7 +12,7 @@ module RASN1
       end
 
       private
-      
+
       def value_to_der
         check_characters
         @value.to_s.force_encoding('BINARY')
@@ -26,7 +25,7 @@ module RASN1
 
       def check_characters
         if @value.to_s =~ /([^0-9 ])/
-          raise ASN1Error, "NUMERIC STRING #@name: invalid character: '#{$1}'"
+          raise ASN1Error, "NUMERIC STRING #{@name}: invalid character: '#{$1}'"
         end
       end
     end

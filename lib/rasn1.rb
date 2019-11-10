@@ -5,7 +5,6 @@ require 'rasn1/model'
 # Rasn1 is a pure ruby library to parse, decode and encode ASN.1 data.
 # @author Sylvain Daubert
 module RASN1
-
   # Base error class
   class Error < StandardError; end
 
@@ -26,10 +25,10 @@ module RASN1
   # CHOICE error: #chosen not set
   class ChoiceError < RASN1::Error
     def message
-      "CHOICE #@name: #chosen not set"
+      "CHOICE #{@name}: #chosen not set"
     end
   end
-  
+
   # Parse a DER/BER string without checking a model
   # @note If you want to check ASN.1 grammary, you should define a {Model}
   #       and use {Model#parse}.
@@ -42,7 +41,7 @@ module RASN1
   # @return [Types::Base]
   def self.parse(der, ber: false)
     root = nil
-    while der.size > 0
+    until der.empty?
       type = Types.tag2type(der[0].ord)
       type.parse!(der, ber: ber)
       root = type if root.nil?
@@ -50,7 +49,7 @@ module RASN1
       if [Types::Sequence, Types::Set].include? type.class
         subder = type.value
         ary = []
-        while subder.size > 0
+        until subder.empty?
           ary << self.parse(subder)
           subder = subder[ary.last.to_der.size..-1]
         end

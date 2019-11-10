@@ -6,6 +6,8 @@ Lint/Void:
   Enabled: false
 Metrics:
   Enabled: false
+Naming/AccessorMethodName:
+  Enabled: false
 Style/AsciiComments:
   Enabled: false
 Style/Encoding:
@@ -20,6 +22,8 @@ Style/PerlBackrefs:
   Enabled: false
 Style/RedundantSelf:
   Enabled: false
+Style/RegexpLiteral:
+  EnforcedStyle: slashes
 Style/StructInheritance:
   Enabled: false
 Style/TrailingCommaInArrayLiteral:

@@ -1,6 +1,5 @@
 module RASN1
   module Types
-
     # ASN.1 GeneralizedTime
     #
     # +{#value} of a {GeneralizedTime} should be a ruby Time.
@@ -29,50 +28,48 @@ module RASN1
       end
 
       private
-      
+
       def value_to_der
-        if @value.nsec > 0
+        if @value.nsec.positive?
           der = @value.getutc.strftime('%Y%m%d%H%M%S.%9NZ')
           der.sub(/0+Z/, 'Z')
         else
           @value.getutc.strftime('%Y%m%d%H%M%SZ')
         end
       end
-      
+
       def der_to_value(der, ber: false)
         date_hour, fraction = der.split('.')
         utc_offset_forced = false
         if fraction.nil?
-          if date_hour[-1] != 'Z' and date_hour !~ /[+-]\d+$/
+          if (date_hour[-1] != 'Z') && (date_hour !~ /[+-]\d+$/)
             # If not UTC, have to add offset with UTC to force
             # DateTime#strptime to generate a local time. But this difference
             # may be errored because of DST.
             date_hour << Time.now.strftime('%z')
             utc_offset_forced = true
           end
+        elsif fraction[-1] == 'Z'
+          fraction = fraction[0...-1]
+          date_hour << 'Z'
         else
-          if fraction[-1] == 'Z'
-            fraction = fraction[0...-1]
-            date_hour << 'Z'
+          match = fraction.match(/(\d+)([+-]\d+)/)
+          if match
+            # fraction contains fraction and timezone info. Split them
+            fraction = match[1]
+            date_hour << match[2]
           else
-            match = fraction.match(/(\d+)([+-]\d+)/)
-            if match
-              # fraction contains fraction and timezone info. Split them
-              fraction = match[1]
-              date_hour << match[2]
-            else
-              # fraction only contains fraction.
-              # Have to add offset with UTC to force DateTime#strptime to
-              # generate a local time. But this difference may be errored
-              # because of DST.
-              date_hour << Time.now.strftime('%z')
-              utc_offset_forced = true
-            end
+            # fraction only contains fraction.
+            # Have to add offset with UTC to force DateTime#strptime to
+            # generate a local time. But this difference may be errored
+            # because of DST.
+            date_hour << Time.now.strftime('%z')
+            utc_offset_forced = true
           end
         end
         format = case date_hour.size
                  when 11
-                   frac_base = 60*60
+                   frac_base = 60 * 60
                    '%Y%m%d%HZ'
                  when 13
                    frac_base = 60
@@ -100,9 +97,7 @@ module RASN1
         # Check DST. There may be a shift of one hour...
         if utc_offset_forced
           compare_time = Time.new(*@value.to_a[0..5].reverse)
-          if compare_time.utc_offset != @value.utc_offset
-            @value = compare_time
-          end
+          @value = compare_time if compare_time.utc_offset != @value.utc_offset
         end
         @value += ".#{fraction}".to_r * frac_base unless fraction.nil?
       end

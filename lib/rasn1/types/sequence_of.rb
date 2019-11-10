@@ -1,6 +1,5 @@
 module RASN1
   module Types
-
     # ASN.1 SEQUENCE OF
     #
     # A SEQUENCE OF is an array of one ASN.1 type.
@@ -68,7 +67,7 @@ module RASN1
       def initialize_copy(other)
         super
         @of_type = @of_type.dup
-        @value = @value.map { |v| v.dup }
+        @value = @value.map(&:dup)
       end
 
       # Add an item to SEQUENCE OF
@@ -76,9 +75,11 @@ module RASN1
       def <<(obj)
         if of_type_class < Primitive
           raise ASN1Error, 'object to add should be an Array' unless obj.is_a?(Array)
+
           @value += obj.map { |item| @of_type.new(item) }
         elsif composed_of_type?
           raise ASN1Error, 'object to add should be an Array' unless obj.is_a?(Array)
+
           new_value = of_type_class.new
           @of_type.value.each_with_index do |type, i|
             type2 = type.dup
@@ -113,7 +114,7 @@ module RASN1
 
       def inspect(level=0)
         str = ''
-        str << '  ' * level if level > 0
+        str << '  ' * level if level.positive?
         str << "#{@name} " unless @name.nil?
         level = level.abs
         str << "#{type}:\n"
@@ -121,8 +122,9 @@ module RASN1
         @value.each do |item|
           case item
           when Base, Model
-            next if item.optional? and item.value.nil?
-            str << "#{item.inspect(level)}"
+            next if item.optional? && item.value.nil?
+
+            str << item.inspect(level)
             str << "\n" unless str.end_with?("\n")
           else
             str << '  ' * level + "#{item.inspect}\n"
@@ -142,7 +144,7 @@ module RASN1
       end
 
       def value_to_der
-        @value.map { |v| v.to_der }.join
+        @value.map(&:to_der).join
       end
 
       def der_to_value(der, ber:false)

@@ -2,7 +2,6 @@ require 'date'
 
 module RASN1
   module Types
-
     # ASN.1 UTCTime
     #
     # +{#value} of a +UtcTime+ should be a ruby Time.
@@ -26,11 +25,11 @@ module RASN1
       end
 
       private
-      
+
       def value_to_der
         @value.getutc.strftime('%y%m%d%H%M%SZ')
       end
-      
+
       def der_to_value(der, ber: false)
         format = case der.size
                  when 11

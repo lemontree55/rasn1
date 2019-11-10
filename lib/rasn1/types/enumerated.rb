@@ -1,6 +1,5 @@
 module RASN1
   module Types
-
     # ASN.1 Enumerated
     #
     # An enumerated type permits to assign names to integer values. It may be defined

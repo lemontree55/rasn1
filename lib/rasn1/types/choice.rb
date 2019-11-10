@@ -1,6 +1,5 @@
 module RASN1
   module Types
-
     # A ASN.1 CHOICE is a choice between different types.
     #
     # == Create a CHOICE
@@ -31,7 +30,6 @@ module RASN1
     #   choice.chosen_value  # => "abc"
     # @author Sylvain Daubert
     class Choice < Base
-
       # Chosen type
       # @return [Integer] index of type in choice value
       attr_accessor :chosen
@@ -87,19 +85,19 @@ module RASN1
             next
           end
         end
-        raise ASN1Error, "CHOICE #@name: no type matching #{der.inspect}" unless parsed
+        raise ASN1Error, "CHOICE #{@name}: no type matching #{der.inspect}" unless parsed
       end
 
       def inspect(level=0)
         str = ''
-        str << '  ' * level if level > 0
+        str << '  ' * level if level.positive?
         str << "#{name} " if name
         str << "#{type}:"
-        if !defined? @chosen
-          str << ' not chosen!'
-        else
-          str << "\n#{@value[@chosen].inspect(level+1)}"
-        end
+        str << if !defined? @chosen
+                 ' not chosen!'
+               else
+                 "\n#{@value[@chosen].inspect(level + 1)}"
+               end
       end
 
       private
@@ -110,5 +108,3 @@ module RASN1
     end
   end
 end
-
-

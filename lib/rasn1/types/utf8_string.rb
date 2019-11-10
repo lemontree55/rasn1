@@ -1,6 +1,5 @@
 module RASN1
   module Types
-
     # ASN.1 UTF8 String
     # @author Sylvain Daubert
     class Utf8String < OctetString
@@ -13,12 +12,12 @@ module RASN1
       end
 
       private
-      
+
       def value_to_der
         @value.to_s.force_encoding('UTF-8').force_encoding('BINARY')
       end
 
-      def der_to_value(der, ber:false)
+      def der_to_value(der, ber: false)
         super
         @value.force_encoding('UTF-8')
       end

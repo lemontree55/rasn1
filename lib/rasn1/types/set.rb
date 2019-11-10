@@ -1,6 +1,5 @@
 module RASN1
   module Types
-
     # ASN.1 set
     #
     # A set is a collection of another ASN.1 types.

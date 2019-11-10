@@ -1,6 +1,5 @@
 module RASN1
   module Types
-
     # ASN.1 sequence
     #
     # A sequence is a collection of another ASN.1 types.
@@ -35,7 +34,7 @@ module RASN1
 
       def initialize_copy(other)
         super
-        @value = @value.map { |v| v.dup }
+        @value = @value.map(&:dup)
       end
 
       private
@@ -43,14 +42,14 @@ module RASN1
       def value_to_der
         case @value
         when Array
-          @value.map { |element| element.to_der }.join
+          @value.map(&:to_der).join
         else
           @value.to_s
         end
       end
 
-      def der_to_value(der, ber:false)
-        if @value.is_a?(Array) and !@value.empty?
+      def der_to_value(der, ber: false)
+        if @value.is_a?(Array) && !@value.empty?
           nb_bytes = 0
           @value.each do |element|
             nb_bytes += element.parse!(der[nb_bytes..-1])
@@ -58,7 +57,7 @@ module RASN1
         else
           @value = der
           der.length
-        end 
+        end
       end
     end
   end

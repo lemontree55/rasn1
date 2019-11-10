@@ -1,6 +1,5 @@
 module RASN1
   module Types
-
     # ASN.1 Visible String
     # @author Sylvain Daubert
     class VisibleString < IA5String
@@ -11,7 +10,6 @@ module RASN1
       def self.type
         'VisibleString'
       end
-
     end
   end
 end

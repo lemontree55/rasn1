@@ -1,6 +1,5 @@
 module RASN1
   module Types
-
     # ASN.1 Boolean
     # @author Sylvain Daubert
     class Boolean < Primitive
@@ -13,9 +12,7 @@ module RASN1
       end
 
       def der_to_value(der, ber: false)
-        unless der.size == 1
-          raise ASN1Error, "tag #@name: BOOLEAN should have a length of 1"
-        end
+        raise ASN1Error, "tag #{@name}: BOOLEAN should have a length of 1" unless der.size == 1
 
         bool = der.unpack('C').first
         case bool
@@ -24,11 +21,9 @@ module RASN1
         when 0xff
           @value = true
         else
-          if ber
-            @value = true
-          else
-            raise ASN1Error, "tag #@name: bad value 0x%02x for BOOLEAN" % bool
-          end
+          raise ASN1Error, "tag #{@name}: bad value 0x%02x for BOOLEAN" % bool unless ber
+
+          @value = true
         end
       end
     end

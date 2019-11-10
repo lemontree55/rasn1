@@ -1,6 +1,5 @@
 module RASN1
   module Types
-
     # @abstract This is base class for all ASN.1 types.
     #
     #   Subclasses SHOULD define:
@@ -46,11 +45,11 @@ module RASN1
     class Base
       # Allowed ASN.1 tag classes
       CLASSES = {
-                 universal:   0x00,
-                 application: 0x40,
-                 context:     0x80,
-                 private:     0xc0
-                }
+        universal:   0x00,
+        application: 0x40,
+        context:     0x80,
+        private:     0xc0
+      }.freeze
 
       # Maximum ASN.1 tag number
       MAX_TAG = 0x1e
@@ -71,6 +70,7 @@ module RASN1
       # @return [String]
       def self.type
         return @type if defined? @type
+
         @type = self.to_s.gsub(/.*::/, '').gsub(/([a-z0-9])([A-Z])/, '\1 \2').upcase
       end
 
@@ -90,7 +90,6 @@ module RASN1
         obj.parse!(der_or_ber, ber: options[:ber])
         obj
       end
-
 
       # @overload initialize(options={})
       #   @param [Hash] options
@@ -129,19 +128,19 @@ module RASN1
       end
 
       # Used by +#dup+ and +#clone+. Deep copy @value.
-      def initialize_copy(other)
-        @value = case
+      def initialize_copy(_other)
+        @value = case self
                  when NilClass, TrueClass, FalseClass, Integer
                    @value
                  else
                    @value.dup
                  end
-        @default = case
-                 when NilClass, TrueClass, FalseClass, Integer
-                   @default
-                 else
-                   @default.dup
-                 end
+        @default = case self
+                   when NilClass, TrueClass, FalseClass, Integer
+                     @default
+                   else
+                     @default.dup
+                   end
       end
 
       # Get value or default value
@@ -192,7 +191,7 @@ module RASN1
 
       # @return [::Boolean] +true+ if this is a constructed type
       def constructed?
-        !!((self.class < Constructed) ||  @constructed)
+        (self.class < Constructed) || !!@constructed
       end
 
       # Get ASN.1 type
@@ -206,9 +205,9 @@ module RASN1
       def tag
         pc = if @constructed.nil?
                self.class::ASN1_PC
-             elsif @constructed   # true
+             elsif @constructed # true
                Constructed::ASN1_PC
-             else    # false
+             else # false
                0
              end
         tag_value | CLASSES[@asn1_class] | pc
@@ -248,10 +247,10 @@ module RASN1
       # @return [String]
       def inspect(level=0)
         str = ''
-        str << '  ' * level if level > 0
+        str << '  ' * level if level.positive?
         str << "#{@name} " unless @name.nil?
         str << "#{type}: #{value.inspect}"
-        str << " OPTIONAL" if optional?
+        str << ' OPTIONAL' if optional?
         str << " DEFAULT #{@default}" unless @default.nil?
         str
       end
@@ -274,7 +273,7 @@ module RASN1
         end
       end
 
-      def der_to_value(der, ber:false)
+      def der_to_value(der, ber: false)
         @value = der
       end
 
@@ -292,11 +291,9 @@ module RASN1
         when nil
           @asn1_class = :universal
         when Symbol
-          if CLASSES.keys.include? asn1_class
-            @asn1_class = asn1_class
-          else
-            raise ClassError
-          end
+          raise ClassError unless CLASSES.keys.include? asn1_class
+
+          @asn1_class = asn1_class
         else
           raise ClassError
         end
@@ -330,8 +327,8 @@ module RASN1
       end
 
       def build_tag?
-        !(!@default.nil? and (@value.nil? or @value == @default)) and
-          !(optional? and @value.nil?)
+        !(!@default.nil? && (@value.nil? || (@value == @default))) &&
+          !(optional? && @value.nil?)
       end
 
       def build_tag
@@ -356,11 +353,9 @@ module RASN1
       end
 
       def encode_tag
-        if tag_value <= MAX_TAG
-          [tag].pack('C')
-        else
-          raise ASN1Error, 'multi-byte tag value are not supported'
-        end
+        raise ASN1Error, 'multi-byte tag value are not supported' unless tag_value <= MAX_TAG
+
+        [tag].pack('C')
       end
 
       def encode_size(size)
@@ -402,27 +397,25 @@ module RASN1
         if length == INDEFINITE_LENGTH
           if primitive?
             raise ASN1Error, "malformed #{type} TAG: indefinite length " \
-              "forbidden for primitive types"
+              'forbidden for primitive types'
+          elsif ber
+            raise NotImplementedError, 'TAG: indefinite length not ' \
+              'supported yet'
           else
-            if ber
-              raise NotImplementedError, "TAG: indefinite length not " \
-                "supported yet"
-            else
-              raise ASN1Error, "TAG: indefinite length forbidden in DER " \
-                "encoding"
-            end
+            raise ASN1Error, 'TAG: indefinite length forbidden in DER ' \
+              'encoding'
           end
         elsif length < INDEFINITE_LENGTH
           data = der[2, length]
         else
           length_length = length & 0x7f
-          length = der[2, length_length].unpack('C*').
-            reduce(0) { |len, b| (len << 8) | b }
+          length = der[2, length_length].unpack('C*')
+                                        .reduce(0) { |len, b| (len << 8) | b }
           data = der[2 + length_length, length]
         end
 
         total_length = 2 + length
-        total_length += length_length if length_length > 0
+        total_length += length_length if length_length.positive?
 
         [total_length, data]
       end
@@ -439,7 +432,7 @@ module RASN1
 
       def self2name
         name = CLASSES.key(tag & 0xc0).to_s.upcase
-        name << " #{tag & Constructed::ASN1_PC > 0 ? 'CONSTRUCTED' : 'PRIMITIVE'}"
+        name << " #{(tag & Constructed::ASN1_PC).positive? ? 'CONSTRUCTED' : 'PRIMITIVE'}"
         if implicit? || explicit?
           name << ' 0x%02X (0x%02X)' % [tag & 0x1f, tag]
         else
@@ -448,15 +441,15 @@ module RASN1
       end
 
       def tag2name(tag)
-        return 'no tag' if tag.nil? or tag.empty?
+        return 'no tag' if tag.nil? || tag.empty?
 
         itag = tag.unpack('C').first
         name = CLASSES.key(itag & 0xc0).to_s.upcase
-        name << " #{itag & Constructed::ASN1_PC > 0 ? 'CONSTRUCTED' : 'PRIMITIVE'}"
-        type =  Types.constants.map { |c| Types.const_get(c) }.
-                  select { |klass| klass < Primitive || klass < Constructed }.
-                  find { |klass| klass::TAG == itag & 0x1f }
-        name << " #{type.nil? ? "0x%02X (0x%02X)" % [itag & 0x1f, itag] : type.encode_type }"
+        name << " #{(itag & Constructed::ASN1_PC).positive? ? 'CONSTRUCTED' : 'PRIMITIVE'}"
+        type =  Types.constants.map { |c| Types.const_get(c) }
+                     .select { |klass| klass < Primitive || klass < Constructed }
+                     .find { |klass| klass::TAG == itag & 0x1f }
+        name << " #{type.nil? ? '0x%02X (0x%02X)' % [itag & 0x1f, itag] : type.encode_type}"
       end
     end
   end

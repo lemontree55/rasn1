@@ -1,6 +1,5 @@
 module RASN1
   module Types
-
     # ASN.1 SET OF
     # @author Sylvain Daubert
     class SetOf < SequenceOf
@@ -14,4 +13,3 @@ module RASN1
     end
   end
 end
-

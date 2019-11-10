@@ -1,6 +1,5 @@
 module RASN1
   module Types
-
     # ASN.1 Printable String
     # @author Sylvain Daubert
     class PrintableString < OctetString
@@ -13,7 +12,7 @@ module RASN1
       end
 
       private
-      
+
       def value_to_der
         check_characters
         @value.to_s.force_encoding('BINARY')
@@ -26,7 +25,7 @@ module RASN1
 
       def check_characters
         if @value.to_s =~ /([^a-zA-Z0-9 '=\(\)\+,\-\.\/:\?])/
-          raise ASN1Error, "PRINTABLE STRING #@name: invalid character: '#{$1}'"
+          raise ASN1Error, "PRINTABLE STRING #{@name}: invalid character: '#{$1}'"
         end
       end
     end

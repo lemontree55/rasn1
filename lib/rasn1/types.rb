@@ -2,19 +2,18 @@ module RASN1
   # This modules is a namesapce for all ASN.1 type classes.
   # @author Sylvain Daubert
   module Types
-
     # Give all primitive types
     # @return [Array<Types::Primitive>]
     def self.primitives
-      @primitives ||= self.constants.map { |c| Types.const_get(c) }.
-                           select { |klass| klass < Primitive }
+      @primitives ||= self.constants.map { |c| Types.const_get(c) }
+                          .select { |klass| klass < Primitive }
     end
 
     # Give all constructed types
     # @return [Array<Types::Constructed>]
     def self.constructed
-      @constructed ||= self.constants.map { |c| Types.const_get(c) }.
-                            select { |klass| klass < Constructed }
+      @constructed ||= self.constants.map { |c| Types.const_get(c) }
+                           .select { |klass| klass < Constructed }
     end
 
     # Give ASN.1 type from an integer. If +tag+ is unknown, return a {Types::Base}
@@ -23,7 +22,7 @@ module RASN1
     # @return [Types::Base]
     # @raise [ASN1Error] +tag+ is out of range
     def self.tag2type(tag)
-      raise ASN1Error, "tag is out of range" if tag > 0xff
+      raise ASN1Error, 'tag is out of range' if tag > 0xff
 
       unless defined? @tag2types
         constructed = self.constructed - [Types::SequenceOf, Types::SetOf]

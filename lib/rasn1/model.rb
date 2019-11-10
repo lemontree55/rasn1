@@ -1,5 +1,4 @@
 module RASN1
-
   # @abstract
   # {Model} class is a base class to define ASN.1 models.
   # == Create a simple ASN.1 model
@@ -58,7 +57,6 @@ module RASN1
   # this method.
   # @author Sylvain Daubert
   class Model
-
     class << self
       # @return [Hash]
       attr_reader :options
@@ -92,7 +90,7 @@ module RASN1
       # @return [void]
       def inherited(klass)
         super
-        root = defined?(@root )? @root : nil
+        root = @root
         klass.class_eval { @root = root }
       end
 
@@ -108,16 +106,16 @@ module RASN1
       #  @param [Symbol,String] name name of object in model
       #  @param [Hash] options
       #  @see Types::Choice#initialize
-      %w(sequence set choice).each do |type|
+      %w[sequence set choice].each do |type|
         class_eval "def #{type}(name, options={})\n" \
                    "  options.merge!(name: name)\n" \
-                   "  proc = Proc.new do |opts|\n" \
+                   "  proc = proc do |opts|\n" \
                    "    Types::#{type.capitalize}.new(options.merge(opts))\n" \
                    "  end\n" \
                    "  @root = [name, proc]\n" \
                    "  @root << options[:content] unless options[:content].nil?\n" \
                    "  @root\n" \
-                   "end"
+                   'end'
       end
 
       # @method sequence_of(name, type, options)
@@ -130,15 +128,15 @@ module RASN1
       #  @param [Model, Types::Base] type type for SET OF
       #  @param [Hash] options
       #  @see Types::SetOf#initialize
-      %w(sequence set).each do |type|
+      %w[sequence set].each do |type|
         klass_name = "Types::#{type.capitalize}Of"
         class_eval "def #{type}_of(name, type, options={})\n" \
                    "  options.merge!(name: name)\n" \
-                   "  proc = Proc.new do |opts|\n" \
+                   "  proc = proc do |opts|\n" \
                    "    #{klass_name}.new(type, options.merge(opts))\n" \
                    "  end\n" \
                    "  @root = [name, proc]\n" \
-                   "end"
+                   'end'
       end
 
       # @method boolean(name, options)
@@ -187,14 +185,15 @@ module RASN1
       #  @see Types::IA5String#initialize
       Types.primitives.each do |prim|
         next if prim == Types::ObjectId
+
         method_name = prim.type.gsub(/([a-z0-9])([A-Z])/, '\1_\2').downcase.gsub(/\s+/, '_')
         class_eval "def #{method_name}(name, options={})\n" \
                    "  options.merge!(name: name)\n" \
-                   "  proc = Proc.new do |opts|\n" \
-                   "    #{prim.to_s}.new(options.merge(opts))\n" \
+                   "  proc = proc do |opts|\n" \
+                   "    #{prim}.new(options.merge(opts))\n" \
                    "  end\n" \
                    "  @root = [name, proc]\n" \
-                   "end"
+                   'end'
       end
 
       # @param [Symbol,String] name name of object in model
@@ -204,7 +203,7 @@ module RASN1
       # @see Types::ObjectId#initialize
       def objectid(name, options={})
         options.merge!(name: name)
-        proc = Proc.new { |opts| Types::ObjectId.new(options.merge(opts)) }
+        proc = proc { |opts| Types::ObjectId.new(options.merge(opts)) }
         @root = [name, proc]
       end
 
@@ -213,7 +212,7 @@ module RASN1
       # @see Types::Any#initialize
       def any(name, options={})
         options.merge!(name: name)
-        proc = Proc.new { |opts| Types::Any.new(options.merge(opts)) }
+        proc = proc { |opts| Types::Any.new(options.merge(opts)) }
         @root = [name, proc]
       end
 
@@ -221,6 +220,7 @@ module RASN1
       # @return [String]
       def type
         return @type if defined? @type
+
         @type = self.to_s.gsub(/.*::/, '')
       end
 
@@ -256,7 +256,8 @@ module RASN1
     # @param [Object] value
     # @return [Object] value
     def []=(name, value)
-      raise Error, "cannot set value for a Model" if @elements[name].is_a? Model
+      raise Error, 'cannot set value for a Model' if @elements[name].is_a? Model
+
       @elements[name].value = value
     end
 
@@ -314,6 +315,11 @@ module RASN1
       end
     end
 
+    # @return [Boolean]
+    def respond_to_missing?(meth, *)
+      @elements[@root].respond_to?(meth) || super
+    end
+
     # @return [String]
     def inspect(level=0)
       '  ' * level + "(#{type}) #{root.inspect(-level)}"
@@ -328,12 +334,8 @@ module RASN1
 
     private
 
-    def is_composed?(el)
-      [Types::Sequence, Types::Set].include? el.class
-    end
-
-    def is_of?(el)
-      [Types::SequenceOf, Types::SetOf].include? el.class
+    def composed?(elt)
+      [Types::Sequence, Types::Set].include? elt.class
     end
 
     def get_type(proc_or_class, options={})
@@ -353,16 +355,16 @@ module RASN1
       root
     end
 
-    def set_elements(name, el, content=nil)
-      if content.is_a? Array
-        @elements[name].value = content.map do |name2, proc_or_class, content2|
-          subel = get_type(proc_or_class)
-          @elements[name2] = subel
-          if is_composed?(subel) and content2.is_a? Array
-            set_elements(name2, proc_or_class, content2)
-          end
-          subel
+    def set_elements(name, _elt, content=nil)
+      return unless content.is_a? Array
+
+      @elements[name].value = content.map do |name2, proc_or_class, content2|
+        subel = get_type(proc_or_class)
+        @elements[name2] = subel
+        if composed?(subel) && content2.is_a?(Array)
+          set_elements(name2, proc_or_class, content2)
         end
+        subel
       end
     end
 
@@ -410,10 +412,11 @@ module RASN1
                 end
               when Types::Sequence
                 seq = my_element.value.map do |el|
-                        next if el.optional? and el.value.nil?
-                        name = el.is_a?(Model) ? @elements.key(el) : el.name
-                        [name, private_to_h(el)]
-                      end
+                  next if el.optional? && el.value.nil?
+
+                  name = el.is_a?(Model) ? @elements.key(el) : el.name
+                  [name, private_to_h(el)]
+                end
                 seq.compact!
                 Hash[seq]
               else

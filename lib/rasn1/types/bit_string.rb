@@ -1,6 +1,5 @@
 module RASN1
   module Types
-
     # ASN.1 Bit String
     # @author Sylvain Daubert
     class BitString < Primitive
@@ -25,7 +24,7 @@ module RASN1
         opts = value_or_options.is_a?(Hash) ? value_or_options : options
         if @default
           if opts[:bit_length].nil?
-            raise ASN1Error, "TAG #@name: default bit length is not defined"
+            raise ASN1Error, "TAG #{@name}: default bit length is not defined"
           end
           @default_bit_length = opts[:bit_length]
         end
@@ -45,7 +44,7 @@ module RASN1
       # @return [String]
       def inspect(level=0)
         str = ''
-        str << '  ' * level if level > 0
+        str << '  ' * level if level.positive?
         str << "#{name} " unless @name.nil?
         str << "#{type}: #{value.inspect} (bit length: #{bit_length})"
       end
@@ -53,28 +52,26 @@ module RASN1
       private
 
       def build_tag?
-        !(!@default.nil? and (@value.nil? or @value == @default and
-                              @bit_length == @default_bit_length)) and
-          !(optional? and @value.nil?)
+        !(!@default.nil? && (@value.nil? || (@value == @default) &&
+                              (@bit_length == @default_bit_length))) &&
+          !(optional? && @value.nil?)
       end
 
       def value_to_der
-        raise ASN1Error, "TAG #@name: bit length is not set" if bit_length.nil?
+        raise ASN1Error, "TAG #{@name}: bit length is not set" if bit_length.nil?
 
-        while @value.length * 8 < @bit_length
-          @value << "\x00"
-        end
+        @value << "\x00" while @value.length * 8 < @bit_length
         @value.force_encoding('BINARY')
 
         if @value.length * 8 > @bit_length
-          max_len = @bit_length / 8 + (@bit_length % 8 > 0 ? 1 : 0)
+          max_len = @bit_length / 8 + ((@bit_length % 8).positive? ? 1 : 0)
           @value = @value[0, max_len]
         end
 
         unused = @value.length * 8 - @bit_length
         der = [unused, @value].pack('CA*')
 
-        if unused > 0
+        if unused.positive?
           last_byte = @value[-1].unpack('C').first
           last_byte &= (0xff >> unused) << unused
           der[-1] = [last_byte].pack('C')
@@ -83,7 +80,7 @@ module RASN1
         der
       end
 
-      def der_to_value(der, ber:false)
+      def der_to_value(der, ber: false)
         unused, @value = der.unpack('CA*')
         @bit_length = @value.length * 8 - unused
       end

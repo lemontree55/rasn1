@@ -9,12 +9,12 @@ module RASN1
       private
 
       def value_to_der
-        ids = @value.split('.').map! { |str| str.to_i }
+        ids = @value.split('.').map!(&:to_i)
 
         if ids[0] > 2
           raise ASN1Error, 'OBJECT ID #@name: first subidentifier should be less than 3'
         end
-        if ids[0] < 2 and ids[1] > 39
+        if (ids[0] < 2) && (ids[1] > 39)
           raise ASN1Error, 'OBJECT ID #@name: second subidentifier should be less than 40'
         end
 
@@ -23,8 +23,8 @@ module RASN1
           next v if v < 128
 
           ary = []
-          while v > 0
-            ary.unshift (v & 0x7f) | 0x80
+          while v.positive?
+            ary.unshift((v & 0x7f) | 0x80)
             v >>= 7
           end
           ary[-1] &= 0x7f
@@ -35,17 +35,15 @@ module RASN1
 
       def der_to_value(der, ber: false)
         bytes = der.unpack('C*')
+        nr_bytes_to_remove = 1
         ids = if bytes[0] < 80
-                remove = 1
-                [ bytes[0] / 40, bytes[0] % 40]
+                [bytes[0] / 40, bytes[0] % 40]
               elsif bytes[0] < 128
-                remove = 1
                 [2, bytes[0] - 80]
               else
-                remove = 1
                 second_id = bytes[0] & 0x7f
                 bytes[1..-1].each do |byte|
-                  remove += 1
+                  nr_bytes_to_remove += 1
                   second_id <<= 7
                   if byte < 128
                     second_id |= byte
@@ -58,10 +56,10 @@ module RASN1
               end
 
         id = 0
-        bytes.shift(remove)
+        bytes.shift(nr_bytes_to_remove)
         bytes.each do |byte|
           if byte < 128
-            if id == 0
+            if id.zero?
               ids << byte
             else
               ids << ((id << 7) | byte)

@@ -1,6 +1,5 @@
 module RASN1
   module Types
-
     # ASN.1 Integer
     # @author Sylvain Daubert
     class Integer < Primitive
@@ -31,18 +30,18 @@ module RASN1
 
         case @default
         when String,Symbol
-          unless @enum.has_key? @default
-            raise EnumeratedError, "TAG #@name: unknwon enumerated default value #@default"
+          unless @enum.key? @default
+            raise EnumeratedError, "TAG #{@name}: unknwon enumerated default value #@{default}"
           end
         when ::Integer
-          if @enum.has_value? @default
+          if @enum.value? @default
             @default = @enum.key(@default)
           else
-            raise EnumeratedError, "TAG #@name: default value #@default not in enumeration"
+            raise EnumeratedError, "TAG #{@name}: default value #@{default} not in enumeration"
           end
         when nil
         else
-          raise TypeError, "TAG #@name: #{@default.class} not handled as default value"
+          raise TypeError, "TAG #{@name}: #{@default.class} not handled as default value"
         end
       end
 
@@ -51,24 +50,24 @@ module RASN1
       def value=(v)
         case v
         when String,Symbol
-          raise EnumeratedError, 'TAG #@name has no :enum' if @enum.nil?
+          raise EnumeratedError, "TAG #{@name} has no :enum" if @enum.nil?
 
-          unless @enum.has_key? v
-            raise EnumeratedError, "TAG #@name: unknwon enumerated value #{v}"
+          unless @enum.key? v
+            raise EnumeratedError, "TAG #{@name}: unknwon enumerated value #{v}"
           end
           @value = v
         when ::Integer
           if @enum.nil?
             @value = v
-          elsif @enum.has_value? v
+          elsif @enum.value? v
             @value = @enum.key(v)
           else
-            raise EnumeratedError, "TAG #@name: #{v} not in enumeration"
+            raise EnumeratedError, "TAG #{@name}: #{v} not in enumeration"
           end
         when nil
           @value = nil
         else
-          raise EnumeratedError, "TAG #@name: not in enumeration"
+          raise EnumeratedError, "TAG #{@name}: not in enumeration"
         end
       end
 
@@ -86,15 +85,15 @@ module RASN1
 
       def int_value_to_der(value=nil)
         v = value || @value
-        size = v.bit_length / 8 + (v.bit_length % 8 > 0 ? 1 : 0)
-        size = 1 if size == 0
-        comp_value = if v > 0
+        size = v.bit_length / 8 + ((v.bit_length % 8).positive? ? 1 : 0)
+        size = 1 if size.zero?
+        comp_value = if v.positive?
                        # If MSB is 1, increment size to set initial octet
                        # to 0 to amrk it as a positive integer
                        size += 1 if v >> (size * 8 - 1) == 1
                        v
                      else
-                       ~(v.abs) + 1
+                       ~v.abs + 1
                      end
         ary = []
         size.times { ary << (comp_value & 0xff); comp_value >>= 8 }
@@ -108,7 +107,7 @@ module RASN1
         when ::Integer
           int_value_to_der
         else
-          raise TypeError, "TAG #@name: #{@value.class} not handled"
+          raise TypeError, "TAG #{@name}: #{@value.class} not handled"
         end
       end
 
@@ -126,7 +125,7 @@ module RASN1
         return if @enum.nil?
 
         @value = @enum.key(@value)
-        raise EnumeratedError, "TAG #@name: value #{v} not in enumeration" if @value.nil?
+        raise EnumeratedError, "TAG #{@name}: value #{v} not in enumeration" if @value.nil?
       end
 
       def explicit_type
