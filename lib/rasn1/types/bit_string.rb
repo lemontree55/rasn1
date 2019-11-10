@@ -5,6 +5,7 @@ module RASN1
     # ASN.1 Bit String
     # @author Sylvain Daubert
     class BitString < Primitive
+      # BitString tag value
       TAG = 0x03
 
       # @param [Integer] bit_length

@@ -46,6 +46,7 @@ module RASN1
     #  seqof[0][:int].value    # => 12
     # @author Sylvain Daubert
     class SequenceOf < Constructed
+      # SequenceOf tag value
       TAG = Sequence::TAG
 
       # @return [Class, Base]

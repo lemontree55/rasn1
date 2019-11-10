@@ -5,6 +5,7 @@ module RASN1
     # ASN.1 SET OF
     # @author Sylvain Daubert
     class SetOf < SequenceOf
+      # SetOf tag value
       TAG = Set::TAG
 
       # A SET OF is encoded as a SET.

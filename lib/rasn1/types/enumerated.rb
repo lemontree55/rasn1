@@ -22,6 +22,7 @@ module RASN1
       # @!attribute enum
       # @return [Hash]
 
+      # Enumerated tag value
       TAG = 0x0a
 
       # @overload initialize(options={})

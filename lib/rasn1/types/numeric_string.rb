@@ -5,6 +5,7 @@ module RASN1
     # ASN.1 Numeric String
     # @author Sylvain Daubert
     class NumericString < OctetString
+      # NumericString tag value
       TAG = 18
 
       # Get ASN.1 type

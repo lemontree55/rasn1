@@ -5,6 +5,7 @@ module RASN1
     # ASN.1 UTF8 String
     # @author Sylvain Daubert
     class Utf8String < OctetString
+      # Utf8String tag value
       TAG = 12
 
       # Get ASN.1 type

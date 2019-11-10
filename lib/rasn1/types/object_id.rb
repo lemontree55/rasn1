@@ -6,6 +6,7 @@ module RASN1
     # ASN.1 Object ID
     # @author Sylvain Daubert
     class ObjectId < Primitive
+      # ObjectId tag value
       TAG = 6
 
       private

@@ -8,6 +8,7 @@ module RASN1
       # @return [Hash,nil]
       attr_reader :enum
 
+      # Integer tag value
       TAG = 0x02
 
       # @overload initialize(options={})
@@ -31,7 +32,7 @@ module RASN1
         self.value = @value
 
         case @default
-        when String,Symbol
+        when String, Symbol
           unless @enum.key? @default
             raise EnumeratedError, "TAG #{@name}: unknwon enumerated default value #@{default}"
           end

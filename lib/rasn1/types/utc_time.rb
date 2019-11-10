@@ -18,6 +18,7 @@ module RASN1
     # not.
     # @author Sylvain Daubert
     class UtcTime < Primitive
+      # UtcTime tag value
       TAG = 23
 
       # Get ASN.1 type

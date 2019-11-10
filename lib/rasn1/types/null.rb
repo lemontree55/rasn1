@@ -5,6 +5,7 @@ module RASN1
     # ASN.1 Null
     # @author Sylvain Daubert
     class Null < Primitive
+      # Null tag value
       TAG = 0x05
 
       # @return [String]

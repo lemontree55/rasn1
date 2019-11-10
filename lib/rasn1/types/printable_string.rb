@@ -5,6 +5,7 @@ module RASN1
     # ASN.1 Printable String
     # @author Sylvain Daubert
     class PrintableString < OctetString
+      # PrintableString tag value
       TAG = 19
 
       # Get ASN.1 type

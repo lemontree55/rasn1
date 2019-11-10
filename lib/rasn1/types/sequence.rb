@@ -26,6 +26,7 @@ module RASN1
     #  seq.value    # => String
     # @author Sylvain Daubert
     class Sequence < Constructed
+      # Sequence tag value
       TAG = 0x10
 
       # @see Base#initialize

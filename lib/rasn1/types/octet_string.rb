@@ -12,6 +12,7 @@ module RASN1
     #  os.to_der   # => DER string with INTEGER in OCTET STRING
     # @author Sylvain Daubert
     class OctetString < Primitive
+      # OctetString tag value
       TAG = 0x04
 
       def inspect(level=0)
