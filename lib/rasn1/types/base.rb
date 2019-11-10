@@ -369,11 +369,10 @@ module RASN1
         if size >= INDEFINITE_LENGTH
           bytes = []
           while size > 255
-            bytes << (size & 0xff)
+            bytes.unshift(size & 0xff)
             size >>= 8
           end
-          bytes << size
-          bytes.reverse!
+          bytes.unshift(size)
           bytes.unshift(INDEFINITE_LENGTH | bytes.size)
           bytes.pack('C*')
         else
