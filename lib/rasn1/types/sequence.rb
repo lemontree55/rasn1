@@ -40,6 +40,18 @@ module RASN1
         @value = @value.map(&:dup)
       end
 
+      # Get element at index +idx+, or element of name +name+
+      # @param [Integer, String, Symbol] idx_or_name
+      # @return [Object]
+      def [](idx_or_name)
+        case idx_or_name
+        when Integer
+          @value[idx]
+        when String, Symbol
+          @value.find { |elt| elt.name == idx_or_name }
+        end
+      end
+
       private
 
       def value_to_der
