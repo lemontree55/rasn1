@@ -53,6 +53,16 @@ module RASN1
         private:     0xc0
       }.freeze
 
+      # @private Types that cannot be dupped (Ruby <= 2.3)
+      UNDUPPABLE_TYPES = [[NilClass, nil], [TrueClass, true], [FalseClass, false], [Integer, 0]].map do |klass, obj|
+        begin
+          obj.dup
+          nil
+        rescue => TypeError
+          klass
+        end
+      end.compact.freeze
+
       # Binary mask to get class
       # @private
       CLASS_MASK = 0xc0
@@ -133,20 +143,10 @@ module RASN1
         end
       end
 
-      # Used by +#dup+ and +#clone+. Deep copy @value.
+      # Used by +#dup+ and +#clone+. Deep copy @value and @default.
       def initialize_copy(_other)
-        @value = case self
-                 when NilClass, TrueClass, FalseClass, Integer
-                   @value
-                 else
-                   @value.dup
-                 end
-        @default = case self
-                   when NilClass, TrueClass, FalseClass, Integer
-                     @default
-                   else
-                     @default.dup
-                   end
+        @value = @value.dup unless UNDUPPABLE_TYPES.include?(@value.class)
+        @default = @default.dup unless UNDUPPABLE_TYPES.include?(@default.class)
       end
 
       # Get value or default value
