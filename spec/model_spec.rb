@@ -305,6 +305,16 @@ module RASN1
         cert = X509Certificate.parse(der)
         expect(cert.to_der).to eq(der)
       end
+
+      it 'may directly access an inner element' do
+        der = binary(File.read(File.join(__dir__, 'cert_example.der')))
+        cert = X509Certificate.parse(der)
+
+        expect(cert.value(:version)).to eq(:v3)
+        expect(cert.value(:serialNumber)).to eq(0x123456789123456789)
+        expect(cert.value(:issuer, 0, 0, :type)).to eq('2.5.4.46')
+        expect(cert.value(:issuer, 0, 0, :value)).to eq(binary("\x13\x03org"))
+      end
     end
   end
 end

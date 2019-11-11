@@ -307,6 +307,32 @@ module RASN1
       @elements[@root].parse!(str.dup.force_encoding('BINARY'), ber: ber)
     end
 
+    # @overload value
+    #  Get value of root element
+    #  @return [Object,nil]
+    # @overload value(name)
+    #  Direct access to the value of +name+ (nested) element of model.
+    #  @param [String,Symbol] name
+    #  @return [Object,nil]
+    # @return [Object,nil]
+    def value(name=nil, *args)
+      if name.nil?
+        @elements[@root].value
+      else
+        elt = by_name(name)
+
+        unless args.empty?
+          elt = elt.root if elt.is_a?(Model)
+          args.each do |arg|
+            elt = elt.root if elt.is_a?(Model)
+            elt = elt[arg]
+          end
+        end
+
+        elt.value
+      end
+    end
+
     # Delegate some methods to root element
     # @param [Symbol] meth
     def method_missing(meth, *args)
@@ -332,6 +358,25 @@ module RASN1
     # @return [Boolean]
     def ==(other)
       (other.class == self.class) && (other.to_der == self.to_der)
+    end
+
+    protected
+
+    # Give a (nested) element from its name
+    # @param [String, Symbol] name
+    # @return [Model, Types::Base]
+    def by_name(name)
+      elt = self[name]
+      return elt unless elt.nil?
+
+      keys.each do |subelt_name|
+        if self[subelt_name].is_a?(Model)
+          elt = self[subelt_name][name]
+          return elt unless elt.nil?
+        end
+      end
+
+      nil
     end
 
     private
