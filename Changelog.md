@@ -1,5 +1,9 @@
 # Rasn1 Changelog
 
+## 0.7.1
+
+* update bundler dependency: now support bundler 2.0.
+
 ## 0.7.0
 
 * add RASN1::Model#value to get value of a (potentially nested) element.
