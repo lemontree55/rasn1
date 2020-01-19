@@ -79,7 +79,7 @@ module RASN1
         @value.each_with_index do |element, i|
           begin
             @chosen = i
-            nb_bytes = element.parse!(der)
+            nb_bytes = element.parse!(der, ber: ber)
             parsed = true
             return nb_bytes
           rescue ASN1Error

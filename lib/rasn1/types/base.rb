@@ -47,10 +47,10 @@ module RASN1
     class Base
       # Allowed ASN.1 tag classes
       CLASSES = {
-        universal:   0x00,
+        universal: 0x00,
         application: 0x40,
-        context:     0x80,
-        private:     0xc0
+        context: 0x80,
+        private: 0xc0
       }.freeze
 
       # @private Types that cannot be dupped (Ruby <= 2.3)
@@ -58,7 +58,7 @@ module RASN1
         begin
           obj.dup
           nil
-        rescue => TypeError
+        rescue TypeError
           klass
         end
       end.compact.freeze
@@ -302,7 +302,7 @@ module RASN1
         when nil
           @asn1_class = :universal
         when Symbol
-          raise ClassError unless CLASSES.keys.include? asn1_class
+          raise ClassError unless CLASSES.key? asn1_class
 
           @asn1_class = asn1_class
         else

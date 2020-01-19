@@ -52,12 +52,10 @@ module RASN1
       # @return [String,Symbol,nil]
       def value=(v)
         case v
-        when String,Symbol
+        when String, Symbol
           raise EnumeratedError, "TAG #{@name} has no :enum" if @enum.nil?
+          raise EnumeratedError, "TAG #{@name}: unknwon enumerated value #{v}" unless @enum.key? v
 
-          unless @enum.key? v
-            raise EnumeratedError, "TAG #{@name}: unknwon enumerated value #{v}"
-          end
           @value = v
         when ::Integer
           if @enum.nil?
@@ -117,9 +115,7 @@ module RASN1
       def der_to_int_value(der, ber: false)
         ary = der.unpack('C*')
         v = ary.reduce(0) { |len, b| (len << 8) | b }
-        if ary[0] & 0x80 == 0x80
-          v = -((~v & ((1 << v.bit_length) - 1)) + 1)
-        end
+        v = -((~v & ((1 << v.bit_length) - 1)) + 1) if ary[0] & 0x80 == 0x80
         v
       end
 

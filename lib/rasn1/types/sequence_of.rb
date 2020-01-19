@@ -147,7 +147,7 @@ module RASN1
         @value.map(&:to_der).join
       end
 
-      def der_to_value(der, ber:false)
+      def der_to_value(der, ber: false)
         @value = []
         nb_bytes = 0
 

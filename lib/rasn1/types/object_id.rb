@@ -2,7 +2,6 @@
 
 module RASN1
   module Types
-
     # ASN.1 Object ID
     # @author Sylvain Daubert
     class ObjectId < Primitive
@@ -14,12 +13,8 @@ module RASN1
       def value_to_der
         ids = @value.split('.').map!(&:to_i)
 
-        if ids[0] > 2
-          raise ASN1Error, 'OBJECT ID #@name: first subidentifier should be less than 3'
-        end
-        if (ids[0] < 2) && (ids[1] > 39)
-          raise ASN1Error, 'OBJECT ID #@name: second subidentifier should be less than 40'
-        end
+        raise ASN1Error, 'OBJECT ID #@name: first subidentifier should be less than 3' if ids[0] > 2
+        raise ASN1Error, 'OBJECT ID #@name: second subidentifier should be less than 40' if (ids[0] < 2) && (ids[1] > 39)
 
         ids[0, 2] = ids[0] * 40 + ids[1]
         ids.map! do |v|

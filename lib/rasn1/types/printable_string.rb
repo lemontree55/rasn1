@@ -21,13 +21,13 @@ module RASN1
         @value.to_s.force_encoding('BINARY')
       end
 
-      def der_to_value(der, ber:false)
+      def der_to_value(der, ber: false)
         super
         check_characters
       end
 
       def check_characters
-        if @value.to_s =~ /([^a-zA-Z0-9 '=\(\)\+,\-\.\/:\?])/
+        if @value.to_s =~ %r{([^a-zA-Z0-9 '=\(\)\+,\-\.\/:\?])}
           raise ASN1Error, "PRINTABLE STRING #{@name}: invalid character: '#{$1}'"
         end
       end

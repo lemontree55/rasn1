@@ -21,7 +21,7 @@ module RASN1
         @value.to_s.force_encoding('BINARY')
       end
 
-      def der_to_value(der, ber:false)
+      def der_to_value(der, ber: false)
         super
         check_characters
       end

@@ -26,9 +26,8 @@ module RASN1
         super
         opts = value_or_options.is_a?(Hash) ? value_or_options : options
         if @default
-          if opts[:bit_length].nil?
-            raise ASN1Error, "TAG #{@name}: default bit length is not defined"
-          end
+          raise ASN1Error, "TAG #{@name}: default bit length is not defined" if opts[:bit_length].nil?
+
           @default_bit_length = opts[:bit_length]
         end
         @bit_length = opts[:bit_length]

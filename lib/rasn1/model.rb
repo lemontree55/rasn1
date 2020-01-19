@@ -204,7 +204,7 @@ module RASN1
       #   +Object#object_id+.
       # @see Types::ObjectId#initialize
       def objectid(name, options={})
-        options.merge!(name: name)
+        options[:name] = name
         proc = proc { |opts| Types::ObjectId.new(options.merge(opts)) }
         @root = [name, proc]
       end
@@ -213,7 +213,7 @@ module RASN1
       # @param [Hash] options
       # @see Types::Any#initialize
       def any(name, options={})
-        options.merge!(name: name)
+        options[:name] = name
         proc = proc { |opts| Types::Any.new(options.merge(opts)) }
         @root = [name, proc]
       end
@@ -408,9 +408,7 @@ module RASN1
       @elements[name].value = content.map do |name2, proc_or_class, content2|
         subel = get_type(proc_or_class)
         @elements[name2] = subel
-        if composed?(subel) && content2.is_a?(Array)
-          set_elements(name2, proc_or_class, content2)
-        end
+        set_elements(name2, proc_or_class, content2) if composed?(subel) && content2.is_a?(Array)
         subel
       end
     end
