@@ -369,7 +369,7 @@ module RASN1
       elt = self[name]
       return elt unless elt.nil?
 
-      keys.each do |subelt_name|
+      @elements.each_key do |subelt_name|
         if self[subelt_name].is_a?(Model)
           elt = self[subelt_name][name]
           return elt unless elt.nil?
