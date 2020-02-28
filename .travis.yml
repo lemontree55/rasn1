@@ -4,6 +4,7 @@ rvm:
   - 2.4
   - 2.5
   - 2.6
+  - 2.7
 install:
   # new bundler install needed by ruby2.3 and 2.6(!)
   - gem install bundler
