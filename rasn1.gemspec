@@ -27,10 +27,13 @@ Gem::Specification.new do |spec|
   spec.required_ruby_version = '>= 2.3.0'
 
   spec.add_development_dependency 'bundler', '>= 1.17.3', '< 3'
-  spec.add_development_dependency 'rake', '~> 10.0'
+  spec.add_development_dependency 'rake', '~> 12.3'
   spec.add_development_dependency 'rspec', '~> 3.0'
   spec.add_development_dependency 'rubocop', '~> 0.79'
   spec.add_development_dependency 'rubocop-performance', '~> 1.5'
   spec.add_development_dependency 'simplecov', '~> 0.14'
   spec.add_development_dependency 'yard', '~>0.9'
+  spec.add_development_dependency 'ruby-debug-ide', '~> 0.7'
+  spec.add_development_dependency 'debase', '~>0.2'
+  spec.add_development_dependency 'rufo', '~>0.11'
 end
