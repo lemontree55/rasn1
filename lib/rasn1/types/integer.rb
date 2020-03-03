@@ -33,15 +33,11 @@ module RASN1
 
         case @default
         when String, Symbol
-          unless @enum.key? @default
-            raise EnumeratedError, "TAG #{@name}: unknwon enumerated default value #@{default}"
-          end
+          raise EnumeratedError, "TAG #{@name}: unknwon enumerated default value #@{default}" unless @enum.key? @default
         when ::Integer
-          if @enum.value? @default
-            @default = @enum.key(@default)
-          else
-            raise EnumeratedError, "TAG #{@name}: default value #@{default} not in enumeration"
-          end
+          raise EnumeratedError, "TAG #{@name}: default value #@{default} not in enumeration" unless @enum.value? @default
+
+          @default = @enum.key(@default)
         when nil
         else
           raise TypeError, "TAG #{@name}: #{@default.class} not handled as default value"
@@ -50,20 +46,20 @@ module RASN1
 
       # @param [Integer,String,Symbol,nil] v
       # @return [String,Symbol,nil]
-      def value=(v)
-        case v
+      def value=(val)
+        case val
         when String, Symbol
           raise EnumeratedError, "TAG #{@name} has no :enum" if @enum.nil?
-          raise EnumeratedError, "TAG #{@name}: unknwon enumerated value #{v}" unless @enum.key? v
+          raise EnumeratedError, "TAG #{@name}: unknwon enumerated value #{val}" unless @enum.key? val
 
-          @value = v
+          @value = val
         when ::Integer
           if @enum.nil?
-            @value = v
-          elsif @enum.value? v
-            @value = @enum.key(v)
+            @value = val
+          elsif @enum.value? val
+            @value = @enum.key(val)
           else
-            raise EnumeratedError, "TAG #{@name}: #{v} not in enumeration"
+            raise EnumeratedError, "TAG #{@name}: #{val} not in enumeration"
           end
         when nil
           @value = nil

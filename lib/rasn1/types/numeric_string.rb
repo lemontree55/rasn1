@@ -27,9 +27,7 @@ module RASN1
       end
 
       def check_characters
-        if @value.to_s =~ /([^0-9 ])/
-          raise ASN1Error, "NUMERIC STRING #{@name}: invalid character: '#{$1}'"
-        end
+        raise ASN1Error, "NUMERIC STRING #{@name}: invalid character: '#{$1}'" if @value.to_s =~ /([^0-9 ])/
       end
     end
   end

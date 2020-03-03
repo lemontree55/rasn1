@@ -417,11 +417,9 @@ module RASN1
       args.each do |name, value|
         if obj[name]
           if value.is_a? Hash
-            if obj[name].is_a? Model
-              initialize_elements obj[name], value
-            else
-              raise ArgumentError, "element #{name}: may only pass a Hash for Model elements"
-            end
+            raise ArgumentError, "element #{name}: may only pass a Hash for Model elements" unless obj[name].is_a? Model
+
+            initialize_elements obj[name], value
           elsif value.is_a? Array
             composed = if obj[name].is_a? Model
                          obj[name].root
