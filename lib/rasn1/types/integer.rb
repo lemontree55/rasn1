@@ -23,8 +23,7 @@ module RASN1
       # @see Base#initialize common options to all ASN.1 types
       def initialize(value_or_options={}, options={})
         super
-        opts = value_or_options.is_a?(Hash) ? value_or_options : options
-        @enum = opts[:enum]
+        @enum = @options[:enum]
 
         return if @enum.nil?
 

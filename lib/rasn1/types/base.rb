@@ -295,6 +295,7 @@ module RASN1
         set_tag options
         @value = options[:value]
         @name = options[:name]
+        @options = options
       end
 
       def set_class(asn1_class)
