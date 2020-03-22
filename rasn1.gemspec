@@ -1,9 +1,7 @@
 # coding: utf-8
 # frozen_string_literal: true
 
-lib = File.expand_path('lib', __dir__)
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'rasn1/version'
+require_relative 'lib/rasn1/version'
 
 Gem::Specification.new do |spec|
   spec.name          = 'rasn1'
@@ -12,28 +10,32 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Sylvain Daubert']
   spec.email         = ['sylvain.daubert@laposte.net']
 
-  spec.summary       = %q(Ruby ASN.1 library)
-  spec.description   = %q(
+  spec.summary       = 'Ruby ASN.1 library'
+  spec.description   = <<~DESC
   RASN1 is a pure ruby ASN.1 library. It may encode and decode DER and BER
   encodings.
-)
-  spec.homepage      = 'https://github.com/sdaubert/rasn1'
+  DESC
 
-  spec.files         = `git ls-files -z`.split("\x0").reject do |f|
-    f.match(%r{^(test|spec|features)/})
-  end
-  spec.require_paths = ['lib']
+  spec.homepage = 'https://github.com/sdaubert/rasn1'
 
+  spec.metadata = {
+    'bug_tracker_uri' => 'https://github.com/sdaubert/rasn1/issues',
+    'documentation_uri' => 'https://www.rubydoc.info/gems/rasn1',
+    'source_code_uri' => spec.homepage
+  }
+
+  spec.files = Dir['lib/**/*']
+
+  spec.extra_rdoc_files = Dir['README.md', 'LICENSE']
+  spec.rdoc_options += [
+    '--title', 'RASN1 - A pure ruby ASN.1 library',
+    '--main', 'README.md',
+    '--inline-source',
+    '--quiet'
+  ]
   spec.required_ruby_version = '>= 2.3.0'
 
-  spec.add_development_dependency 'bundler', '>= 1.17.3', '< 3'
   spec.add_development_dependency 'rake', '~> 12.3'
   spec.add_development_dependency 'rspec', '~> 3.0'
-  spec.add_development_dependency 'rubocop', '~> 0.79'
-  spec.add_development_dependency 'rubocop-performance', '~> 1.5'
-  spec.add_development_dependency 'simplecov', '~> 0.14'
   spec.add_development_dependency 'yard', '~>0.9'
-  spec.add_development_dependency 'ruby-debug-ide', '~> 0.7'
-  spec.add_development_dependency 'debase', '~>0.2'
-  spec.add_development_dependency 'rufo', '~>0.11'
 end
