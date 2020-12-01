@@ -12,16 +12,17 @@ Gem::Specification.new do |spec|
 
   spec.summary       = 'Ruby ASN.1 library'
   spec.description   = <<~DESC
-  RASN1 is a pure ruby ASN.1 library. It may encode and decode DER and BER
-  encodings.
+    RASN1 is a pure ruby ASN.1 library. It may encode and decode DER and BER
+    encodings.
   DESC
 
   spec.homepage = 'https://github.com/sdaubert/rasn1'
 
   spec.metadata = {
+    'homepage_uri' => 'https://github.com/sdaubert/rasn1',
+    'source_code_uri' => 'https://github.com/sdaubert/rasn1',
     'bug_tracker_uri' => 'https://github.com/sdaubert/rasn1/issues',
     'documentation_uri' => 'https://www.rubydoc.info/gems/rasn1',
-    'source_code_uri' => spec.homepage
   }
 
   spec.files = Dir['lib/**/*']
@@ -33,7 +34,7 @@ Gem::Specification.new do |spec|
     '--inline-source',
     '--quiet'
   ]
-  spec.required_ruby_version = '>= 2.3.0'
+  spec.required_ruby_version = '>= 2.4.0'
 
   spec.add_development_dependency 'rake', '~> 12.3'
   spec.add_development_dependency 'rspec', '~> 3.0'
