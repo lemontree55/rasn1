@@ -83,16 +83,10 @@ module RASN1
         v = value || @value
         size = v.bit_length / 8 + ((v.bit_length % 8).positive? ? 1 : 0)
         size = 1 if size.zero?
-        comp_value = if v.positive?
-                       # If MSB is 1, increment size to set initial octet
-                       # to 0 to amrk it as a positive integer
-                       size += 1 if v >> (size * 8 - 1) == 1
-                       v
-                     else
-                       ~v.abs + 1
-                     end
-        ary = []
-        size.times { ary << (comp_value & 0xff); comp_value >>= 8 }
+        comp_value = v >= 0 ? v : (~(-v) + 1) & ((1 << (size * 8)) - 1)
+        ary = comp_value.digits(256)
+        # v is > 0 and its MSBit is 1. Add a 0 byte to mark it as positive
+        ary << 0 if v.positive? && (v >> (size * 8 - 1) == 1)
         ary.reverse.pack('C*')
       end
 

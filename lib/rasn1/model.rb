@@ -415,29 +415,30 @@ module RASN1
 
     def initialize_elements(obj, args)
       args.each do |name, value|
-        if obj[name]
-          if value.is_a? Hash
-            raise ArgumentError, "element #{name}: may only pass a Hash for Model elements" unless obj[name].is_a? Model
+        next unless obj[name]
 
-            initialize_elements obj[name], value
-          elsif value.is_a? Array
-            composed = if obj[name].is_a? Model
-                         obj[name].root
-                       else
-                         obj[name]
-                       end
-            if composed.of_type.is_a? Model
-              value.each do |el|
-                composed << initialize_elements(composed.of_type.class.new, el)
-              end
-            else
-              value.each do |el|
-                obj[name] << el
-              end
+        case value
+        when Hash
+          raise ArgumentError, "element #{name}: may only pass a Hash for Model elements" unless obj[name].is_a? Model
+
+          initialize_elements obj[name], value
+        when Array
+          composed = if obj[name].is_a? Model
+                       obj[name].root
+                     else
+                       obj[name]
+                     end
+          if composed.of_type.is_a? Model
+            value.each do |el|
+              composed << initialize_elements(composed.of_type.class.new, el)
             end
           else
-            obj[name].value = value
+            value.each do |el|
+              obj[name] << el
+            end
           end
+        else
+          obj[name].value = value
         end
       end
     end

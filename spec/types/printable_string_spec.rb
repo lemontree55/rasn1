@@ -1,8 +1,8 @@
 # coding: utf-8
+
 require_relative '../spec_helper'
 
 module RASN1::Types
-
   describe PrintableString do
     describe '.type' do
       it 'gets ASN.1 type' do
@@ -19,7 +19,7 @@ module RASN1::Types
         expect(printable.default).to eq(nil)
       end
     end
-    
+
     describe '#to_der' do
       it 'generates a DER string' do
         printable = PrintableString.new
@@ -52,7 +52,7 @@ module RASN1::Types
       it 'raises on illegal character' do
         printable = PrintableString.new
         printable.value = ';'
-        expect {printable.to_der }.to raise_error(RASN1::ASN1Error, /invalid char.*';'$/)
+        expect { printable.to_der }.to raise_error(RASN1::ASN1Error, /invalid char.*';'$/)
       end
     end
 
@@ -65,8 +65,8 @@ module RASN1::Types
       end
 
       it 'raises on illegal character' do
-        expect { printable.parse!(binary("\x13\x03ab;")) }.
-          to raise_error(RASN1::ASN1Error, /invalid char.*';'$/)
+        expect { printable.parse!(binary("\x13\x03ab;")) }
+          .to raise_error(RASN1::ASN1Error, /invalid char.*';'$/)
       end
     end
   end

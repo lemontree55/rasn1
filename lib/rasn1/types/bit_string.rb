@@ -71,7 +71,7 @@ module RASN1
         der = [unused, @value].pack('CA*')
 
         if unused.positive?
-          last_byte = @value[-1].unpack('C').first
+          last_byte = @value[-1].unpack1('C')
           last_byte &= (0xff >> unused) << unused
           der[-1] = [last_byte].pack('C')
         end

@@ -22,7 +22,7 @@ module RASN1
       def der_to_value(der, ber: false)
         raise ASN1Error, "tag #{@name}: BOOLEAN should have a length of 1" unless der.size == 1
 
-        bool = der.unpack('C').first
+        bool = der.unpack1('C')
         case bool
         when DER_FALSE
           @value = false

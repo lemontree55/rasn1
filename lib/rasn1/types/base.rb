@@ -402,7 +402,7 @@ module RASN1
       end
 
       def get_data(der, ber)
-        length = der[1, 1].unpack('C').first
+        length = der[1, 1].unpack1('C')
         length_length = 0
 
         if length == INDEFINITE_LENGTH
@@ -458,7 +458,7 @@ module RASN1
       def tag2name(tag)
         return 'no tag' if tag.nil? || tag.empty?
 
-        itag = tag.unpack('C').first
+        itag = tag.unpack1('C')
         name = class_from_numeric_tag(itag).to_s.upcase
         name << " #{(itag & Constructed::ASN1_PC).positive? ? 'CONSTRUCTED' : 'PRIMITIVE'}"
         type =  Types.constants.map { |c| Types.const_get(c) }

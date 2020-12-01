@@ -23,7 +23,8 @@ module RASN1
 
               str << "#{item.inspect(level)}\n"
             else
-              str << '  ' * level + item.inspect + "\n"
+              str << '  ' * level
+              str << "#{item.inspect}\n"
             end
           end
           str

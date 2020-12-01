@@ -27,7 +27,8 @@ module RASN1
       end
 
       def check_characters
-        raise ASN1Error, "PRINTABLE STRING #{@name}: invalid character: '#{$1}'" if @value.to_s =~ %r{([^a-zA-Z0-9 '=\(\)\+,\-\.\/:\?])}
+        m = @value.to_s.match(%r{([^a-zA-Z0-9 '=()+,\-./:?])})
+        raise ASN1Error, "PRINTABLE STRING #{@name}: invalid character: '#{m[1]}'" if m
       end
     end
   end
