@@ -1,7 +1,6 @@
 require_relative '../spec_helper'
 
 module RASN1::Types
-
   describe ObjectId do
     describe '.type' do
       it 'gets ASN.1 type' do
@@ -18,7 +17,7 @@ module RASN1::Types
         expect(oi.default).to eq(nil)
       end
     end
-    
+
     describe '#to_der' do
       it 'generates a DER string' do
         oi = ObjectId.new('1.2.3.4')
@@ -53,7 +52,7 @@ module RASN1::Types
         oi.value = '3.1'
         expect { oi.to_der }.to raise_error(RASN1::ASN1Error, /less than 3/)
       end
-      
+
       it 'raises if first subidentifier is lesser than 2 and second is greater than 39' do
         oi = ObjectId.new
         oi.value = '0.39'
@@ -65,7 +64,6 @@ module RASN1::Types
         oi.value = '2.40'
         expect { oi.to_der }.to_not raise_error
       end
-      
     end
 
     describe '#parse!' do
