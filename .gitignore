@@ -1,11 +1,15 @@
 *~
 /.bundle/
+/.vscode/
 /.yardoc
 /Gemfile.lock
 /_yardoc/
+/bin/
 /coverage/
 /doc/
 /pkg/
 /spec/reports/
 /tmp/
 /vendor/
+
+*.code-workspace
