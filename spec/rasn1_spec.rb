@@ -8,7 +8,7 @@ describe RASN1 do
         expect(obj).to be_a(RASN1::Types::Integer)
         expect(obj.value).to eq(-32647)
       end
-      
+
       it '(BIT STRING)' do
         obj = RASN1.parse("\x03\x04\x01\x12\x34\x56")
         expect(obj).to be_a(RASN1::Types::BitString)
@@ -28,7 +28,7 @@ describe RASN1 do
         expect(obj.value).to eq('1.2.3.4')
       end
     end
-    
+
     context 'decodes Constructed types' do
       before(:each) do
         @bool = RASN1::Types::Boolean.new(false)
@@ -77,7 +77,7 @@ describe RASN1 do
         expect(obj).to eq(seq3)
       end
     end
-    
+
     context 'decodes tagged types' do
       before(:each) do
         @bool = RASN1::Types::Boolean.new(false)
@@ -88,7 +88,7 @@ describe RASN1 do
         int = RASN1::Types::Integer.new(-1, implicit: 0, class: :application)
         obj = RASN1.parse(int.to_der)
         expect(obj).to be_instance_of(RASN1::Types::Base)
-        expect(obj.tag).to eq(0x40)
+        expect(obj.id).to eq(0x40)
         expect(obj.asn1_class).to eq(:application)
         expect(obj.value).to eq(255.chr)
       end
@@ -97,7 +97,7 @@ describe RASN1 do
         int = RASN1::Types::Integer.new(1, explicit: 7, class: :context)
         obj = RASN1.parse(int.to_der)
         expect(obj).to be_instance_of(RASN1::Types::Base)
-        expect(obj.tag).to eq(0x87)
+        expect(obj.id).to eq(0x87)
         expect(obj.asn1_class).to eq(:context)
         expect(obj.value).to eq(RASN1::Types::Integer.new(1).to_der)
       end
@@ -106,7 +106,7 @@ describe RASN1 do
         seq = RASN1::Types::Sequence.new([@bool, @int], implicit: 1, class: :context)
         obj = RASN1.parse(seq.to_der)
         expect(obj).to be_a(RASN1::Types::Base)
-        expect(obj.tag).to eq(0xa1)
+        expect(obj.id).to eq(0xa1)
         expect(obj.asn1_class).to eq(:context)
         expect(obj.constructed?).to be(true)
         expect(obj.value).to eq(@bool.to_der << @int.to_der)
@@ -115,7 +115,7 @@ describe RASN1 do
                                          class: :context, constructed: false)
         obj = RASN1.parse(seq.to_der)
         expect(obj).to be_a(RASN1::Types::Base)
-        expect(obj.tag).to eq(0x81)
+        expect(obj.id).to eq(0x81)
         expect(obj.asn1_class).to eq(:context)
         expect(obj.constructed?).to be(false)
       end
@@ -124,7 +124,7 @@ describe RASN1 do
         seq = RASN1::Types::Sequence.new([@bool, @int], explicit: 2, class: :private)
         obj = RASN1.parse(seq.to_der)
         expect(obj).to be_a(RASN1::Types::Base)
-        expect(obj.tag).to eq(0xe2)
+        expect(obj.id).to eq(0xe2)
         expect(obj.asn1_class).to eq(:private)
         expect(obj.constructed?).to be(true)
         expect(obj.value).to eq(RASN1::Types::Sequence.new([@bool, @int]).to_der)
@@ -152,7 +152,7 @@ describe RASN1 do
 
           expect(cert.value[0].value.size).to eq(8)
           expect(cert.value[0].value[0]).to be_instance_of(RASN1::Types::Base)
-          expect(cert.value[0].value[0].tag).to eq(0xa0)
+          expect(cert.value[0].value[0].id).to eq(0xa0)
           expected_str = RASN1::Types::Integer.new(2).to_der
           expect(cert.value[0].value[0].value).to eq(expected_str)
           expect(cert.value[0].value[1]).to be_instance_of(RASN1::Types::Integer)
@@ -169,7 +169,7 @@ describe RASN1 do
             expect(obj.value[0].value[1].value).to eq(dn[i])
           end
           expect(cert.value[0].value[7]).to be_instance_of(RASN1::Types::Base)
-          expect(cert.value[0].value[7].tag).to eq(0xa3)
+          expect(cert.value[0].value[7].id).to eq(0xa3)
         end
       end
     end

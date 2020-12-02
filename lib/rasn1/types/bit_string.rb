@@ -5,8 +5,8 @@ module RASN1
     # ASN.1 Bit String
     # @author Sylvain Daubert
     class BitString < Primitive
-      # BitString tag value
-      TAG = 0x03
+      # BitString id value
+      ID = 3
 
       # @param [Integer] bit_length
       # @return [Integer]
@@ -25,7 +25,7 @@ module RASN1
       def initialize(value_or_options={}, options={})
         super
         if @default
-          raise ASN1Error, "TAG #{@name}: default bit length is not defined" if @options[:bit_length].nil?
+          raise ASN1Error, "#{@name}: default bit length is not defined" if @options[:bit_length].nil?
 
           @default_bit_length = @options[:bit_length]
         end
@@ -50,14 +50,14 @@ module RASN1
 
       private
 
-      def build_tag?
+      def can_build?
         !(!@default.nil? && (@value.nil? || (@value == @default) &&
                               (@bit_length == @default_bit_length))) &&
           !(optional? && @value.nil?)
       end
 
       def value_to_der
-        raise ASN1Error, "TAG #{@name}: bit length is not set" if bit_length.nil?
+        raise ASN1Error, "#{@name}: bit length is not set" if bit_length.nil?
 
         @value << "\x00" while @value.length * 8 < @bit_length
         @value.force_encoding('BINARY')

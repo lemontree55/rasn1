@@ -5,7 +5,7 @@ module RASN1
     # @abstract This is base class for all ASN.1 types.
     #
     #   Subclasses SHOULD define:
-    #   * a TAG constant defining ASN.1 tag number,
+    #   * an ID constant defining ASN.1 BER/DER identification number,
     #   * a private method {#value_to_der} converting its {#value} to DER,
     #   * a private method {#der_to_value} converting DER into {#value}.
     #
@@ -13,15 +13,15 @@ module RASN1
     # An optional value may be defined using +:optional+ key from {#initialize}:
     #   Integer.new(:int, optional: true)
     # An optional value implies:
-    # * while parsing, if decoded tag is not optional expected tag, no {ASN1Error}
-    #   is raised, and parser tries net tag,
+    # * while parsing, if decoded ID is not optional expected ID, no {ASN1Error}
+    #   is raised, and parser tries next field,
     # * while encoding, if {#value} is +nil+, this value is not encoded.
     # ==Define a default value
     # A default value may be defined using +:default+ key from {#initialize}:
     #  Integer.new(:int, default: 0)
     # A default value implies:
-    # * while parsing, if decoded tag is not expected tag, no {ASN1Error} is raised
-    #   and parser sets default value to this tag. Then parser tries nex tag,
+    # * while parsing, if decoded ID is not expected one, no {ASN1Error} is raised
+    #   and parser sets default value to this ID. Then parser tries next field,
     # * while encoding, if {#value} is equal to default value, this value is not
     #   encoded.
     # ==Define a tagged value
@@ -45,7 +45,7 @@ module RASN1
     #  ctype_implicit = RASN1::Types::Integer.new(implicit: 0)
     # @author Sylvain Daubert
     class Base
-      # Allowed ASN.1 tag classes
+      # Allowed ASN.1 classes
       CLASSES = {
         universal: 0x00,
         application: 0x40,
@@ -53,22 +53,12 @@ module RASN1
         private: 0xc0
       }.freeze
 
-      # @private Types that cannot be dupped (Ruby <= 2.3)
-      UNDUPPABLE_TYPES = [[NilClass, nil], [TrueClass, true], [FalseClass, false], [Integer, 0]].map do |klass, obj|
-        begin
-          obj.dup
-          nil
-        rescue TypeError
-          klass
-        end
-      end.compact.freeze
-
       # Binary mask to get class
       # @private
       CLASS_MASK = 0xc0
 
-      # Maximum ASN.1 tag number
-      MAX_TAG = 0x1e
+      # Maximum ASN.1 id number
+      MAX_ID = 0x1e
 
       # Length value for indefinite length
       INDEFINITE_LENGTH = 0x80
@@ -109,11 +99,11 @@ module RASN1
 
       # @overload initialize(options={})
       #   @param [Hash] options
-      #   @option options [Symbol] :class ASN.1 tag class. Default value is +:universal+.
+      #   @option options [Symbol] :class ASN.1 class. Default value is +:universal+.
       #    If +:explicit+ or +:implicit:+ is defined, default value is +:context+.
       #   @option options [::Boolean] :optional define this tag as optional. Default
       #     is +false+
-      #   @option options [Object] :default default value for DEFAULT tag
+      #   @option options [Object] :default default value (ASN.1 DEFAULT)
       #   @option options [Object] :value value to set
       #   @option options [::Integer] :implicit define an IMPLICIT tagged type
       #   @option options [::Integer] :explicit define an EXPLICIT tagged type
@@ -123,11 +113,11 @@ module RASN1
       # @overload initialize(value, options={})
       #   @param [Object] value value to set for this ASN.1 object
       #   @param [Hash] options
-      #   @option options [Symbol] :class ASN.1 tag class. Default value is +:universal+.
+      #   @option options [Symbol] :class ASN.1 class. Default value is +:universal+.
       #    If +:explicit+ or +:implicit:+ is defined, default value is +:context+.
-      #   @option options [::Boolean] :optional define this tag as optional. Default
+      #   @option options [::Boolean] :optional define this value as optional. Default
       #     is +false+
-      #   @option options [Object] :default default value for DEFAULT tag
+      #   @option options [Object] :default default value (ASN.1 DEFAULT)
       #   @option options [::Integer] :implicit define an IMPLICIT tagged type
       #   @option options [::Integer] :explicit define an EXPLICIT tagged type
       #   @option options [::Boolean] :constructed if +true+, set type as constructed.
@@ -145,8 +135,8 @@ module RASN1
 
       # Used by +#dup+ and +#clone+. Deep copy @value and @default.
       def initialize_copy(_other)
-        @value = @value.dup unless UNDUPPABLE_TYPES.include?(@value.class)
-        @default = @default.dup unless UNDUPPABLE_TYPES.include?(@default.class)
+        @value = @value.dup
+        @default = @default.dup
       end
 
       # Get value or default value
@@ -187,7 +177,7 @@ module RASN1
       #   SHOULD respond to +#value_to_der+.
       # @return [String] DER-formated string
       def to_der
-        build_tag
+        build
       end
 
       # @return [::Boolean] +true+ if this is a primitive type
@@ -206,17 +196,10 @@ module RASN1
         self.class.type
       end
 
-      # Get tag value
+      # Get id value
       # @return [Integer]
-      def tag
-        pc = if @constructed.nil?
-               self.class::ASN1_PC
-             elsif @constructed # true
-               Constructed::ASN1_PC
-             else # false
-               0
-             end
-        tag_value | CLASSES[@asn1_class] | pc
+      def id
+        id_value | CLASSES[@asn1_class] | pc_bit
       end
 
       # @abstract This method SHOULD be partly implemented by subclasses to parse
@@ -227,11 +210,11 @@ module RASN1
       # @return [Integer] total number of parsed bytes
       # @raise [ASN1Error] error on parsing
       def parse!(der, ber: false)
-        return 0 unless check_tag(der)
+        return 0 unless check_id(der)
 
         total_length, data = get_data(der, ber)
         if explicit?
-          # Delegate to #explicit type to generate sub-tag
+          # Delegate to #explicit type to generate sub-value
           type = explicit_type
           type.value = @value
           type.parse!(data)
@@ -267,6 +250,16 @@ module RASN1
       end
 
       private
+
+      def pc_bit
+        if @constructed.nil?
+          self.class::ASN1_PC
+        elsif @constructed # true
+          Constructed::ASN1_PC
+        else # false
+          Primitive::ASN1_PC
+        end
+      end
 
       def common_inspect(level)
         lvl = level >= 0 ? level : 0
@@ -324,27 +317,27 @@ module RASN1
       def set_tag(options)
         if options[:explicit]
           @tag = :explicit
-          @tag_value = options[:explicit]
+          @id_value = options[:explicit]
           @constructed = options[:constructed]
         elsif options[:implicit]
           @tag = :implicit
-          @tag_value = options[:implicit]
+          @id_value = options[:implicit]
           @constructed = options[:constructed]
         elsif options[:tag_value]
-          @tag_value = options[:tag_value]
+          @id_value = options[:tag_value]
           @constructed = options[:constructed]
         end
 
         @asn1_class = :context if defined?(@tag) && (@asn1_class == :universal)
       end
 
-      def build_tag?
+      def can_build?
         !(!@default.nil? && (@value.nil? || (@value == @default))) &&
           !(optional? && @value.nil?)
       end
 
-      def build_tag
-        if build_tag?
+      def build
+        if can_build?
           if explicit?
             v = explicit_type
             v.value = @value
@@ -352,22 +345,22 @@ module RASN1
           else
             encoded_value = value_to_der
           end
-          encode_tag << encode_size(encoded_value.size) << encoded_value
+          encode_id << encode_size(encoded_value.size) << encoded_value
         else
           ''
         end
       end
 
-      def tag_value
-        return @tag_value if defined? @tag_value
+      def id_value
+        return @id_value if defined? @id_value
 
-        self.class::TAG
+        self.class::ID
       end
 
-      def encode_tag
-        raise ASN1Error, 'multi-byte tag value are not supported' unless tag_value <= MAX_TAG
+      def encode_id
+        raise ASN1Error, 'multi-byte tag value are not supported' unless id_value <= MAX_ID
 
-        [tag].pack('C')
+        [id].pack('C')
       end
 
       def encode_size(size)
@@ -385,15 +378,15 @@ module RASN1
         end
       end
 
-      def check_tag(der)
-        tag = der[0, 1]
-        if tag != encode_tag
+      def check_id(der)
+        id = der[0, 1]
+        if id != encode_id
           if optional?
             @value = nil
           elsif !@default.nil?
             @value = @default
           else
-            raise_tag_error(tag)
+            raise_id_error(id)
           end
           false
         else
@@ -407,14 +400,12 @@ module RASN1
 
         if length == INDEFINITE_LENGTH
           if primitive?
-            raise ASN1Error, "malformed #{type} TAG: indefinite length " \
+            raise ASN1Error, "malformed #{type}: indefinite length " \
               'forbidden for primitive types'
           elsif ber
-            raise NotImplementedError, 'TAG: indefinite length not ' \
-              'supported yet'
+            raise NotImplementedError, 'indefinite length not supported'
           else
-            raise ASN1Error, 'TAG: indefinite length forbidden in DER ' \
-              'encoding'
+            raise ASN1Error, 'indefinite length forbidden in DER encoding'
           end
         elsif length < INDEFINITE_LENGTH
           data = der[2, length]
@@ -435,36 +426,36 @@ module RASN1
         self.class.new
       end
 
-      def raise_tag_error(tag)
+      def raise_id_error(id)
         msg = name.nil? ? +'' : +"#{name}: "
-        msg << "Expected #{self2name} but get #{tag2name(tag)}"
+        msg << "Expected #{self2name} but get #{id2name(id)}"
         raise ASN1Error, msg
       end
 
-      def class_from_numeric_tag(tag)
-        CLASSES.key(tag & CLASS_MASK)
+      def class_from_numeric_id(id)
+        CLASSES.key(id & CLASS_MASK)
       end
 
       def self2name
-        name = class_from_numeric_tag(tag).to_s.upcase
-        name << " #{(tag & Constructed::ASN1_PC).positive? ? 'CONSTRUCTED' : 'PRIMITIVE'}"
+        name = class_from_numeric_id(id).to_s.upcase
+        name << " #{(id & Constructed::ASN1_PC).positive? ? 'CONSTRUCTED' : 'PRIMITIVE'}"
         if implicit? || explicit?
-          name << ' 0x%02X (0x%02X)' % [tag & 0x1f, tag]
+          name << ' 0x%02X (0x%02X)' % [id & 0x1f, id]
         else
           name << ' ' << self.class.type
         end
       end
 
-      def tag2name(tag)
-        return 'no tag' if tag.nil? || tag.empty?
+      def id2name(id)
+        return 'no ID' if id.nil? || id.empty?
 
-        itag = tag.unpack1('C')
-        name = class_from_numeric_tag(itag).to_s.upcase
-        name << " #{(itag & Constructed::ASN1_PC).positive? ? 'CONSTRUCTED' : 'PRIMITIVE'}"
+        iid = id.unpack1('C')
+        name = class_from_numeric_id(iid).to_s.upcase
+        name << " #{(iid & Constructed::ASN1_PC).positive? ? 'CONSTRUCTED' : 'PRIMITIVE'}"
         type =  Types.constants.map { |c| Types.const_get(c) }
                      .select { |klass| klass < Primitive || klass < Constructed }
-                     .find { |klass| klass::TAG == itag & 0x1f }
-        name << " #{type.nil? ? '0x%02X (0x%02X)' % [itag & 0x1f, itag] : type.encode_type}"
+                     .find { |klass| klass::ID == iid & 0x1f }
+        name << " #{type.nil? ? '0x%02X (0x%02X)' % [iid & 0x1f, iid] : type.encode_type}"
       end
     end
   end

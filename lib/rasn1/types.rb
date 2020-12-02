@@ -30,9 +30,9 @@ module RASN1
         constructed = self.constructed - [Types::SequenceOf, Types::SetOf]
         primitives = self.primitives - [Types::Enumerated]
         ary = (primitives + constructed).map do |type|
-          next unless type.const_defined? :TAG
+          next unless type.const_defined? :ID
 
-          [type::TAG, type]
+          [type::ID, type]
         end
         @tag2types = Hash[ary]
         @tag2types.default = Types::Base

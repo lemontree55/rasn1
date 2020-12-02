@@ -16,7 +16,7 @@ module RASN1::Types
         expect(utc).to_not be_optional
         expect(utc.asn1_class).to eq(:universal)
         expect(utc.default).to eq(nil)
-        expect(utc.tag).to eq(23)
+        expect(utc.id).to eq(23)
       end
     end
 

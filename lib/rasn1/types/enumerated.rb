@@ -22,8 +22,8 @@ module RASN1
       # @!attribute enum
       # @return [Hash]
 
-      # Enumerated tag value
-      TAG = 0x0a
+      # Enumerated id value
+      ID = 0x0a
 
       # @overload initialize(options={})
       #   @option options [Hash] :enum enumeration hash. Keys are names, and values

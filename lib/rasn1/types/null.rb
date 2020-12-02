@@ -5,8 +5,8 @@ module RASN1
     # ASN.1 Null
     # @author Sylvain Daubert
     class Null < Primitive
-      # Null tag value
-      TAG = 0x05
+      # Null id value
+      ID = 0x05
 
       # @return [String]
       def inspect(level=0)
@@ -22,7 +22,7 @@ module RASN1
       end
 
       def der_to_value(der, ber: false)
-        raise ASN1Error, 'NULL TAG should not have content!' if der.length.positive?
+        raise ASN1Error, 'NULL should not have content!' if der.length.positive?
 
         @value = nil
       end

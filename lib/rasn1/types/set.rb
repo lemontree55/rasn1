@@ -21,8 +21,8 @@ module RASN1
     #              ]
     # @author Sylvain Daubert
     class Set < Sequence
-      # Set tag value
-      TAG = 0x11
+      # Set id value
+      ID = 0x11
     end
   end
 end

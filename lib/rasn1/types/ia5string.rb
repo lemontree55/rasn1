@@ -5,8 +5,8 @@ module RASN1
     # ASN.1 IA5 String
     # @author Sylvain Daubert
     class IA5String < OctetString
-      # IA5String tag value
-      TAG = 22
+      # IA5String id value
+      ID = 22
 
       # Get ASN.1 type
       # @return [String]

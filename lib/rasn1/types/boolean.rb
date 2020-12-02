@@ -5,8 +5,8 @@ module RASN1
     # ASN.1 Boolean
     # @author Sylvain Daubert
     class Boolean < Primitive
-      # Boolean tag value
-      TAG = 0x01
+      # Boolean id value
+      ID = 0x01
 
       # @private
       DER_TRUE = 0xff

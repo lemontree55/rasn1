@@ -8,8 +8,8 @@ module RASN1
       # @return [Hash,nil]
       attr_reader :enum
 
-      # Integer tag value
-      TAG = 0x02
+      # Integer id value
+      ID = 2
 
       # @overload initialize(options={})
       #   @option options [Hash] :enum enumeration hash. Keys are names, and values
@@ -32,14 +32,14 @@ module RASN1
 
         case @default
         when String, Symbol
-          raise EnumeratedError, "TAG #{@name}: unknwon enumerated default value #@{default}" unless @enum.key? @default
+          raise EnumeratedError, "#{@name}: unknwon enumerated default value #@{default}" unless @enum.key? @default
         when ::Integer
-          raise EnumeratedError, "TAG #{@name}: default value #@{default} not in enumeration" unless @enum.value? @default
+          raise EnumeratedError, "#{@name}: default value #@{default} not in enumeration" unless @enum.value? @default
 
           @default = @enum.key(@default)
         when nil
         else
-          raise TypeError, "TAG #{@name}: #{@default.class} not handled as default value"
+          raise TypeError, "#{@name}: #{@default.class} not handled as default value"
         end
       end
 
@@ -48,8 +48,8 @@ module RASN1
       def value=(val)
         case val
         when String, Symbol
-          raise EnumeratedError, "TAG #{@name} has no :enum" if @enum.nil?
-          raise EnumeratedError, "TAG #{@name}: unknwon enumerated value #{val}" unless @enum.key? val
+          raise EnumeratedError, "#{@name} has no :enum" if @enum.nil?
+          raise EnumeratedError, "#{@name}: unknwon enumerated value #{val}" unless @enum.key? val
 
           @value = val
         when ::Integer
@@ -58,12 +58,12 @@ module RASN1
           elsif @enum.value? val
             @value = @enum.key(val)
           else
-            raise EnumeratedError, "TAG #{@name}: #{val} not in enumeration"
+            raise EnumeratedError, "#{@name}: #{val} not in enumeration"
           end
         when nil
           @value = nil
         else
-          raise EnumeratedError, "TAG #{@name}: not in enumeration"
+          raise EnumeratedError, "#{@name}: not in enumeration"
         end
       end
 
@@ -97,7 +97,7 @@ module RASN1
         when ::Integer
           int_value_to_der
         else
-          raise TypeError, "TAG #{@name}: #{@value.class} not handled"
+          raise TypeError, "#{@name}: #{@value.class} not handled"
         end
       end
 
@@ -113,7 +113,7 @@ module RASN1
         return if @enum.nil?
 
         @value = @enum.key(@value)
-        raise EnumeratedError, "TAG #{@name}: value #{v} not in enumeration" if @value.nil?
+        raise EnumeratedError, "#{@name}: value #{v} not in enumeration" if @value.nil?
       end
 
       def explicit_type

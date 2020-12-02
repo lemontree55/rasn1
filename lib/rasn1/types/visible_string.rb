@@ -5,8 +5,8 @@ module RASN1
     # ASN.1 Visible String
     # @author Sylvain Daubert
     class VisibleString < IA5String
-      # VisibleString tag value
-      TAG = 26
+      # VisibleString id value
+      ID = 26
 
       # Get ASN.1 type
       # @return [String]

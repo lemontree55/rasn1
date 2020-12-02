@@ -16,7 +16,7 @@ module RASN1::Types
         expect(utc).to_not be_optional
         expect(utc.asn1_class).to eq(:universal)
         expect(utc.default).to eq(nil)
-        expect(utc.tag).to eq(24)
+        expect(utc.id).to eq(24)
       end
     end
 
@@ -26,7 +26,7 @@ module RASN1::Types
         gt.value = Time.utc(2017, 12, 30, 16, 30)
         expect(gt.to_der).to eq(binary("\x18\x0f20171230163000Z"))
       end
-      
+
       it 'generates a DER string with fragments of a second' do
         gt = GeneralizedTime.new
         gt.value = Time.utc(2017, 12, 30, 16, 30, 23.55)

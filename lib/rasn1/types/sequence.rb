@@ -26,8 +26,8 @@ module RASN1
     #  seq.value    # => String
     # @author Sylvain Daubert
     class Sequence < Constructed
-      # Sequence tag value
-      TAG = 0x10
+      # Sequence id value
+      ID = 0x10
 
       # @see Base#initialize
       def initialize(value_or_options={}, options={})

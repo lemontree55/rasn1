@@ -21,8 +21,8 @@ module RASN1
     # second are supported.
     # @author Sylvain Daubert
     class GeneralizedTime < Primitive
-      # GeneralizedTime tag value
-      TAG = 24
+      # GeneralizedTime id value
+      ID = 24
 
       # Get ASN.1 type
       # @return [String]

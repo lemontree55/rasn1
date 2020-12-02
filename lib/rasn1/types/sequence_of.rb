@@ -46,8 +46,8 @@ module RASN1
     #  seqof[0][:int].value    # => 12
     # @author Sylvain Daubert
     class SequenceOf < Constructed
-      # SequenceOf tag value
-      TAG = Sequence::TAG
+      # SequenceOf id value
+      ID = Sequence::ID
 
       # @return [Class, Base]
       attr_reader :of_type
