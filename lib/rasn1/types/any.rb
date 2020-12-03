@@ -31,8 +31,12 @@ module RASN1
           raise ASN1Error, 'Expected ANY but get nothing'
         end
 
-        total_length, = get_data(der, ber)
+        id_size = Types.decode_identifier_octets(der).last
+        total_length, = get_data(der[id_size..-1], ber)
+        total_length += id_size
+
         @value = der[0, total_length]
+
         total_length
       end
 

@@ -1,9 +1,7 @@
 require_relative '../spec_helper'
 
 module RASN1::Types
-
   describe Base do
-
     describe '#initialize' do
       it 'sets value' do
         base = Base.new('value')
@@ -17,7 +15,7 @@ module RASN1::Types
       end
 
       it 'sets class option' do
-        Base::CLASSES.keys.each do |asn1_class|
+        Base::CLASSES.each_key do |asn1_class|
           base = Base.new(class: asn1_class)
           expect(base.asn1_class).to eq(asn1_class)
         end
@@ -51,16 +49,19 @@ module RASN1::Types
     describe '#to_der' do
       it 'should encode long length' do
         os = OctetString.new
-        os.value = binary("\x00") * 65537
+        os.value = binary("\x00") * 65_537
         os_der = os.to_der
         expect(os_der[1, 4]).to eq(binary("\x83\x01\x00\x01"))
         expect(os_der[5, os_der.length]).to eq(os.value)
       end
 
-      it 'should raise on multi-byte ID' do
-        int = Integer.new(implicit: 43)
-        int.value = 0
-        expect { int.to_der }.to raise_error(RASN1::ASN1Error, /multi-byte/)
+      it 'should encode long ID' do
+        int = Integer.new(0, implicit: 43)
+        expect(int.to_der).to eq(binary("\x9f\x2b\x01\x00"))
+        int = Integer.new(1, implicit: 255)
+        expect(int.to_der).to eq(binary("\x9f\x81\x7f\x01\x01"))
+        int = Integer.new(2, implicit: 60_000)
+        expect(int.to_der).to eq(binary("\x9f\x83\xd4\x60\x01\2"))
       end
     end
 
@@ -100,6 +101,18 @@ module RASN1::Types
         bool = Boolean.new(default: false)
         bool.parse!(unexpected_der)
         expect(bool.value).to be(false)
+      end
+
+      it 'parses tags with multi-byte ID' do
+        int = Integer.new(implicit: 43)
+        int.parse!(binary("\x9f\x2b\x01\x00"))
+        expect(int.id).to eq(43)
+        expect(int.value).to eq(0)
+
+        #int = Integer.new(1, implicit: 255)
+        #expect(int.to_der).to eq(binary("\x9f\x81\x7f\x01\x01"))
+        #int = Integer.new(2, implicit: 60_000)
+        #expect(int.to_der).to eq(binary("\x9f\x83\xd4\x60\x01\2"))
       end
 
       it 'parses tags with multi-byte length' do
@@ -150,7 +163,7 @@ module RASN1::Types
           expect(type.constructed?).to be(false)
           expect(type.explicit?).to be(true)
           expect(type.asn1_class).to eq(:context)
-          expect(type.id).to eq(0x85)
+          expect(type.id).to eq(0x5)
         end
 
         it 'creates an explicit application tagged type' do
@@ -159,7 +172,7 @@ module RASN1::Types
           expect(type.constructed?).to be(false)
           expect(type.explicit?).to be(true)
           expect(type.asn1_class).to eq(:application)
-          expect(type.id).to eq(0x40)
+          expect(type.id).to eq(0)
         end
 
         it 'creates an explicit private tagged type' do
@@ -168,7 +181,7 @@ module RASN1::Types
           expect(type.constructed?).to be(false)
           expect(type.explicit?).to be(true)
           expect(type.asn1_class).to eq(:private)
-          expect(type.id).to eq(0xcf)
+          expect(type.id).to eq(15)
         end
 
         it 'creates an explicit constructed tagged type' do
@@ -177,7 +190,7 @@ module RASN1::Types
           expect(type.constructed?).to be(true)
           expect(type.explicit?).to be(true)
           expect(type.asn1_class).to eq(:context)
-          expect(type.id).to eq(0xa1)
+          expect(type.id).to eq(1)
         end
 
         it 'creates an implicit tagged type' do
@@ -185,7 +198,7 @@ module RASN1::Types
           expect(type.tagged?).to be(true)
           expect(type.implicit?).to be(true)
           expect(type.asn1_class).to eq(:context)
-          expect(type.id).to eq(0x85)
+          expect(type.id).to eq(5)
         end
 
         it 'creates an implicit application tagged type' do
@@ -193,7 +206,7 @@ module RASN1::Types
           expect(type.tagged?).to be(true)
           expect(type.implicit?).to be(true)
           expect(type.asn1_class).to eq(:application)
-          expect(type.id).to eq(0x40)
+          expect(type.id).to eq(0)
         end
 
         it 'creates an implicit private tagged type' do
@@ -201,7 +214,7 @@ module RASN1::Types
           expect(type.tagged?).to be(true)
           expect(type.implicit?).to be(true)
           expect(type.asn1_class).to eq(:private)
-          expect(type.id).to eq(0xcf)
+          expect(type.id).to eq(15)
         end
       end
 
@@ -263,7 +276,8 @@ module RASN1::Types
         os = OctetString.parse("\x42\x04abcd", implicit: 2, class: :application)
         expect(os).to be_a(OctetString)
         expect(os.value).to eq('abcd')
-        expect(os.id).to eq(0x42)
+        expect(os.asn1_class).to eq(:application)
+        expect(os.id).to eq(2)
       end
 
       it 'accepts ber option' do

@@ -55,16 +55,16 @@ module RASN1::Types
     end
 
     describe '#parse!' do
-      it 'parses any sequence with 2 elements and the second one is an OCTET STRING' do
+      it 'parses any sequence with 2 elements and the first one is an OCTET STRING' do
         anymodel = AnyModel.parse(os_der)
-        expect(anymodel[:id].value).to eq('1.2.3.4')
         expect(anymodel[:data].value).to eq(binary("\x04\x03abc"))
+        expect(anymodel[:id].value).to eq('1.2.3.4')
       end
 
-      it 'parses any sequence with 2 elements and the second one is an INTEGER' do
+      it 'parses any sequence with 2 elements and the first one is an INTEGER' do
         anymodel = AnyModel.parse(int_der)
-        expect(anymodel[:id].value).to eq('1.2.3.5')
         expect(anymodel[:data].value).to eq(binary("\x02\x02\x00\x80"))
+        expect(anymodel[:id].value).to eq('1.2.3.5')
       end
 
       it 'raises on empty string' do

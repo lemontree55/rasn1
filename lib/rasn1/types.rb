@@ -18,15 +18,39 @@ module RASN1
                            .select { |klass| klass < Constructed }
     end
 
-    # Give ASN.1 type from an integer. If +tag+ is unknown, return a {Types::Base}
+    # @private
+    # Decode a DER string to extract identifier octets.
+    # @param [String] der
+    # @return [Array] Return ASN.1 class as Symbol, contructed/primitive as Symbol,
+    #                 ID and size of identifier octets
+    def self.decode_identifier_octets(der)
+      first_octet = der[0].unpack1('C')
+      asn1_class = Types::Base::CLASSES.key(first_octet & Types::Base::CLASS_MASK)
+      pc = (first_octet & Types::Constructed::ASN1_PC).positive? ? :constructed : :primitive
+      id = first_octet & Types::Base::MULTI_OCTETS_ID
+
+      size = if id == Types::Base::MULTI_OCTETS_ID
+               id = 0
+               1.upto(der.size - 1) do |i|
+                 octet = der[i].unpack1('C')
+                 id = (id << 7) | (octet & 0x7f)
+                 break i + 1 if (octet & 0x80).zero?
+               end
+             else
+               1
+             end
+
+      [asn1_class, pc, id, size]
+    end
+
+    # Give ASN.1 type from a DER string. If ID is unknown, return a {Types::Base}
     # object.
-    # @param [Integer] tag
+    # @param [String] der
     # @return [Types::Base]
     # @raise [ASN1Error] +tag+ is out of range
-    def self.tag2type(tag)
-      raise ASN1Error, 'tag is out of range' if tag > 0xff
-
-      unless defined? @tag2types
+    def self.id2type(der)
+      # Define a cache for well-known ASN.1 types
+      unless defined? @id2types
         constructed = self.constructed - [Types::SequenceOf, Types::SetOf]
         primitives = self.primitives - [Types::Enumerated]
         ary = (primitives + constructed).map do |type|
@@ -34,16 +58,18 @@ module RASN1
 
           [type::ID, type]
         end
-        @tag2types = Hash[ary]
-        @tag2types.default = Types::Base
-        @tag2types.freeze
+        @id2types = Hash[ary]
+        @id2types.default = Types::Base
+        @id2types.freeze
       end
 
-      klass = @tag2types[tag & 0xdf] # Remove CONSTRUCTED bit
-      is_constructed = (tag & 0x20) == 0x20
-      asn1class = Types::Base::CLASSES.key(tag & 0xc0)
+      asn1class, pc, id, = self.decode_identifier_octets(der)
+      # cache_id: check versus class and 5 LSB bits
+      cache_id = der.unpack1('C') & 0xdf
+      klass = cache_id < Types::Base::MULTI_OCTETS_ID ? @id2types[id] : Types::Base
+      is_constructed = (pc == :constructed)
       options = { class: asn1class, constructed: is_constructed }
-      options[:tag_value] = (tag & 0x1f) if klass == Types::Base
+      options[:tag_value] = id if klass == Types::Base
       klass.new(options)
     end
   end

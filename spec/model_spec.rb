@@ -60,8 +60,8 @@ module RASN1
 
       it 'updates root options from a super class' do
         classical_model = ModelTest.new
-        expect(classical_model.id).to eq(0x30)
-        expect(model.id).to eq(0xa4)
+        expect(classical_model.id).to eq(Types::Sequence::ID)
+        expect(model.id).to eq(4)
       end
 
       it 'does not update other elements' do

@@ -57,8 +57,8 @@ module RASN1
       # @private
       CLASS_MASK = 0xc0
 
-      # Maximum ASN.1 id number
-      MAX_ID = 0x1e
+      # @private first octet identifier for multi-octets identifier
+      MULTI_OCTETS_ID = 0x1f
 
       # Length value for indefinite length
       INDEFINITE_LENGTH = 0x80
@@ -196,10 +196,10 @@ module RASN1
         self.class.type
       end
 
-      # Get id value
+      # Get identifier value
       # @return [Integer]
       def id
-        id_value | CLASSES[@asn1_class] | pc_bit
+        id_value
       end
 
       # @abstract This method SHOULD be partly implemented by subclasses to parse
@@ -212,7 +212,9 @@ module RASN1
       def parse!(der, ber: false)
         return 0 unless check_id(der)
 
-        total_length, data = get_data(der, ber)
+        id_size = Types.decode_identifier_octets(der).last
+        total_length, data = get_data(der[id_size..-1], ber)
+        total_length += id_size
         if explicit?
           # Delegate to #explicit type to generate sub-value
           type = explicit_type
@@ -345,7 +347,7 @@ module RASN1
           else
             encoded_value = value_to_der
           end
-          encode_id << encode_size(encoded_value.size) << encoded_value
+          encode_identifier_octets << encode_size(encoded_value.size) << encoded_value
         else
           ''
         end
@@ -357,10 +359,30 @@ module RASN1
         self.class::ID
       end
 
-      def encode_id
-        raise ASN1Error, 'multi-byte tag value are not supported' unless id_value <= MAX_ID
+      def encode_identifier_octets
+        id2octets.pack('C*')
+      end
 
-        [id].pack('C')
+      def id2octets
+        first_octet = CLASSES[asn1_class] | pc_bit
+        if id < MULTI_OCTETS_ID
+          [first_octet | id]
+        else
+          [first_octet | MULTI_OCTETS_ID] + unsigned_to_chained_octets(id)
+        end
+      end
+
+      # Encode an unsigned integer on multiple octets.
+      # Value is encoded on bit 6-0 of each octet, bit 7(MSB) indicates wether
+      # further octets follow.
+      def unsigned_to_chained_octets(value)
+        ary = []
+        while value.positive?
+          ary.unshift(value & 0x7f | 0x80)
+          value >>= 7
+        end
+        ary[-1] &= 0x7f
+        ary
       end
 
       def encode_size(size)
@@ -379,14 +401,15 @@ module RASN1
       end
 
       def check_id(der)
-        id = der[0, 1]
-        if id != encode_id
+        expected_id = encode_identifier_octets
+        real_id = der[0, expected_id.size]
+        if real_id != expected_id
           if optional?
             @value = nil
           elsif !@default.nil?
             @value = @default
           else
-            raise_id_error(id)
+            raise_id_error(der)
           end
           false
         else
@@ -395,7 +418,7 @@ module RASN1
       end
 
       def get_data(der, ber)
-        length = der[1, 1].unpack1('C')
+        length = der[0, 1].unpack1('C')
         length_length = 0
 
         if length == INDEFINITE_LENGTH
@@ -408,15 +431,15 @@ module RASN1
             raise ASN1Error, 'indefinite length forbidden in DER encoding'
           end
         elsif length < INDEFINITE_LENGTH
-          data = der[2, length]
+          data = der[1, length]
         else
           length_length = length & 0x7f
-          length = der[2, length_length].unpack('C*')
+          length = der[1, length_length].unpack('C*')
                                         .reduce(0) { |len, b| (len << 8) | b }
-          data = der[2 + length_length, length]
+          data = der[1 + length_length, length]
         end
 
-        total_length = 2 + length
+        total_length = 1 + length
         total_length += length_length if length_length.positive?
 
         [total_length, data]
@@ -426,9 +449,9 @@ module RASN1
         self.class.new
       end
 
-      def raise_id_error(id)
+      def raise_id_error(der)
         msg = name.nil? ? +'' : +"#{name}: "
-        msg << "Expected #{self2name} but get #{id2name(id)}"
+        msg << "Expected #{self2name} but get #{der2name(der)}"
         raise ASN1Error, msg
       end
 
@@ -437,25 +460,27 @@ module RASN1
       end
 
       def self2name
-        name = class_from_numeric_id(id).to_s.upcase
-        name << " #{(id & Constructed::ASN1_PC).positive? ? 'CONSTRUCTED' : 'PRIMITIVE'}"
+        name = +"#{asn1_class.to_s.upcase} #{constructed? ? 'CONSTRUCTED' : 'PRIMITIVE'}"
         if implicit? || explicit?
-          name << ' 0x%02X (0x%02X)' % [id & 0x1f, id]
+          name << ' 0x%X (0x%s)' % [id, bin2hex(encode_identifier_octets)]
         else
           name << ' ' << self.class.type
         end
       end
 
-      def id2name(id)
-        return 'no ID' if id.nil? || id.empty?
+      def der2name(der)
+        return 'no ID' if der.nil? || der.empty?
 
-        iid = id.unpack1('C')
-        name = class_from_numeric_id(iid).to_s.upcase
-        name << " #{(iid & Constructed::ASN1_PC).positive? ? 'CONSTRUCTED' : 'PRIMITIVE'}"
+        asn1_class, pc, id, id_size = Types.decode_identifier_octets(der)
+        name = +"#{asn1_class.to_s.upcase} #{pc.to_s.upcase}"
         type =  Types.constants.map { |c| Types.const_get(c) }
                      .select { |klass| klass < Primitive || klass < Constructed }
-                     .find { |klass| klass::ID == iid & 0x1f }
-        name << " #{type.nil? ? '0x%02X (0x%02X)' % [iid & 0x1f, iid] : type.encode_type}"
+                     .find { |klass| klass::ID == id }
+        name << " #{type.nil? ? '0x%X (0x%s)' % [id, bin2hex(der[0...id_size])] : type.encode_type}"
+      end
+
+      def bin2hex(str)
+        str.unpack1('H*')
       end
     end
   end

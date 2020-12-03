@@ -44,7 +44,7 @@ module RASN1
   def self.parse(der, ber: false)
     root = nil
     until der.empty?
-      type = Types.tag2type(der[0].ord)
+      type = Types.id2type(der)
       type.parse!(der, ber: ber)
       root = type if root.nil?
 

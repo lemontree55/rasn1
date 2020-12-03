@@ -20,13 +20,7 @@ module RASN1
         ids.map! do |v|
           next v if v < 128
 
-          ary = []
-          while v.positive?
-            ary.unshift((v & 0x7f) | 0x80)
-            v >>= 7
-          end
-          ary[-1] &= 0x7f
-          ary
+          unsigned_to_chained_octets(v)
         end
         ids.flatten.pack('C*')
       end

@@ -3,7 +3,7 @@ require_relative '../spec_helper'
 module RASN1::Types
   describe Constructed do
     it 'has a PC bit set' do
-      expect(Sequence.new.id & Constructed::ASN1_PC).to eq(Constructed::ASN1_PC)
+      expect(Sequence.new.constructed?).to eq(true)
     end
 
     describe '#inspect' do
