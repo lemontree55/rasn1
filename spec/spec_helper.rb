@@ -1,13 +1,19 @@
-require 'simplecov'
-SimpleCov.start do
-  add_filter "/spec/"
-  add_filter "/vendor/"
+# frozen_string_literal: true
+
+begin
+  require 'simplecov'
+  SimpleCov.start do
+    add_filter '/spec/'
+    add_filter '/vendor/'
+  end
+rescue LoadError
+  nil
 end
 
 $LOAD_PATH.unshift File.join(File.dirname(__FILE__), '..', 'lib')
 require 'rasn1'
 
-Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each {|f| require f}
+Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
 RSpec.configure do |config|
   config.include Binary
