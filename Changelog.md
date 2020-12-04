@@ -5,8 +5,8 @@
 * Add support for multi-byte types. This breaks API on minor methods (mainly
   Types::Base#tag removed, partly replaced by Types::Base#id, Types.tag2type renamed into Types.id2type).
 * Speed up Model#value when accessing a nested element value.
-* Speed up and simplify Types::ObjectID#.
-* Remove support for Ruby 2..
+* Speed up and simplify Types::ObjectID#der_to_value.
+* Remove support for Ruby 2.3.
 * Clean up and refactor code.
 
 ## 0.7.1
