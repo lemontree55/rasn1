@@ -1,6 +1,6 @@
 # Rasn1 Changelog
 
-## Master
+## 0.8.0
 
 * Add support for multi-byte types. This breaks API on minor methods (mainly
   Types::Base#tag removed, partly replaced by Types::Base#id, Types.tag2type renamed into Types.id2type).
