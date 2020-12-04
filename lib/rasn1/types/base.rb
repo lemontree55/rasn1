@@ -82,7 +82,7 @@ module RASN1
 
       # Get ASN.1 type used to encode this one
       # @return [String]
-      def self.encode_type
+      def self.encoded_type
         type
       end
 
@@ -476,7 +476,7 @@ module RASN1
         type =  Types.constants.map { |c| Types.const_get(c) }
                      .select { |klass| klass < Primitive || klass < Constructed }
                      .find { |klass| klass::ID == id }
-        name << " #{type.nil? ? '0x%X (0x%s)' % [id, bin2hex(der[0...id_size])] : type.encode_type}"
+        name << " #{type.nil? ? '0x%X (0x%s)' % [id, bin2hex(der[0...id_size])] : type.encoded_type}"
       end
 
       def bin2hex(str)
