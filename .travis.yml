@@ -8,4 +8,4 @@ install:
   # new bundler install needed by ruby2.6(!)
   - gem install bundler
   - bundle config set path 'vendor/bundle'
-  - bundle install --path vendor/bundle --jobs=3 --retry=3 --without=development
+  - bundle install --jobs=3 --retry=3 --without=noci
