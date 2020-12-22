@@ -22,4 +22,5 @@ jobs:
       run: |
         bundle config set path 'vendor/bundle'
         bundle config set --local without noci
+        bundle install
         bundle exec rake
