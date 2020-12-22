@@ -1,5 +1,4 @@
 [![Gem Version](https://badge.fury.io/rb/rasn1.svg)](https://badge.fury.io/rb/rasn1)
-[![Build Status](https://travis-ci.org/sdaubert/rasn1.svg?branch=master)](https://travis-ci.org/sdaubert/rasn1)
 
 # Rasn1
 
