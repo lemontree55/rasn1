@@ -23,18 +23,18 @@ module RASN1
       # @see Base#initialize common options to all ASN.1 types
       def initialize(value_or_options={}, options={})
         super
-        @enum = @options[:enum]
+        @enum = @options[:enum] || {}
 
-        return if @enum.nil?
+        return if @enum.empty?
 
         # To ensure @value has the correct type
         self.value = @value
 
         case @default
         when String, Symbol
-          raise EnumeratedError, "#{@name}: unknwon enumerated default value #@{default}" unless @enum.key? @default
+          raise EnumeratedError, "#{@name}: unknwon enumerated default value #@{default}" unless @enum.key?(@default)
         when ::Integer
-          raise EnumeratedError, "#{@name}: default value #@{default} not in enumeration" unless @enum.value? @default
+          raise EnumeratedError, "#{@name}: default value #@{default} not in enumeration" unless @enum.value?(@default)
 
           @default = @enum.key(@default)
         when nil
@@ -44,16 +44,16 @@ module RASN1
       end
 
       # @param [Integer,String,Symbol,nil] v
-      # @return [String,Symbol,nil]
+      # @return [void]
       def value=(val)
         case val
         when String, Symbol
-          raise EnumeratedError, "#{@name} has no :enum" if @enum.nil?
+          raise EnumeratedError, "#{@name} has no :enum" if @enum.empty?
           raise EnumeratedError, "#{@name}: unknwon enumerated value #{val}" unless @enum.key? val
 
           @value = val
         when ::Integer
-          if @enum.nil?
+          if @enum.empty?
             @value = val
           elsif @enum.value? val
             @value = @enum.key(val)
@@ -70,7 +70,7 @@ module RASN1
       # Integer value
       # @return [Integer]
       def to_i
-        if @enum.nil?
+        if @enum.empty?
           @value || @default || 0
         else
           @enum[@value || @default] || 0
@@ -79,8 +79,8 @@ module RASN1
 
       private
 
-      def int_value_to_der(value=nil)
-        v = value || @value
+      def int_value_to_der(value)
+        v = value
         size = v.bit_length / 8 + ((v.bit_length % 8).positive? ? 1 : 0)
         size = 1 if size.zero?
         comp_value = v >= 0 ? v : (~(-v) + 1) & ((1 << (size * 8)) - 1)
@@ -93,9 +93,9 @@ module RASN1
       def value_to_der
         case @value
         when String, Symbol
-          int_value_to_der @enum[@value]
+          int_value_to_der(@enum[@value])
         when ::Integer
-          int_value_to_der
+          int_value_to_der(@value)
         else
           raise TypeError, "#{@name}: #{@value.class} not handled"
         end
@@ -110,7 +110,7 @@ module RASN1
 
       def der_to_value(der, ber: false)
         @value = der_to_int_value(der, ber: ber)
-        return if @enum.nil?
+        return if @enum.empty?
 
         @value = @enum.key(@value)
         raise EnumeratedError, "#{@name}: value #{v} not in enumeration" if @value.nil?

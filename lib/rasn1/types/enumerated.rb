@@ -39,7 +39,7 @@ module RASN1
       # @see Base#initialize common options to all ASN.1 types
       def initialize(value_or_options={}, options={})
         super
-        raise EnumeratedError, 'no enumeration given' if @enum.nil?
+        raise EnumeratedError, 'no enumeration given' if @enum.empty?
       end
 
       # @return [Hash]
