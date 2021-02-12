@@ -22,7 +22,7 @@ module RASN1
 
       def der_to_value(der, ber: false)
         super
-        @value.force_encoding('UTF-8')
+        @value = der.force_encoding('UTF-8')
       end
     end
   end

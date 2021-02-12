@@ -22,7 +22,7 @@ module RASN1
 
       def der_to_value(der, ber: false)
         super
-        @value.force_encoding('US-ASCII')
+        @value.to_s.force_encoding('US-ASCII')
       end
     end
   end
