@@ -59,6 +59,9 @@ module RASN1
   # this method.
   # @author Sylvain Daubert
   class Model
+    # @private
+    Root = Struct.new(:name, :proc_or_class, :content)
+
     class << self
       # @return [Hash]
       attr_reader :options
@@ -67,7 +70,7 @@ module RASN1
       # @param [String,Symbol] name
       # @param [Class] model_klass
       def model(name, model_klass)
-        @root = [name, model_klass]
+        @root = Root.new(name, model_klass, nil)
       end
 
       # Update options of root element.
@@ -114,9 +117,7 @@ module RASN1
                    "  proc = proc do |opts|\n" \
                    "    Types::#{type.capitalize}.new(options.merge(opts))\n" \
                    "  end\n" \
-                   "  @root = [name, proc]\n" \
-                   "  @root << options[:content] unless options[:content].nil?\n" \
-                   "  @root\n" \
+                   "  @root = Root.new(name, proc, options[:content])\n" \
                    'end'
       end
 
@@ -137,7 +138,7 @@ module RASN1
                    "  proc = proc do |opts|\n" \
                    "    #{klass_name}.new(type, options.merge(opts))\n" \
                    "  end\n" \
-                   "  @root = [name, proc]\n" \
+                   "  @root = Root.new(name, proc, nil)\n" \
                    'end'
       end
 
@@ -194,7 +195,7 @@ module RASN1
                    "  proc = proc do |opts|\n" \
                    "    #{prim}.new(options.merge(opts))\n" \
                    "  end\n" \
-                   "  @root = [name, proc]\n" \
+                   "  @root = Root.new(name, proc, nil)\n" \
                    'end'
       end
 
@@ -206,7 +207,7 @@ module RASN1
       def objectid(name, options={})
         options[:name] = name
         proc = proc { |opts| Types::ObjectId.new(options.merge(opts)) }
-        @root = [name, proc]
+        @root = Root.new(name, proc, nil)
       end
 
       # @param [Symbol,String] name name of object in model
@@ -215,7 +216,7 @@ module RASN1
       def any(name, options={})
         options[:name] = name
         proc = proc { |opts| Types::Any.new(options.merge(opts)) }
-        @root = [name, proc]
+        @root = Root.new(name, proc, nil)
       end
 
       # Give type name (aka class name)
@@ -242,7 +243,7 @@ module RASN1
     # @param [Hash] args
     def initialize(args={})
       root = generate_root
-      set_elements(*root)
+      set_elements(root)
       initialize_elements self, args
     end
 
@@ -395,20 +396,20 @@ module RASN1
     end
 
     def generate_root
-      root = self.class.class_eval { @root }
-      @root = root[0]
+      class_root = self.class.class_eval { @root }
+      @root = class_root.name
       @elements = {}
-      @elements[@root] = get_type(root[1], self.class.options || {})
-      root
+      @elements[@root] = get_type(class_root.proc_or_class, self.class.options || {})
+      class_root
     end
 
-    def set_elements(name, _elt, content=nil)
-      return unless content.is_a? Array
+    def set_elements(a_root)
+      return unless a_root.content.is_a? Array
 
-      @elements[name].value = content.map do |name2, proc_or_class, content2|
-        subel = get_type(proc_or_class)
-        @elements[name2] = subel
-        set_elements(name2, proc_or_class, content2) if composed?(subel) && content2.is_a?(Array)
+      @elements[name].value = a_root.content.map do |another_root|
+        subel = get_type(another_root.proc_or_class)
+        @elements[another_root.name] = subel
+        set_elements(another_root) if composed?(subel) && another_root.content.is_a?(Array)
         subel
       end
     end
