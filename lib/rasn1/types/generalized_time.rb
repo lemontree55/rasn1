@@ -42,9 +42,12 @@ module RASN1
       end
 
       def der_to_value(der, ber: false)
-        date_hour, fraction = der.split('.')
         utc_offset_forced = false
-        if fraction.nil?
+        date_hour, fraction = der.split('.')
+        date_hour = date_hour.to_s
+        fraction = fraction.to_s
+
+        if fraction.empty?
           if (date_hour[-1] != 'Z') && (date_hour !~ /[+-]\d+$/)
             # If not UTC, have to add offset with UTC to force
             # DateTime#strptime to generate a local time. But this difference
@@ -92,6 +95,7 @@ module RASN1
                    frac_base = 1
                    '%Y%m%d%H%M%S%z'
                  else
+                   frac_base = 0
                    prefix = @name.nil? ? type : "tag #{@name}"
                    raise ASN1Error, "#{prefix}: unrecognized format: #{der}"
                  end

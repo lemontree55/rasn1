@@ -65,7 +65,7 @@ module RASN1
       end
 
       it 'does not update other elements' do
-        expect(model[:id].id).to eq(0x02)
+        expect(model[:id].id).to eq(Types::Integer::ID)
       end
     end
 

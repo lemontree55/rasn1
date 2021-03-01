@@ -24,7 +24,7 @@ module RASN1
     # @return [Array] Return ASN.1 class as Symbol, contructed/primitive as Symbol,
     #                 ID and size of identifier octets
     def self.decode_identifier_octets(der)
-      first_octet = der[0].unpack1('C')
+      first_octet = der.unpack1('C').to_i
       asn1_class = Types::Base::CLASSES.key(first_octet & Types::Base::CLASS_MASK)
       pc = (first_octet & Types::Constructed::ASN1_PC).positive? ? :constructed : :primitive
       id = first_octet & Types::Base::MULTI_OCTETS_ID
@@ -32,7 +32,7 @@ module RASN1
       size = if id == Types::Base::MULTI_OCTETS_ID
                id = 0
                1.upto(der.size - 1) do |i|
-                 octet = der[i].unpack1('C')
+                 octet = der[i].to_s.unpack1('C').to_i
                  id = (id << 7) | (octet & 0x7f)
                  break i + 1 if (octet & 0x80).zero?
                end
@@ -53,11 +53,8 @@ module RASN1
       unless defined? @id2types
         constructed = self.constructed - [Types::SequenceOf, Types::SetOf]
         primitives = self.primitives - [Types::Enumerated]
-        ary = (primitives + constructed).map do |type|
-          next unless type.const_defined? :ID
-
-          [type::ID, type]
-        end
+        ary = (primitives + constructed).select { |type| type.const_defined? :ID }
+                                        .map { |type| [type::ID, type] }
         @id2types = Hash[ary]
         @id2types.default = Types::Base
         @id2types.freeze

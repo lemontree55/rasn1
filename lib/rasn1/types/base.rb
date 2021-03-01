@@ -334,8 +334,8 @@ module RASN1
       end
 
       def can_build?
-        !(!@default.nil? && (@value.nil? || (@value == @default))) &&
-          !(optional? && @value.nil?)
+        (@default.nil? || (!@value.nil? && (@value != @default))) &&
+          (!optional? || !@value.nil?)
       end
 
       def build
@@ -418,7 +418,7 @@ module RASN1
       end
 
       def get_data(der, ber)
-        length = der[0, 1].unpack1('C')
+        length = der.unpack1('C').to_i
         length_length = 0
 
         if length == INDEFINITE_LENGTH

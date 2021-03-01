@@ -59,29 +59,34 @@ module RASN1
       def value_to_der
         raise ASN1Error, "#{@name}: bit length is not set" if bit_length.nil?
 
-        @value << "\x00" while @value.length * 8 < @bit_length
-        @value.force_encoding('BINARY')
+        value = @value || ''
+        value << "\x00" while value.length * 8 < @bit_length.to_i
+        value.force_encoding('BINARY')
 
-        if @value.length * 8 > @bit_length
-          max_len = @bit_length / 8 + ((@bit_length % 8).positive? ? 1 : 0)
-          @value = @value[0, max_len]
+        if value.length * 8 > @bit_length.to_i
+          max_len = @bit_length.to_i / 8 + ((@bit_length.to_i % 8).positive? ? 1 : 0)
+          value = value[0, max_len].to_s
         end
 
-        unused = @value.length * 8 - @bit_length
-        der = [unused, @value].pack('CA*')
+        unused = value.length * 8 - @bit_length.to_i
+        der = [unused, value].pack('CA*')
 
         if unused.positive?
-          last_byte = @value[-1].unpack1('C')
+          last_byte = value[-1].to_s.unpack1('C').to_i
           last_byte &= (0xff >> unused) << unused
           der[-1] = [last_byte].pack('C')
         end
+
+        @value = value
 
         der
       end
 
       def der_to_value(der, ber: false)
-        unused, @value = der.unpack('CA*')
-        @bit_length = @value.length * 8 - unused
+        unused = der.unpack1('C').to_i
+        value = der[1..-1].to_s
+        @bit_length = value.length * 8 - unused
+        @value = value
       end
     end
   end

@@ -11,7 +11,7 @@ module RASN1
       private
 
       def value_to_der
-        ids = @value.split('.').map!(&:to_i)
+        ids = @value.to_s.split('.').map!(&:to_i)
 
         raise ASN1Error, "OBJECT ID #{@name}: first subidentifier should be less than 3" if ids[0] > 2
         raise ASN1Error, "OBJECT ID #{@name}: second subidentifier should be less than 40" if (ids[0] < 2) && (ids[1] > 39)

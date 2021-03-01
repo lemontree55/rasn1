@@ -37,18 +37,25 @@ module RASN1
 
       def initialize_copy(other)
         super
-        @value = @value.map(&:dup)
+        @value = case @value
+                 when Array
+                   @value.map(&:dup)
+                 else
+                   @value.dup
+                 end
       end
 
       # Get element at index +idx+, or element of name +name+
       # @param [Integer, String, Symbol] idx_or_name
       # @return [Object]
       def [](idx_or_name)
-        case idx_or_name
-        when Integer
-          @value[idx]
-        when String, Symbol
-          @value.find { |elt| elt.name == idx_or_name }
+        if @value.is_a?(Array)
+          case idx_or_name
+          when Integer
+            @value[idx_or_name.to_i]
+          when String, Symbol
+            @value.find { |elt| elt.name == idx_or_name }
+          end
         end
       end
 

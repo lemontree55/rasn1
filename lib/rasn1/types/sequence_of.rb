@@ -79,7 +79,7 @@ module RASN1
         if of_type_class < Primitive
           raise ASN1Error, 'object to add should be an Array' unless obj.is_a?(Array)
 
-          @value += obj.map { |item| @of_type.new(item) }
+          @value += obj.map { |item| of_type_class.new(item) }
         elsif composed_of_type?
           raise ASN1Error, 'object to add should be an Array' unless obj.is_a?(Array)
 
@@ -93,7 +93,7 @@ module RASN1
         elsif of_type_class < Model
           case obj
           when Hash
-            @value << @of_type.new(obj)
+            @value << of_type_class.new(obj)
           when of_type_class
             @value << obj
           else
@@ -140,7 +140,7 @@ module RASN1
       end
 
       def composed_of_type?
-        [Sequence, Set].include? of_type_class
+        !@of_type.is_a?(Class) && [Sequence, Set].include?(of_type_class)
       end
 
       def value_to_der
@@ -152,7 +152,7 @@ module RASN1
         nb_bytes = 0
 
         while nb_bytes < der.length
-          type = if composed_of_type?
+          type = if composed_of_type? && !@of_type.is_a?(Class)
                    @of_type.dup
                  elsif of_type_class < Model
                    of_type_class.new
