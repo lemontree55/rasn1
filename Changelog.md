@@ -1,5 +1,13 @@
 # Rasn1 Changelog
 
+## Head
+
+* Model: use a private class Elem instead of an array to define model's root.
+* Types::Integer#enum is always a Hash.
+* Fix Types::Utf8String#der_to_value by setting @value.
+* Fix some minor issues due to type handling (Types::Base, Types::BitString,
+  Types::GeneralizedTime, Types::ObjectIf, Types::Sequence and Types::SequenceOf)
+
 ## 0.8.0
 
 * Add support for multi-byte types. This breaks API on minor methods (mainly
