@@ -96,7 +96,7 @@ module RASN1::Types
 
       it 'gets a String with an unknown type' do
         any.value = OctetString.new('1234').to_der
-        expect(any.inspect).to eq("ANY: #{any.value.inspect}")
+        expect(any.inspect).to eq("(ANY) #{any.value.inspect}")
       end
     end
   end

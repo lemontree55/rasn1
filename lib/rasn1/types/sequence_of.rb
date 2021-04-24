@@ -76,30 +76,10 @@ module RASN1
       # Add an item to SEQUENCE OF
       # @param [Array,Hash, Model]
       def <<(obj)
-        if of_type_class < Primitive
-          raise ASN1Error, 'object to add should be an Array' unless obj.is_a?(Array)
+        return push_array_of_primitive(obj) if of_type_class < Primitive
+        return push_composed_array(obj) if composed_of_type?
 
-          @value += obj.map { |item| of_type_class.new(item) }
-        elsif composed_of_type?
-          raise ASN1Error, 'object to add should be an Array' unless obj.is_a?(Array)
-
-          new_value = of_type_class.new
-          @of_type.value.each_with_index do |type, i|
-            type2 = type.dup
-            type2.value = obj[i]
-            new_value.value << type2
-          end
-          @value << new_value
-        elsif of_type_class < Model
-          case obj
-          when Hash
-            @value << of_type_class.new(obj)
-          when of_type_class
-            @value << obj
-          else
-            raise ASN1Error, "object to add should be a #{of_type_class} or a Hash"
-          end
-        end
+        push_model(obj)
       end
 
       # Get element of index +idx+
@@ -147,7 +127,7 @@ module RASN1
         @value.map(&:to_der).join
       end
 
-      def der_to_value(der, ber: false)
+      def der_to_value(der, ber: false) # rubocop:disable Lint/UnusedMethodArgument
         @value = []
         nb_bytes = 0
 
@@ -166,6 +146,35 @@ module RASN1
 
       def explicit_type
         self.class.new(self.of_type)
+      end
+
+      def push_array_of_primitive(obj)
+        raise ASN1Error, 'object to add should be an Array' unless obj.is_a?(Array)
+
+        @value += obj.map { |item| of_type_class.new(item) }
+      end
+
+      def push_composed_array(obj)
+        raise ASN1Error, 'object to add should be an Array' unless obj.is_a?(Array)
+
+        new_value = of_type_class.new
+        @of_type.value.each_with_index do |type, i|
+          type2 = type.dup
+          type2.value = obj[i]
+          new_value.value << type2
+        end
+        @value << new_value
+      end
+
+      def push_model(obj)
+        case obj
+        when Hash
+          @value << of_type_class.new(obj)
+        when of_type_class
+          @value << obj
+        else
+          raise ASN1Error, "object to add should be a #{of_type_class} or a Hash"
+        end
       end
     end
   end

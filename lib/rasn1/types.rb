@@ -31,8 +31,9 @@ module RASN1
 
       size = if id == Types::Base::MULTI_OCTETS_ID
                id = 0
-               1.upto(der.size - 1) do |i|
-                 octet = der[i].to_s.unpack1('C').to_i
+               der.bytes.each_with_index do |octet, i|
+                 next if i.zero?
+
                  id = (id << 7) | (octet & 0x7f)
                  break i + 1 if (octet & 0x80).zero?
                end
@@ -50,15 +51,7 @@ module RASN1
     # @raise [ASN1Error] +tag+ is out of range
     def self.id2type(der)
       # Define a cache for well-known ASN.1 types
-      unless defined? @id2types
-        constructed = self.constructed - [Types::SequenceOf, Types::SetOf]
-        primitives = self.primitives - [Types::Enumerated]
-        ary = (primitives + constructed).select { |type| type.const_defined? :ID }
-                                        .map { |type| [type::ID, type] }
-        @id2types = Hash[ary]
-        @id2types.default = Types::Base
-        @id2types.freeze
-      end
+      self.generate_id2type_cache unless defined? @id2types
 
       asn1class, pc, id, = self.decode_identifier_octets(der)
       # cache_id: check versus class and 5 LSB bits
@@ -68,6 +61,17 @@ module RASN1
       options = { class: asn1class, constructed: is_constructed }
       options[:tag_value] = id if klass == Types::Base
       klass.new(options)
+    end
+
+    # @private Generate cache for {.id2type}
+    def self.generate_id2type_cache
+      constructed = self.constructed - [Types::SequenceOf, Types::SetOf]
+      primitives = self.primitives - [Types::Enumerated]
+      ary = (primitives + constructed).select { |type| type.const_defined? :ID }
+                                      .map { |type| [type::ID, type] }
+      @id2types = ary.to_h
+      @id2types.default = Types::Base
+      @id2types.freeze
     end
   end
 end

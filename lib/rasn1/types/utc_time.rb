@@ -33,7 +33,7 @@ module RASN1
         @value.getutc.strftime('%y%m%d%H%M%SZ')
       end
 
-      def der_to_value(der, ber: false)
+      def der_to_value(der, ber: false) # rubocop:disable Lint/UnusedMethodArgument
         format = case der.size
                  when 11
                    '%Y%m%d%H%MZ'

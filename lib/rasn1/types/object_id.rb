@@ -25,7 +25,7 @@ module RASN1
         ids.flatten.pack('C*')
       end
 
-      def der_to_value(der, ber: false)
+      def der_to_value(der, ber: false) # rubocop:disable Lint/UnusedMethodArgument
         bytes = der.unpack('C*')
 
         ids = []

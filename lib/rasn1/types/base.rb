@@ -44,7 +44,7 @@ module RASN1
     # Implicit tagged values may also be defined:
     #  ctype_implicit = RASN1::Types::Integer.new(implicit: 0)
     # @author Sylvain Daubert
-    class Base
+    class Base # rubocop:disable Metrics/ClassLength
       # Allowed ASN.1 classes
       CLASSES = {
         universal: 0x00,
@@ -163,14 +163,14 @@ module RASN1
       # @return [::Boolean,nil] return +nil+ if not tagged, return +true+
       #   if explicit, else +false+
       def explicit?
-        !defined?(@tag) ? nil : @tag == :explicit
+        defined?(@tag) ? @tag == :explicit : nil
       end
 
       # Say if a tagged type is implicit
       # @return [::Boolean,nil] return +nil+ if not tagged, return +true+
       #   if implicit, else +false+
       def implicit?
-        !defined?(@tag) ? nil : @tag == :implicit
+        defined?(@tag) ? @tag == :implicit : nil
       end
 
       # @abstract This method SHOULD be partly implemented by subclasses, which
@@ -279,11 +279,11 @@ module RASN1
         end
       end
 
-      def der_to_value(der, ber: false)
+      def der_to_value(der, ber: false) # rubocop:disable Lint/UnusedMethodArgument
         @value = der
       end
 
-      def set_options(options)
+      def set_options(options) # rubocop:disable Naming/AccessorMethodName
         set_class options[:class]
         set_optional options[:optional]
         set_default options[:default]
@@ -293,7 +293,7 @@ module RASN1
         @options = options
       end
 
-      def set_class(asn1_class)
+      def set_class(asn1_class) # rubocop:disable Naming/AccessorMethodName
         case asn1_class
         when nil
           @asn1_class = :universal
@@ -306,17 +306,17 @@ module RASN1
         end
       end
 
-      def set_optional(optional)
+      def set_optional(optional) # rubocop:disable Naming/AccessorMethodName
         @optional = !!optional
       end
 
-      def set_default(default)
+      def set_default(default) # rubocop:disable Naming/AccessorMethodName
         @default = default
       end
 
       # handle undocumented option +:tag_value+, used internally by
       # {RASN1.parse} to parse non-universal class tags.
-      def set_tag(options)
+      def set_tag(options) # rubocop:disable Naming/AccessorMethodName
         if options[:explicit]
           @tag = :explicit
           @id_value = options[:explicit]
@@ -403,18 +403,16 @@ module RASN1
       def check_id(der)
         expected_id = encode_identifier_octets
         real_id = der[0, expected_id.size]
-        if real_id != expected_id
-          if optional?
-            @value = nil
-          elsif !@default.nil?
-            @value = @default
-          else
-            raise_id_error(der)
-          end
-          false
+        return true if real_id == expected_id
+
+        if optional?
+          @value = nil
+        elsif !@default.nil?
+          @value = @default
         else
-          true
+          raise_id_error(der)
         end
+        false
       end
 
       def get_data(der, ber)
@@ -422,27 +420,29 @@ module RASN1
         length_length = 0
 
         if length == INDEFINITE_LENGTH
-          if primitive?
-            raise ASN1Error, "malformed #{type}: indefinite length " \
-              'forbidden for primitive types'
-          elsif ber
-            raise NotImplementedError, 'indefinite length not supported'
-          else
-            raise ASN1Error, 'indefinite length forbidden in DER encoding'
-          end
-        elsif length < INDEFINITE_LENGTH
-          data = der[1, length]
-        else
+          raise_on_indefinite_length(ber)
+        elsif length > INDEFINITE_LENGTH
           length_length = length & 0x7f
           length = der[1, length_length].unpack('C*')
                                         .reduce(0) { |len, b| (len << 8) | b }
-          data = der[1 + length_length, length]
         end
+        data = der[1 + length_length, length]
 
         total_length = 1 + length
         total_length += length_length if length_length.positive?
 
         [total_length, data]
+      end
+
+      def raise_on_indefinite_length(ber)
+        if primitive?
+          raise ASN1Error, "malformed #{type}: indefinite length " \
+            'forbidden for primitive types'
+        elsif ber
+          raise NotImplementedError, 'indefinite length not supported'
+        else
+          raise ASN1Error, 'indefinite length forbidden in DER encoding'
+        end
       end
 
       def explicit_type
@@ -473,10 +473,14 @@ module RASN1
 
         asn1_class, pc, id, id_size = Types.decode_identifier_octets(der)
         name = +"#{asn1_class.to_s.upcase} #{pc.to_s.upcase}"
-        type =  Types.constants.map { |c| Types.const_get(c) }
-                     .select { |klass| klass < Primitive || klass < Constructed }
-                     .find { |klass| klass::ID == id }
+        type =  find_type(id)
         name << " #{type.nil? ? '0x%X (0x%s)' % [id, bin2hex(der[0...id_size])] : type.encoded_type}"
+      end
+
+      def find_type(id)
+        Types.constants.map { |c| Types.const_get(c) }
+             .select { |klass| klass < Primitive || klass < Constructed }
+             .find { |klass| klass::ID == id }
       end
 
       def bin2hex(str)

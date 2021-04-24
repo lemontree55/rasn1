@@ -41,7 +41,7 @@ module RASN1
       # @param [Object] value
       # @return [Object] value
       # @raise [ChoiceError] {#chosen} not set
-      def set_chosen_value(value)
+      def set_chosen_value(value) # rubocop:disable Naming/AccessorMethodName
         check_chosen
         @value[@chosen].value = value
       end
@@ -92,10 +92,10 @@ module RASN1
 
       def inspect(level=0)
         str = common_inspect(level)
-        str << if !defined? @chosen
-                 ' not chosen!'
-               else
+        str << if defined? @chosen
                  "\n#{@value[@chosen].inspect(level + 1)}"
+               else
+                 ' not chosen!'
                end
       end
 

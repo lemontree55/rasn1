@@ -49,13 +49,13 @@ module RASN1
       # @param [Integer, String, Symbol] idx_or_name
       # @return [Object]
       def [](idx_or_name)
-        if @value.is_a?(Array)
-          case idx_or_name
-          when Integer
-            @value[idx_or_name.to_i]
-          when String, Symbol
-            @value.find { |elt| elt.name == idx_or_name }
-          end
+        return unless @value.is_a?(Array)
+
+        case idx_or_name
+        when Integer
+          @value[idx_or_name.to_i]
+        when String, Symbol
+          @value.find { |elt| elt.name == idx_or_name }
         end
       end
 
@@ -70,7 +70,7 @@ module RASN1
         end
       end
 
-      def der_to_value(der, ber: false)
+      def der_to_value(der, ber: false) # rubocop:disable Lint/UnusedMethodArgument
         if @value.is_a?(Array) && !@value.empty?
           nb_bytes = 0
           @value.each do |element|

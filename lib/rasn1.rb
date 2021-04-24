@@ -46,7 +46,7 @@ module RASN1
     until der.empty?
       type = Types.id2type(der)
       type.parse!(der, ber: ber)
-      root = type if root.nil?
+      root ||= type
 
       if [Types::Sequence, Types::Set].include? type.class
         subder = type.value

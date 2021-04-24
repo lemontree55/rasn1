@@ -59,14 +59,7 @@ module RASN1
       def value_to_der
         raise ASN1Error, "#{@name}: bit length is not set" if bit_length.nil?
 
-        value = @value || ''
-        value << "\x00" while value.length * 8 < @bit_length.to_i
-        value.force_encoding('BINARY')
-
-        if value.length * 8 > @bit_length.to_i
-          max_len = @bit_length.to_i / 8 + ((@bit_length.to_i % 8).positive? ? 1 : 0)
-          value = value[0, max_len].to_s
-        end
+        value = generate_value_with_correct_length
 
         unused = value.length * 8 - @bit_length.to_i
         der = [unused, value].pack('CA*')
@@ -82,7 +75,17 @@ module RASN1
         der
       end
 
-      def der_to_value(der, ber: false)
+      def generate_value_with_correct_length
+        value = @value || ''
+        value << "\x00" while value.length * 8 < @bit_length.to_i
+        value.force_encoding('BINARY')
+        return value unless value.length * 8 > @bit_length.to_i
+
+        max_len = @bit_length.to_i / 8 + ((@bit_length.to_i % 8).positive? ? 1 : 0)
+        value[0, max_len].to_s
+      end
+
+      def der_to_value(der, ber: false) # rubocop:disable Lint/UnusedMethodArgument
         unused = der.unpack1('C').to_i
         value = der[1..-1].to_s
         @bit_length = value.length * 8 - unused

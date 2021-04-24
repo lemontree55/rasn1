@@ -23,24 +23,7 @@ module RASN1
       # @see Base#initialize common options to all ASN.1 types
       def initialize(value_or_options={}, options={})
         super
-        @enum = @options[:enum] || {}
-
-        return if @enum.empty?
-
-        # To ensure @value has the correct type
-        self.value = @value
-
-        case @default
-        when String, Symbol
-          raise EnumeratedError, "#{@name}: unknwon enumerated default value #@{default}" unless @enum.key?(@default)
-        when ::Integer
-          raise EnumeratedError, "#{@name}: default value #@{default} not in enumeration" unless @enum.value?(@default)
-
-          @default = @enum.key(@default)
-        when nil
-        else
-          raise TypeError, "#{@name}: #{@default.class} not handled as default value"
-        end
+        initialize_enum(@options[:enum])
       end
 
       # @param [Integer,String,Symbol,nil] v
@@ -48,18 +31,9 @@ module RASN1
       def value=(val)
         case val
         when String, Symbol
-          raise EnumeratedError, "#{@name} has no :enum" if @enum.empty?
-          raise EnumeratedError, "#{@name}: unknwon enumerated value #{val}" unless @enum.key? val
-
-          @value = val
+          value_from_string_or_symbol(val)
         when ::Integer
-          if @enum.empty?
-            @value = val
-          elsif @enum.value? val
-            @value = @enum.key(val)
-          else
-            raise EnumeratedError, "#{@name}: #{val} not in enumeration"
-          end
+          value_from_integer(val)
         when nil
           @value = nil
         else
@@ -79,15 +53,60 @@ module RASN1
 
       private
 
+      def initialize_enum(enum)
+        @enum = enum || {}
+        return if @enum.empty?
+
+        # To ensure @value has the correct type
+        self.value = @value
+
+        check_enum_default
+      end
+
+      def check_enum_default
+        case @default
+        when String, Symbol
+          raise EnumeratedError, "#{@name}: unknwon enumerated default value #@{default}" unless @enum.key?(@default)
+        when ::Integer
+          raise EnumeratedError, "#{@name}: default value #@{default} not in enumeration" unless @enum.value?(@default)
+
+          @default = @enum.key(@default)
+        when nil
+        else
+          raise TypeError, "#{@name}: #{@default.class} not handled as default value"
+        end
+      end
+
+      def value_from_string_or_symbol(val)
+        raise EnumeratedError, "#{@name} has no :enum" if @enum.empty?
+        raise EnumeratedError, "#{@name}: unknwon enumerated value #{val}" unless @enum.key? val
+
+        @value = val
+      end
+
+      def value_from_integer(val)
+        if @enum.empty?
+          @value = val
+        elsif @enum.value? val
+          @value = @enum.key(val)
+        else
+          raise EnumeratedError, "#{@name}: #{val} not in enumeration"
+        end
+      end
+
       def int_value_to_der(value)
-        v = value
-        size = v.bit_length / 8 + ((v.bit_length % 8).positive? ? 1 : 0)
-        size = 1 if size.zero?
-        comp_value = v >= 0 ? v : (~(-v) + 1) & ((1 << (size * 8)) - 1)
+        size = compute_size(value)
+        comp_value = value >= 0 ? value : (~(-value) + 1) & ((1 << (size * 8)) - 1)
         ary = comp_value.digits(256)
         # v is > 0 and its MSBit is 1. Add a 0 byte to mark it as positive
-        ary << 0 if v.positive? && (v >> (size * 8 - 1) == 1)
+        ary << 0 if value.positive? && (value >> (size * 8 - 1) == 1)
         ary.reverse.pack('C*')
+      end
+
+      def compute_size(value)
+        size = value.bit_length / 8 + ((value.bit_length % 8).positive? ? 1 : 0)
+        size = 1 if size.zero?
+        size
       end
 
       def value_to_der
@@ -101,7 +120,7 @@ module RASN1
         end
       end
 
-      def der_to_int_value(der, ber: false)
+      def der_to_int_value(der, ber: false) # rubocop:disable Lint/UnusedMethodArgument
         ary = der.unpack('C*')
         v = ary.reduce(0) { |len, b| (len << 8) | b }
         v = -((~v & ((1 << v.bit_length) - 1)) + 1) if ary[0] & 0x80 == 0x80

@@ -58,7 +58,7 @@ module RASN1
   # All methods defined by root may be delegated by model, unless model also defines
   # this method.
   # @author Sylvain Daubert
-  class Model
+  class Model # rubocop:disable Metrics/ClassLength
     # @private
     Root = Struct.new(:name, :proc_or_class, :content)
 
@@ -403,7 +403,7 @@ module RASN1
       class_root
     end
 
-    def set_elements(a_root)
+    def set_elements(a_root) # rubocop:disable Naming/AccessorMethodName
       return unless a_root.content.is_a? Array
 
       @elements[name].value = a_root.content.map do |another_root|
@@ -424,22 +424,22 @@ module RASN1
 
           initialize_elements obj[name], value
         when Array
-          composed = if obj[name].is_a? Model
-                       obj[name].root
-                     else
-                       obj[name]
-                     end
-          if composed.of_type.is_a? Model
-            value.each do |el|
-              composed << initialize_elements(composed.of_type.class.new, el)
-            end
-          else
-            value.each do |el|
-              obj[name] << el
-            end
-          end
+          initialize_element_from_array(obj[name], value)
         else
           obj[name].value = value
+        end
+      end
+    end
+
+    def initialize_element_from_array(obj, value)
+      composed = obj.is_a?(Model) ? obj.root : obj
+      if composed.of_type.is_a?(Model)
+        value.each do |el|
+          composed << initialize_elements(composed.of_type.class.new, el)
+        end
+      else
+        value.each do |el|
+          composed << el
         end
       end
     end
@@ -450,20 +450,9 @@ module RASN1
       my_element = my_element.root if my_element.is_a?(Model)
       value = case my_element
               when Types::SequenceOf
-                if my_element.of_type < Model
-                  my_element.value.map { |el| el.to_h.values.first }
-                else
-                  my_element.value.map { |el| private_to_h(el) }
-                end
+                sequence_of_to_h(my_element)
               when Types::Sequence
-                seq = my_element.value.map do |el|
-                  next if el.optional? && el.value.nil?
-
-                  name = el.is_a?(Model) ? @elements.key(el) : el.name
-                  [name, private_to_h(el)]
-                end
-                seq.compact!
-                Hash[seq]
+                sequence_to_h(my_element)
               else
                 my_element.value
               end
@@ -472,6 +461,25 @@ module RASN1
       else
         value
       end
+    end
+
+    def sequence_of_to_h(elt)
+      if elt.of_type < Model
+        elt.value.map { |el| el.to_h.values.first }
+      else
+        elt.value.map { |el| private_to_h(el) }
+      end
+    end
+
+    def sequence_to_h(seq)
+      ary = seq.value.map do |el|
+        next if el.optional? && el.value.nil?
+
+        name = el.is_a?(Model) ? @elements.key(el) : el.name
+        [name, private_to_h(el)]
+      end
+      ary.compact!
+      ary.to_h
     end
   end
 end

@@ -41,18 +41,23 @@ module RASN1
       end
 
       def inspect(level=0)
+        str = common_inspect(level)
+        str << if @value.nil?
+                 'NULL'
+               elsif @value.is_a?(OctetString) || @value.is_a?(BitString)
+                 "#{@value.type}: #{value.value.inspect}"
+               elsif @value.class < Base
+                 "#{@value.type}: #{value.value}"
+               else
+                 value.to_s.inspect
+               end
+      end
+
+      def common_inspect(level)
         lvl = level >= 0 ? level : 0
         str = '  ' * lvl
         str << "#{@name} " unless @name.nil?
-        str << if @value.nil?
-                 '(ANY) NULL'
-               elsif @value.is_a?(OctetString) || @value.is_a?(BitString)
-                 "(ANY) #{@value.type}: #{value.value.inspect}"
-               elsif @value.class < Base
-                 "(ANY) #{@value.type}: #{value.value}"
-               else
-                 "ANY: #{value.to_s.inspect}"
-               end
+        str << '(ANY) '
       end
     end
   end
