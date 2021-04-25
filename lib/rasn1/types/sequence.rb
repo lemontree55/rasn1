@@ -47,7 +47,7 @@ module RASN1
 
       # Get element at index +idx+, or element of name +name+
       # @param [Integer, String, Symbol] idx_or_name
-      # @return [Object]
+      # @return [Object,nil]
       def [](idx_or_name)
         return unless @value.is_a?(Array)
 
