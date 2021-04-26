@@ -32,6 +32,7 @@ module RASN1
       # @see Base#initialize
       def initialize(options={})
         super
+        @no_value = false
         @value ||= []
       end
 
@@ -43,6 +44,11 @@ module RASN1
                  else
                    @value.dup
                  end
+      end
+
+      # @return [Array]
+      def void_value
+        []
       end
 
       # Get element at index +idx+, or element of name +name+
@@ -80,6 +86,10 @@ module RASN1
           @value = der
           der.length
         end
+      end
+
+      def explicit_type
+        self.class.new(value: @value)
       end
     end
   end

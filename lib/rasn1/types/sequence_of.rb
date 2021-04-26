@@ -64,13 +64,18 @@ module RASN1
       def initialize(of_type, options={})
         super(options)
         @of_type = of_type
-        @value = []
+        @no_value = false
       end
 
       def initialize_copy(other)
         super
         @of_type = @of_type.dup
         @value = @value.map(&:dup)
+      end
+
+      # @return [Array]
+      def void_value
+        []
       end
 
       # Add an item to SEQUENCE OF

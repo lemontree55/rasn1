@@ -289,7 +289,7 @@ module RASN1::Types
 
     describe '#inspect' do
       it 'returns TYPE: VALUE for child classes' do
-        expect(Integer.new.inspect).to eq("INTEGER: nil")
+        expect(Integer.new.inspect).to eq("INTEGER: (NO VALUE)")
         expect(Integer.new(value: 0).inspect).to eq("INTEGER: 0")
       end
 

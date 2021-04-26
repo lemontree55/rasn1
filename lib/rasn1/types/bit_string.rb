@@ -28,10 +28,10 @@ module RASN1
 
       # Get bit length
       def bit_length
-        if @value.nil?
-          @default_bit_length
-        else
+        if value?
           @bit_length
+        else
+          @default_bit_length
         end
       end
 
@@ -45,9 +45,9 @@ module RASN1
       private
 
       def can_build?
-        !(!@default.nil? && (@value.nil? || (@value == @default) &&
+        !(!@default.nil? && (!value? || (@value == @default) &&
                               (@bit_length == @default_bit_length))) &&
-          !(optional? && @value.nil?)
+          !(optional? && !value?)
       end
 
       def value_to_der

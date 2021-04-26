@@ -68,7 +68,6 @@ module RASN1::Types
       end
 
       it 'raises on empty string' do
-        expect { Any.new.parse!(nil) }.to raise_error(RASN1::ASN1Error)
         expect { Any.new.parse!('') }.to raise_error(RASN1::ASN1Error)
       end
 

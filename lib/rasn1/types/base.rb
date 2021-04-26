@@ -69,8 +69,6 @@ module RASN1
       attr_reader :asn1_class
       # @return [Object,nil] default value, if defined
       attr_reader :default
-      # @return [Object]
-      attr_writer :value
 
       # Get ASN.1 type
       # @return [String]
@@ -117,16 +115,28 @@ module RASN1
       # Used by +#dup+ and +#clone+. Deep copy @value and @default.
       def initialize_copy(_other)
         @value = @value.dup
+        @no_value = @no_value.dup
         @default = @default.dup
       end
 
       # Get value or default value
       def value
-        if @value.nil?
-          @default
-        else
+        if value?
           @value
+        else
+          @default
         end
+      end
+
+      # Set value. If +val+ is +nil+, unset value
+      # @param [Object,nil] val
+      def value=(val)
+        set_value(val)
+      end
+
+      # @abstract Define 'void' value (i.e. 'value' when no value was set)
+      def void_value
+        ''
       end
 
       # @return [::Boolean]
@@ -196,10 +206,10 @@ module RASN1
         id_size = Types.decode_identifier_octets(der).last
         total_length, data = get_data(der[id_size..-1], ber)
         total_length += id_size
+        @no_value = false
         if explicit?
           # Delegate to #explicit type to generate sub-value
           type = explicit_type
-          type.value = @value
           type.parse!(data)
           @value = type.value
         else
@@ -219,7 +229,7 @@ module RASN1
       # @return [String]
       def inspect(level=0)
         str = common_inspect(level)
-        str << " #{value.inspect}"
+        str << ' ' << inspect_value
         str << ' OPTIONAL' if optional?
         str << " DEFAULT #{@default}" unless @default.nil?
         str
@@ -247,12 +257,19 @@ module RASN1
       def common_inspect(level)
         lvl = level >= 0 ? level : 0
         str = '  ' * lvl
-        str << "[#{id}] EXPLICIT " if explicit?
+        str << "#{@name} " unless @name.nil?
         str << asn1_class.to_s.upcase << ' ' unless asn1_class == :universal
         str << "[#{id}] EXPLICIT " if explicit?
         str << "[#{id}] IMPLICIT " if implicit?
-        str << "#{@name} " unless @name.nil?
         str << "#{type}:"
+      end
+
+      def inspect_value
+        if value?
+          value.inspect
+        else
+          '(NO VALUE)'
+        end
       end
 
       def value_to_der
@@ -273,7 +290,7 @@ module RASN1
         set_optional options[:optional]
         set_default options[:default]
         set_tag options
-        @value = options[:value]
+        set_value options[:value]
         @name = options[:name]
         @options = options
       end
@@ -318,9 +335,24 @@ module RASN1
         @asn1_class = :context if defined?(@tag) && (@asn1_class == :universal)
       end
 
+      def set_value(value) # rubocop:disable Naming/AccessorMethodName
+        if value.nil?
+          @no_value = true
+          @value = void_value
+        else
+          @no_value = false
+          @value = value
+        end
+        value
+      end
+
+      def value?
+        !@no_value
+      end
+
       def can_build?
-        (@default.nil? || (!@value.nil? && (@value != @default))) &&
-          (!optional? || !@value.nil?)
+        (@default.nil? || (value? && (@value != @default))) &&
+          (!optional? || value?)
       end
 
       def build
@@ -391,7 +423,8 @@ module RASN1
         return true if real_id == expected_id
 
         if optional?
-          @value = nil
+          @no_value = true
+          @value = void_value
         elsif !@default.nil?
           @value = @default
         else

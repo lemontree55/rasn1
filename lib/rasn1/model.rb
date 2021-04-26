@@ -437,7 +437,7 @@ module RASN1
       class_element
     end
 
-    def set_elements(element)
+    def set_elements(element) # rubocop:disable Naming/AccessorMethodName
       return unless element.content.is_a? Array
 
       @elements[name].value = element.content.map do |another_element|

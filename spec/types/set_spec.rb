@@ -1,3 +1,5 @@
+require_relative '../spec_helper'
+
 module RASN1
   module Types
 
@@ -12,7 +14,7 @@ module RASN1
           @no_bool_der = binary("\x31\x09\x02\x01\x2A\x03\x04\x01\x01\x04\x06")
           @der = binary("\x31\x0c\x01\x01\x00\x02\x01\x2A\x03\x04\x01\x01\x04\x06")
         end
-        
+
       describe '.type' do
         it 'gets ASN.1 type' do
           expect(Set.type).to eq('SET')

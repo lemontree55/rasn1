@@ -30,6 +30,11 @@ module RASN1
         'GeneralizedTime'
       end
 
+      # @return [DateTime]
+      def void_value
+        DateTime.now
+      end
+
       private
 
       def value_to_der
