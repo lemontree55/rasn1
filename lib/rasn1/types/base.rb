@@ -247,6 +247,10 @@ module RASN1
       def common_inspect(level)
         lvl = level >= 0 ? level : 0
         str = '  ' * lvl
+        str << "[#{id}] EXPLICIT " if explicit?
+        str << asn1_class.to_s.upcase << ' ' unless asn1_class == :universal
+        str << "[#{id}] EXPLICIT " if explicit?
+        str << "[#{id}] IMPLICIT " if implicit?
         str << "#{@name} " unless @name.nil?
         str << "#{type}:"
       end
