@@ -42,7 +42,7 @@ module RASN1::Types
 
     describe '#to_i' do
       it 'gets ruby Integer object' do
-        int = Integer.new(53)
+        int = Integer.new(value: 53)
         expect(int.to_i).to eq(53)
       end
 
@@ -59,7 +59,7 @@ module RASN1::Types
 
       it 'returns integer even when was build with an :enum key' do
         expect(Integer.new(enum: hsh).to_i).to eq(0)
-        expect(Integer.new(:one, enum: hsh).to_i).to eq(1)
+        expect(Integer.new(value: :one, enum: hsh).to_i).to eq(1)
       end
     end
 
@@ -79,7 +79,7 @@ module RASN1::Types
       end
 
       it 'generates a DER string with enum' do
-        int = Integer.new(:two, enum: hsh)
+        int = Integer.new(value: :two, enum: hsh)
         expect(int.to_der).to eq(binary("\x02\x01\x02"))
       end
 

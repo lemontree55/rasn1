@@ -30,7 +30,7 @@ module RASN1
       ID = 0x10
 
       # @see Base#initialize
-      def initialize(value_or_options={}, options={})
+      def initialize(options={})
         super
         @value ||= []
       end

@@ -19,15 +19,15 @@ module RASN1::Types
         expect(utf8.default).to eq(nil)
       end
     end
-    
+
     describe '#to_der' do
       it 'generates a DER string' do
-        utf8 = Utf8String.new('azertyù€')
+        utf8 = Utf8String.new(value: 'azertyù€')
         expect(utf8.to_der).to eq(binary("\x0c\x0bazertyù€"))
       end
 
       it 'generates a DER string according to ASN.1 class' do
-        utf8 = Utf8String.new('a', class: :context)
+        utf8 = Utf8String.new(value: 'a', class: :context)
         expect(utf8.to_der).to eq(binary("\x8c\x01a"))
       end
 

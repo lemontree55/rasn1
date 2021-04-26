@@ -11,17 +11,11 @@ module RASN1
       # Integer id value
       ID = 2
 
-      # @overload initialize(options={})
-      #   @option options [Hash] :enum enumeration hash. Keys are names, and values
-      #     are integers.
-      #   @raise [EnumeratedError] +:default+ value is unknown when +:enum+ key is present
-      # @overload initialize(value, options={})
-      #   @param [Object] value value to set for this ASN.1 object
-      #   @option options [Hash] :enum enumeration hash. Keys are names, and values
-      #     are integers. This key is mandatory.
-      #   @raise [EnumeratedError] +:default+ value is unknown when +:enum+ key is present
+      # @option options [Hash] :enum enumeration hash. Keys are names, and values
+      #   are integers.
+      # @raise [EnumeratedError] +:default+ value is unknown when +:enum+ key is present
       # @see Base#initialize common options to all ASN.1 types
-      def initialize(value_or_options={}, options={})
+      def initialize(options={})
         super
         initialize_enum(@options[:enum])
       end

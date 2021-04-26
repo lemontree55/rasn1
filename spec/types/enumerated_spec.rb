@@ -22,8 +22,8 @@ module RASN1::Types
       end
 
       it 'raises when enum key is absent' do
-        expect { Enumerated.new(:enum) }.to raise_error(RASN1::EnumeratedError,
-                                                        'no enumeration given')
+        expect { Enumerated.new }.to raise_error(RASN1::EnumeratedError,
+                                                 'no enumeration given')
       end
 
       it 'raises on unknown default value' do

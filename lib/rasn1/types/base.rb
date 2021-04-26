@@ -97,40 +97,21 @@ module RASN1
         obj
       end
 
-      # @overload initialize(options={})
-      #   @param [Hash] options
-      #   @option options [Symbol] :class ASN.1 class. Default value is +:universal+.
-      #    If +:explicit+ or +:implicit:+ is defined, default value is +:context+.
-      #   @option options [::Boolean] :optional define this tag as optional. Default
-      #     is +false+
-      #   @option options [Object] :default default value (ASN.1 DEFAULT)
-      #   @option options [Object] :value value to set
-      #   @option options [::Integer] :implicit define an IMPLICIT tagged type
-      #   @option options [::Integer] :explicit define an EXPLICIT tagged type
-      #   @option options [::Boolean] :constructed if +true+, set type as constructed.
-      #    May only be used when +:explicit+ is defined, else it is discarded.
-      #   @option options [::String] :name name for this node
-      # @overload initialize(value, options={})
-      #   @param [Object] value value to set for this ASN.1 object
-      #   @param [Hash] options
-      #   @option options [Symbol] :class ASN.1 class. Default value is +:universal+.
-      #    If +:explicit+ or +:implicit:+ is defined, default value is +:context+.
-      #   @option options [::Boolean] :optional define this value as optional. Default
-      #     is +false+
-      #   @option options [Object] :default default value (ASN.1 DEFAULT)
-      #   @option options [::Integer] :implicit define an IMPLICIT tagged type
-      #   @option options [::Integer] :explicit define an EXPLICIT tagged type
-      #   @option options [::Boolean] :constructed if +true+, set type as constructed.
-      #    May only be used when +:explicit+ is defined, else it is discarded.
-      #   @option options [::String] :name name for this node
-      def initialize(value_or_options={}, options={})
+      # @param [Hash] options
+      # @option options [Symbol] :class ASN.1 class. Default value is +:universal+.
+      #  If +:explicit+ or +:implicit:+ is defined, default value is +:context+.
+      # @option options [::Boolean] :optional define this tag as optional. Default
+      #   is +false+
+      # @option options [Object] :default default value (ASN.1 DEFAULT)
+      # @option options [Object] :value value to set
+      # @option options [::Integer] :implicit define an IMPLICIT tagged type
+      # @option options [::Integer] :explicit define an EXPLICIT tagged type
+      # @option options [::Boolean] :constructed if +true+, set type as constructed.
+      #  May only be used when +:explicit+ is defined, else it is discarded.
+      # @option options [::String] :name name for this node
+      def initialize(options={})
         @constructed = nil
-        if value_or_options.is_a? Hash
-          set_options value_or_options
-        else
-          set_options options
-          @value = value_or_options
-        end
+        set_options options
       end
 
       # Used by +#dup+ and +#clone+. Deep copy @value and @default.

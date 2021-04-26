@@ -18,7 +18,7 @@ module RASN1::Types
         expect(os.default).to eq(nil)
       end
     end
-    
+
     describe '#to_der' do
       it 'generates a DER string' do
         os = OctetString.new
@@ -50,7 +50,7 @@ module RASN1::Types
 
       it 'serializes a Types::Base object when set as value' do
         os = OctetString.new
-        int = Integer.new(:int)
+        int = Integer.new
         int.value = 12
         os.value = int
         expect(os.to_der).to eq(binary("\x04\x03\x02\x01\x0c"))
