@@ -25,19 +25,12 @@ module RASN1
       # Enumerated id value
       ID = 0x0a
 
-      # @overload initialize(options={})
-      #   @option options [Hash] :enum enumeration hash. Keys are names, and values
-      #     are integers. This key is mandatory.
-      #   @raise [EnumeratedError] +:enum+ key is not present
-      #   @raise [EnumeratedError] +:default+ value is unknown
-      # @overload initialize(value, options={})
-      #   @param [Object] value value to set for this ASN.1 object
-      #   @option options [Hash] :enum enumeration hash. Keys are names, and values
-      #     are integers. This key is mandatory.
-      #   @raise [EnumeratedError] +:enum+ key is not present
-      #   @raise [EnumeratedError] +:default+ value is unknown
+      # @option options [Hash] :enum enumeration hash. Keys are names, and values
+      #   are integers. This key is mandatory.
+      # @raise [EnumeratedError] +:enum+ key is not present
+      # @raise [EnumeratedError] +:default+ value is unknown
       # @see Base#initialize common options to all ASN.1 types
-      def initialize(value_or_options={}, options={})
+      def initialize(options={})
         super
         raise EnumeratedError, 'no enumeration given' if @enum.empty?
       end

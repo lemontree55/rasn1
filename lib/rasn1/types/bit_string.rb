@@ -12,17 +12,11 @@ module RASN1
       # @return [Integer]
       attr_writer :bit_length
 
-      # @overload initialize(options={})
-      #   @param [Hash] options
-      #   @option options [Object] :bit_length default bit_length value. Should be
-      #     present if +:default+ is set
-      # @overload initialize(value, options={})
-      #   @param [Object] value value to set for this ASN.1 object
-      #   @param [Hash] options
-      #   @option options [Object] :bit_length default bit_length value. Should be
-      #     present if +:default+ is set
+      # @param [Hash] options
+      # @option options [Object] :bit_length default bit_length value. Should be
+      #   present if +:default+ is set
       # @see Base#initialize common options to all ASN.1 types
-      def initialize(value_or_options={}, options={})
+      def initialize(options={})
         super
         if @default
           raise ASN1Error, "#{@name}: default bit length is not defined" if @options[:bit_length].nil?
@@ -34,10 +28,10 @@ module RASN1
 
       # Get bit length
       def bit_length
-        if @value.nil?
-          @default_bit_length
-        else
+        if value?
           @bit_length
+        else
+          @default_bit_length
         end
       end
 
@@ -51,9 +45,9 @@ module RASN1
       private
 
       def can_build?
-        !(!@default.nil? && (@value.nil? || (@value == @default) &&
+        !(!@default.nil? && (!value? || (@value == @default) &&
                               (@bit_length == @default_bit_length))) &&
-          !(optional? && @value.nil?)
+          !(optional? && !value?)
       end
 
       def value_to_der

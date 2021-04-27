@@ -20,14 +20,14 @@ module RASN1::Types
 
     describe '#to_der' do
       it 'generates a DER string' do
-        oi = ObjectId.new('1.2.3.4')
+        oi = ObjectId.new(value: '1.2.3.4')
         expect(oi.to_der).to eq(binary("\x06\x03\x2a\x03\x04"))
         oi.value = '2.999.3'
         expect(oi.to_der).to eq(binary("\x06\x03\x88\x37\x03"))
       end
 
       it 'generates a DER string according to ASN.1 class' do
-        oi = ObjectId.new('1.2.3.4', class: :context)
+        oi = ObjectId.new(value: '1.2.3.4', class: :context)
         expect(oi.to_der).to eq(binary("\x86\x03\x2a\x03\x04"))
       end
 

@@ -60,7 +60,7 @@ module RASN1
   # @author Sylvain Daubert
   class Model # rubocop:disable Metrics/ClassLength
     # @private
-    Root = Struct.new(:name, :proc_or_class, :content)
+    Elem = Struct.new(:name, :proc_or_class, :content)
 
     class << self
       # @return [Hash]
@@ -69,8 +69,9 @@ module RASN1
       # Use another model in this model
       # @param [String,Symbol] name
       # @param [Class] model_klass
+      # @return [Elem]
       def model(name, model_klass)
-        @root = Root.new(name, model_klass, nil)
+        @root = Elem.new(name, model_klass, nil)
       end
 
       # Update options of root element.
@@ -102,14 +103,17 @@ module RASN1
       # @method sequence(name, options)
       #  @param [Symbol,String] name name of object in model
       #  @param [Hash] options
+      #  @return [Elem]
       #  @see Types::Sequence#initialize
       # @method set(name, options)
       #  @param [Symbol,String] name name of object in model
       #  @param [Hash] options
+      #  @return [Elem]
       #  @see Types::Set#initialize
       # @method choice(name, options)
       #  @param [Symbol,String] name name of object in model
       #  @param [Hash] options
+      #  @return [Elem]
       #  @see Types::Choice#initialize
       %w[sequence set choice].each do |type|
         class_eval "def #{type}(name, options={})\n" \
@@ -117,7 +121,7 @@ module RASN1
                    "  proc = proc do |opts|\n" \
                    "    Types::#{type.capitalize}.new(options.merge(opts))\n" \
                    "  end\n" \
-                   "  @root = Root.new(name, proc, options[:content])\n" \
+                   "  @root = Elem.new(name, proc, options[:content])\n" \
                    'end'
       end
 
@@ -125,11 +129,13 @@ module RASN1
       #  @param [Symbol,String] name name of object in model
       #  @param [Model, Types::Base] type type for SEQUENCE OF
       #  @param [Hash] options
+      #  @return [Elem]
       #  @see Types::SequenceOf#initialize
       # @method set_of(name, type, options)
       #  @param [Symbol,String] name name of object in model
       #  @param [Model, Types::Base] type type for SET OF
       #  @param [Hash] options
+      #  @return [Elem]
       #  @see Types::SetOf#initialize
       %w[sequence set].each do |type|
         klass_name = "Types::#{type.capitalize}Of"
@@ -138,53 +144,64 @@ module RASN1
                    "  proc = proc do |opts|\n" \
                    "    #{klass_name}.new(type, options.merge(opts))\n" \
                    "  end\n" \
-                   "  @root = Root.new(name, proc, nil)\n" \
+                   "  @root = Elem.new(name, proc, nil)\n" \
                    'end'
       end
 
       # @method boolean(name, options)
       #  @param [Symbol,String] name name of object in model
       #  @param [Hash] options
+      #  @return [Elem]
       #  @see Types::Boolean#initialize
       # @method integer(name, options)
       #  @param [Symbol,String] name name of object in model
       #  @param [Hash] options
+      #  @return [Elem]
       #  @see Types::Integer#initialize
       # @method bit_string(name, options)
       #  @param [Symbol,String] name name of object in model
       #  @param [Hash] options
+      #  @return [Elem]
       #  @see Types::BitString#initialize
       # @method octet_string(name, options)
       #  @param [Symbol,String] name name of object in model
       #  @param [Hash] options
+      #  @return [Elem]
       #  @see Types::OctetString#initialize
       # @method null(name, options)
       #  @param [Symbol,String] name name of object in model
       #  @param [Hash] options
+      #  @return [Elem]
       #  @see Types::Null#initialize
       # @method enumerated(name, options)
       #  @param [Symbol,String] name name of object in model
       #  @param [Hash] options
+      #  @return [Elem]
       #  @see Types::Enumerated#initialize
       # @method utf8_string(name, options)
       #  @param [Symbol,String] name name of object in model
       #  @param [Hash] options
+      #  @return [Elem]
       #  @see Types::Utf8String#initialize
       # @method numeric_string(name, options)
       #  @param [Symbol,String] name name of object in model
       #  @param [Hash] options
+      #  @return [Elem]
       #  @see Types::NumericString#initialize
       # @method printable_string(name, options)
       #  @param [Symbol,String] name name of object in model
       #  @param [Hash] options
+      #  @return [Elem]
       #  @see Types::PrintableString#initialize
       # @method visible_string(name, options)
       #  @param [Symbol,String] name name of object in model
       #  @param [Hash] options
+      #  @return [Elem]
       #  @see Types::VisibleString#initialize
       # @method ia5_string(name, options)
       #  @param [Symbol,String] name name of object in model
       #  @param [Hash] options
+      #  @return [Elem]
       #  @see Types::IA5String#initialize
       Types.primitives.each do |prim|
         next if prim == Types::ObjectId
@@ -195,28 +212,30 @@ module RASN1
                    "  proc = proc do |opts|\n" \
                    "    #{prim}.new(options.merge(opts))\n" \
                    "  end\n" \
-                   "  @root = Root.new(name, proc, nil)\n" \
+                   "  @root = Elem.new(name, proc, nil)\n" \
                    'end'
       end
 
       # @param [Symbol,String] name name of object in model
       # @param [Hash] options
+      # @return [Elem]
       # @note This method is named +objectid+ and not +object_id+ to not override
       #   +Object#object_id+.
       # @see Types::ObjectId#initialize
       def objectid(name, options={})
         options[:name] = name
         proc = proc { |opts| Types::ObjectId.new(options.merge(opts)) }
-        @root = Root.new(name, proc, nil)
+        @root = Elem.new(name, proc, nil)
       end
 
       # @param [Symbol,String] name name of object in model
       # @param [Hash] options
+      # @return [Elem]
       # @see Types::Any#initialize
       def any(name, options={})
         options[:name] = name
         proc = proc { |opts| Types::Any.new(options.merge(opts)) }
-        @root = Root.new(name, proc, nil)
+        @root = Elem.new(name, proc, nil)
       end
 
       # Give type name (aka class name)
@@ -234,7 +253,7 @@ module RASN1
       # @raise [ASN1Error] error on parsing
       def parse(str, ber: false)
         model = new
-        model.parse! str, ber: ber
+        model.parse!(str, ber: ber)
         model
       end
     end
@@ -244,7 +263,7 @@ module RASN1
     def initialize(args={})
       root = generate_root
       set_elements(root)
-      initialize_elements self, args
+      initialize_elements(self, args)
     end
 
     # Give access to element +name+ in model
@@ -264,10 +283,10 @@ module RASN1
       @elements[name].value = value
     end
 
-    # Get name frm root type
+    # Get name from root type
     # @return [String,Symbol]
     def name
-      @root
+      @root_name
     end
 
     # Get elements names
@@ -282,15 +301,15 @@ module RASN1
       private_to_h
     end
 
-    # @return [String]
-    def to_der
-      @elements[@root].to_der
-    end
-
     # Get root element from model
     # @return [Types::Base,Model]
     def root
-      @elements[@root]
+      @elements[@root_name]
+    end
+
+    # @return [String]
+    def to_der
+      root.to_der
     end
 
     # Give type name (aka class name)
@@ -305,25 +324,37 @@ module RASN1
     # @return [Integer] number of parsed bytes
     # @raise [ASN1Error] error on parsing
     def parse!(str, ber: false)
-      @elements[@root].parse!(str.dup.force_encoding('BINARY'), ber: ber)
+      root.parse!(str.dup.force_encoding('BINARY'), ber: ber)
     end
 
     # @overload value
     #  Get value of root element
     #  @return [Object,nil]
-    # @overload value(name)
+    # @overload value(name, *args)
     #  Direct access to the value of +name+ (nested) element of model.
     #  @param [String,Symbol] name
+    #  @param [Array<Integer,String,Symbol>] args more argument to access element. May be
+    #     used to access content of a SequenceOf or a SetOf
     #  @return [Object,nil]
     # @return [Object,nil]
+    # @example
+    #  class MyModel1 < RASN1::Model
+    #    sequence('seq', content: [boolean('boolean'), integer('int')])
+    #  end
+    #  class MyModel2 < RASN1::Model
+    #    sequence('root', content: [sequence_of('list', MyModel1)])
+    #  end
+    #  model = MyModel2.new
+    #  model.parse!(der)
+    #  # access to 2nd MyModel1.int in list
+    #  model.value('list', 1, 'int')
     def value(name=nil, *args)
       if name.nil?
-        @elements[@root].value
+        root.value
       else
         elt = by_name(name)
 
         unless args.empty?
-          elt = elt.root if elt.is_a?(Model)
           args.each do |arg|
             elt = elt.root if elt.is_a?(Model)
             elt = elt[arg]
@@ -337,8 +368,8 @@ module RASN1
     # Delegate some methods to root element
     # @param [Symbol] meth
     def method_missing(meth, *args)
-      if @elements[@root].respond_to? meth
-        @elements[@root].send meth, *args
+      if root.respond_to? meth
+        root.send meth, *args
       else
         super
       end
@@ -346,7 +377,7 @@ module RASN1
 
     # @return [Boolean]
     def respond_to_missing?(meth, *)
-      @elements[@root].respond_to?(meth) || super
+      root.respond_to?(meth) || super
     end
 
     # @return [String]
@@ -386,6 +417,9 @@ module RASN1
       [Types::Sequence, Types::Set].include? elt.class
     end
 
+    # proc_or_class:
+    # * proc: a Types::Base subclass
+    # * class: a model
     def get_type(proc_or_class, options={})
       case proc_or_class
       when Proc
@@ -396,20 +430,20 @@ module RASN1
     end
 
     def generate_root
-      class_root = self.class.class_eval { @root }
-      @root = class_root.name
+      class_element = self.class.class_eval { @root }
+      @root_name = class_element.name
       @elements = {}
-      @elements[@root] = get_type(class_root.proc_or_class, self.class.options || {})
-      class_root
+      @elements[@root_name] = get_type(class_element.proc_or_class, self.class.options || {})
+      class_element
     end
 
-    def set_elements(a_root) # rubocop:disable Naming/AccessorMethodName
-      return unless a_root.content.is_a? Array
+    def set_elements(element) # rubocop:disable Naming/AccessorMethodName
+      return unless element.content.is_a? Array
 
-      @elements[name].value = a_root.content.map do |another_root|
-        subel = get_type(another_root.proc_or_class)
-        @elements[another_root.name] = subel
-        set_elements(another_root) if composed?(subel) && another_root.content.is_a?(Array)
+      @elements[name].value = element.content.map do |another_element|
+        subel = get_type(another_element.proc_or_class)
+        @elements[another_element.name] = subel
+        set_elements(another_element) if composed?(subel) && another_element.content.is_a?(Array)
         subel
       end
     end
@@ -438,15 +472,12 @@ module RASN1
           composed << initialize_elements(composed.of_type.class.new, el)
         end
       else
-        value.each do |el|
-          composed << el
-        end
+        value.each { |el| composed << el }
       end
     end
 
     def private_to_h(element=nil)
-      my_element = element
-      my_element = root if my_element.nil?
+      my_element = element || root
       my_element = my_element.root if my_element.is_a?(Model)
       value = case my_element
               when Types::SequenceOf
@@ -457,7 +488,7 @@ module RASN1
                 my_element.value
               end
       if element.nil?
-        { @root => value }
+        { @root_name => value }
       else
         value
       end

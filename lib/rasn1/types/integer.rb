@@ -11,17 +11,11 @@ module RASN1
       # Integer id value
       ID = 2
 
-      # @overload initialize(options={})
-      #   @option options [Hash] :enum enumeration hash. Keys are names, and values
-      #     are integers.
-      #   @raise [EnumeratedError] +:default+ value is unknown when +:enum+ key is present
-      # @overload initialize(value, options={})
-      #   @param [Object] value value to set for this ASN.1 object
-      #   @option options [Hash] :enum enumeration hash. Keys are names, and values
-      #     are integers. This key is mandatory.
-      #   @raise [EnumeratedError] +:default+ value is unknown when +:enum+ key is present
+      # @option options [Hash] :enum enumeration hash. Keys are names, and values
+      #   are integers.
+      # @raise [EnumeratedError] +:default+ value is unknown when +:enum+ key is present
       # @see Base#initialize common options to all ASN.1 types
-      def initialize(value_or_options={}, options={})
+      def initialize(options={})
         super
         initialize_enum(@options[:enum])
       end
@@ -29,25 +23,32 @@ module RASN1
       # @param [Integer,String,Symbol,nil] v
       # @return [void]
       def value=(val)
+        @no_value = false
         case val
         when String, Symbol
           value_from_string_or_symbol(val)
         when ::Integer
           value_from_integer(val)
         when nil
-          @value = nil
+          @no_value = true
+          @value = void_value
         else
           raise EnumeratedError, "#{@name}: not in enumeration"
         end
+      end
+
+      # @return [Integer]
+      def void_value
+        0
       end
 
       # Integer value
       # @return [Integer]
       def to_i
         if @enum.empty?
-          @value || @default || 0
+          value? ? @value : @default || 0
         else
-          @enum[@value || @default] || 0
+          @enum[value? ? @value : @default] || 0
         end
       end
 
@@ -58,7 +59,7 @@ module RASN1
         return if @enum.empty?
 
         # To ensure @value has the correct type
-        self.value = @value
+        self.value = @value if value?
 
         check_enum_default
       end
@@ -131,8 +132,9 @@ module RASN1
         @value = der_to_int_value(der, ber: ber)
         return if @enum.empty?
 
+        int_value = @value
         @value = @enum.key(@value)
-        raise EnumeratedError, "#{@name}: value #{v} not in enumeration" if @value.nil?
+        raise EnumeratedError, "#{@name}: value #{int_value} not in enumeration" unless value?
       end
 
       def explicit_type

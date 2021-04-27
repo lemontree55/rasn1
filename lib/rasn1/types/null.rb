@@ -24,7 +24,8 @@ module RASN1
       def der_to_value(der, ber: false) # rubocop:disable Lint/UnusedMethodArgument
         raise ASN1Error, 'NULL should not have content!' if der.length.positive?
 
-        @value = nil
+        @no_value = true
+        @value = void_value
       end
     end
   end

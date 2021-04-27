@@ -9,13 +9,15 @@ module RASN1
     class Any < Base
       # @return [String] DER-formated string
       def to_der
-        case @value
-        when Base, Model
-          @value.to_der
-        when nil
-          optional? ? '' : Null.new.to_der
+        if value?
+          case @value
+          when Base, Model
+            @value.to_der
+          else
+            @value.to_s
+          end
         else
-          @value.to_s
+          optional? ? '' : Null.new.to_der
         end
       end
 
@@ -25,7 +27,7 @@ module RASN1
       # @param [Boolean] ber if +true+, accept BER encoding
       # @return [Integer] total number of parsed bytes
       def parse!(der, ber: false)
-        if der.nil? || der.empty?
+        if der.empty?
           return 0 if optional?
 
           raise ASN1Error, 'Expected ANY but get nothing'
@@ -35,6 +37,7 @@ module RASN1
         total_length, = get_data(der[id_size..-1], ber)
         total_length += id_size
 
+        @no_value = false
         @value = der[0, total_length]
 
         total_length
@@ -42,7 +45,7 @@ module RASN1
 
       def inspect(level=0)
         str = common_inspect(level)
-        str << if @value.nil?
+        str << if !value?
                  'NULL'
                elsif @value.is_a?(OctetString) || @value.is_a?(BitString)
                  "#{@value.type}: #{value.value.inspect}"
@@ -57,6 +60,9 @@ module RASN1
         lvl = level >= 0 ? level : 0
         str = '  ' * lvl
         str << "#{@name} " unless @name.nil?
+        str << asn1_class.to_s.upcase << ' ' unless asn1_class == :universal
+        str << "[#{id}] EXPLICIT " if explicit?
+        str << "[#{id}] IMPLICIT " if implicit?
         str << '(ANY) '
       end
     end

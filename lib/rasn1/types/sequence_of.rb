@@ -64,13 +64,18 @@ module RASN1
       def initialize(of_type, options={})
         super(options)
         @of_type = of_type
-        @value = []
+        @no_value = false
       end
 
       def initialize_copy(other)
         super
         @of_type = @of_type.dup
         @value = @value.map(&:dup)
+      end
+
+      # @return [Array]
+      def void_value
+        []
       end
 
       # Add an item to SEQUENCE OF
@@ -134,10 +139,8 @@ module RASN1
         while nb_bytes < der.length
           type = if composed_of_type? && !@of_type.is_a?(Class)
                    @of_type.dup
-                 elsif of_type_class < Model
-                   of_type_class.new
                  else
-                   of_type_class.new(:t)
+                   of_type_class.new
                  end
           nb_bytes += type.parse!(der[nb_bytes, der.length])
           @value << type
@@ -151,7 +154,7 @@ module RASN1
       def push_array_of_primitive(obj)
         raise ASN1Error, 'object to add should be an Array' unless obj.is_a?(Array)
 
-        @value += obj.map { |item| of_type_class.new(item) }
+        @value += obj.map { |item| of_type_class.new(value: item) }
       end
 
       def push_composed_array(obj)

@@ -4,7 +4,7 @@ module RASN1::Types
   describe Base do
     describe '#initialize' do
       it 'sets value' do
-        base = Base.new('value')
+        base = Base.new(value: 'value')
         expect(base.value).to eq('value')
         expect(base.optional?).to be(false)
         expect(base.default).to be(nil)
@@ -56,11 +56,11 @@ module RASN1::Types
       end
 
       it 'should encode long ID' do
-        int = Integer.new(0, implicit: 43)
+        int = Integer.new(value: 0, implicit: 43)
         expect(int.to_der).to eq(binary("\x9f\x2b\x01\x00"))
-        int = Integer.new(1, implicit: 255)
+        int = Integer.new(value: 1, implicit: 255)
         expect(int.to_der).to eq(binary("\x9f\x81\x7f\x01\x01"))
-        int = Integer.new(2, implicit: 60_000)
+        int = Integer.new(value: 2, implicit: 60_000)
         expect(int.to_der).to eq(binary("\x9f\x83\xd4\x60\x01\2"))
       end
     end
@@ -109,9 +109,9 @@ module RASN1::Types
         expect(int.id).to eq(43)
         expect(int.value).to eq(0)
 
-        #int = Integer.new(1, implicit: 255)
+        #int = Integer.new(value: 1, implicit: 255)
         #expect(int.to_der).to eq(binary("\x9f\x81\x7f\x01\x01"))
-        #int = Integer.new(2, implicit: 60_000)
+        #int = Integer.new(value: 2, implicit: 60_000)
         #expect(int.to_der).to eq(binary("\x9f\x83\xd4\x60\x01\2"))
       end
 
@@ -289,7 +289,7 @@ module RASN1::Types
 
     describe '#inspect' do
       it 'returns TYPE: VALUE for child classes' do
-        expect(Integer.new.inspect).to eq("INTEGER: nil")
+        expect(Integer.new.inspect).to eq("INTEGER: (NO VALUE)")
         expect(Integer.new(value: 0).inspect).to eq("INTEGER: 0")
       end
 

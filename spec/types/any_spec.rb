@@ -32,13 +32,13 @@ module RASN1::Types
 
       it 'generates a DER string with an octet string' do
         anymodel[:id].value = '1.2.3.4'
-        anymodel[:data].value = OctetString.new('abc')
+        anymodel[:data].value = OctetString.new(value: 'abc')
         expect(anymodel.to_der).to eq(os_der)
       end
 
       it 'generates a DER string with an integer' do
         anymodel[:id].value = '1.2.3.5'
-        anymodel[:data].value = Integer.new(128)
+        anymodel[:data].value = Integer.new(value: 128)
         expect(anymodel.to_der).to eq(int_der)
       end
 
@@ -68,7 +68,6 @@ module RASN1::Types
       end
 
       it 'raises on empty string' do
-        expect { Any.new.parse!(nil) }.to raise_error(RASN1::ASN1Error)
         expect { Any.new.parse!('') }.to raise_error(RASN1::ASN1Error)
       end
 
@@ -86,16 +85,16 @@ module RASN1::Types
       end
 
       it 'gets a String with real type' do
-        any.value = OctetString.new('1234')
+        any.value = OctetString.new(value: '1234')
         expect(any.inspect).to eq('(ANY) OCTET STRING: "1234"')
-        any.value = BitString.new('1235', bit_length: 30)
+        any.value = BitString.new(value: '1235', bit_length: 30)
         expect(any.inspect).to eq('(ANY) BIT STRING: "1235"')
-        any.value = Integer.new(45)
+        any.value = Integer.new(value: 45)
         expect(any.inspect).to eq('(ANY) INTEGER: 45')
       end
 
       it 'gets a String with an unknown type' do
-        any.value = OctetString.new('1234').to_der
+        any.value = OctetString.new(value: '1234').to_der
         expect(any.inspect).to eq("(ANY) #{any.value.inspect}")
       end
     end

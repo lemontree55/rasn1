@@ -22,7 +22,7 @@ module RASN1::Types
         expect { BitString.new(default: '123') }.to raise_error(RASN1::ASN1Error)
       end
     end
-    
+
     describe '#to_der' do
       it 'raises if bit length is not set' do
         bs = BitString.new
@@ -103,12 +103,12 @@ module RASN1::Types
 
     describe '#inspect' do
       it 'gets inspect string' do
-        bs = BitString.new('abcd', bit_length: 30)
+        bs = BitString.new(value: 'abcd', bit_length: 30)
         expect(bs.inspect).to eq('BIT STRING: "abcd" (bit length: 30)')
       end
 
       it 'gets inspect string with name' do
-        bs = BitString.new('abcd', name: :bs, bit_length: 30)
+        bs = BitString.new(value: 'abcd', name: :bs, bit_length: 30)
         expect(bs.inspect).to eq('bs BIT STRING: "abcd" (bit length: 30)')
       end
     end
