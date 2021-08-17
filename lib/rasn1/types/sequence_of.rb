@@ -31,7 +31,7 @@ module RASN1
     #             content: [boolean(:bool), integer(:int)]
     #  end
     #
-    #  seqof = RASN1::Types::SequenceOf.new(:record, MyModel)
+    #  seqof = RASN1::Types::SequenceOf.new(MyModel)
     #  # set values
     #  seqof << { bool: true, int: 12 }
     #  seqof << { bool: false, int: 65535 }

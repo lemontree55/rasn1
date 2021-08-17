@@ -396,7 +396,7 @@ module RASN1
 
     # Give a (nested) element from its name
     # @param [String, Symbol] name
-    # @return [Model, Types::Base]
+    # @return [Model, Types::Base, nil]
     def by_name(name)
       elt = self[name]
       return elt unless elt.nil?
