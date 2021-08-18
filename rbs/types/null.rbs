@@ -1,0 +1,15 @@
+module RASN1
+  module Types
+    class Null < Primitive
+      ID: Integer
+      @value: String
+
+      def inspect: (?level: Integer) -> String
+
+      private
+
+      def value_to_der: -> String
+      def der_to_value: (String der, ?ber: false?) -> String
+    end
+  end
+end

@@ -1,0 +1,16 @@
+module RASN1
+  module Types
+    class Boolean < Primitive
+      ID: Integer
+      DER_TRUE: Integer
+      DER_FALSE: Integer
+      @value: bool
+
+      def void_value: -> false
+
+      private
+      def value_to_der: -> String
+      def der_to_value: (String der, ?ber: false) -> bool
+    end
+  end
+end

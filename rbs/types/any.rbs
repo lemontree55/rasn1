@@ -1,0 +1,12 @@
+module RASN1
+  module Types
+    class Any < Base
+      @value: untyped
+
+      def to_der: -> String
+      def parse!: (String der, ?ber: false) -> Integer
+      def inspect: (?Integer level) -> String
+      def common_inspect: (Integer level) -> String
+    end
+  end
+end

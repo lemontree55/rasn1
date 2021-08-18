@@ -1,0 +1,12 @@
+module RASN1
+  module Types
+    class ObjectId < Primitive
+      ID: Integer
+      @value: String
+
+      private
+      def value_to_der: -> String
+      def der_to_value: (String der, ?ber: false) -> void
+    end
+  end
+end

@@ -1,0 +1,17 @@
+module RASN1
+  module Types
+    class Choice < Base
+      @value: Array[Base]
+
+      attr_accessor chosen: Integer?
+      def set_chosen_value: (untyped value) -> untyped
+      def chosen_value: -> untyped
+      def to_der: -> String
+      def parse!: (String der, ?ber: false) -> Integer
+      def inspect: (?Integer level) -> String
+
+      private
+      def check_chosen: -> void
+    end
+  end
+end

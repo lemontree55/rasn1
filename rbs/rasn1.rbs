@@ -1,0 +1,24 @@
+module RASN1
+  VERSION: String
+
+  class Error < StandardError
+  end
+
+  class ASN1Error < Error
+  end
+
+  class ClassError < Error
+    def message: -> String
+  end
+
+  class EnumeratedError < Error
+  end
+
+  class ChoiceError < Error
+    @name: String | Symbol
+
+    def message: -> String
+  end
+
+  def self.parse: (String der, ?ber: false) -> Types::Base?
+end

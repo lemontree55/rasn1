@@ -1,0 +1,32 @@
+module RASN1
+  module Types
+    class GeneralizedTime < Primitive
+      ID: Integer
+      @value: DateTime
+
+      def void_value: -> DateTime
+
+      private
+      def value_to_der: -> String
+      def der_to_value: (String der, ?ber: false) -> void
+      def value_when_fraction_empty: (String date_hour) -> void
+      def value_when_fraction_ends_with_z: (String date_hour, String fraction) -> void
+      def value_on_others_cases: (String date_hour, String fraction) -> void
+      def value_from: (String date_hour) -> Integer
+      def fix_dst: -> void
+      def fix_value: (String? fraction, Integer frac_base) -> void
+      def strformat: (String date_hour) -> [String?, Integer]
+    end
+
+    class UtcTime < Primitive
+      ID: Integer
+      @value: DateTime
+
+      def void_value: -> DateTime
+
+      private
+      def value_to_der: -> String
+      def der_to_value: (String der, ?ber: false) -> DateTime
+    end
+  end
+end

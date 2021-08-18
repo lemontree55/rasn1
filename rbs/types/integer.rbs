@@ -1,0 +1,33 @@
+module RASN1
+  module Types
+    class Integer < Primitive
+      ID: ::Integer
+      @id_value: ::Integer
+      @value: ::Integer
+
+      attr_reader enum: Hash[String | Symbol, ::Integer]?
+      def initialize: (?Hash[Symbol, untyped] options) -> void
+      def value=: ((::Integer | String | Symbol)? val) -> void
+      def void_value: -> ::Integer
+      def to_i: -> ::Integer
+
+      private
+      def initialize_enum: (Hash[String | Symbol, ::Integer]? enum) -> void
+      def check_enum_default: -> void
+      def value_from_string_or_symbol: ((String | Symbol) val) -> void
+      def value_from_integer: (::Integer val) -> void
+      def int_value_to_der: (::Integer value) -> String
+      def compute_size: (::Integer value) -> ::Integer
+      def value_to_der: -> String
+      def der_to_int_value: (String der, ?ber: false) -> ::Integer
+      def der_to_value: (String der, ?ber: false) -> void
+      def explicit_type: -> Integer
+    end
+
+    class Enumerated < Integer
+      attr_reader enum: Hash[String | Symbol, ::Integer]
+      def initialize: (?Hash[Symbol, untyped] options) -> void
+      def to_h: -> Hash[String | Symbol, ::Integer]
+    end
+  end
+end

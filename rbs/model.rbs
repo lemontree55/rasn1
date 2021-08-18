@@ -1,0 +1,69 @@
+module RASN1
+  class Model
+    class Elem < Struct[untyped]
+      attr_accessor name(): String | Symbol
+      attr_accessor proc_or_class(): (^(Hash[Symbol, untyped]) -> Types::Base) | Class
+      attr_accessor content(): nil
+    end
+
+    self.@root: Elem
+    self.@options: Hash[Symbol, untyped]
+    self.@type: String
+    @root_name: String | Symbol
+    @elements: Hash[String | Symbol, nil]
+
+    def self.model: (String | Symbol name, Class model_klass) -> void
+    def self.root_options: (Hash[Symbol, untyped] options) -> void
+    def self.inherited: (Class klass) -> void
+    def self.sequence: (String | Symbol name, ?Hash[Symbol, untyped] options) -> void
+    def self.set: (String | Symbol name, ?Hash[Symbol, untyped] options) -> void
+    def self.choice: (String | Symbol name, ?Hash[Symbol, untyped] options) -> void
+    def self.sequence_of: (String | Symbol name, Model | Types::Base of_type, ?Hash[Symbol, untyped] options) -> void
+    def self.set_of: (String | Symbol name, Model | Types::Base of_type, ?Hash[Symbol, untyped] options) -> void
+    def self.boolean: (String | Symbol name, ?Hash[Symbol, untyped] options) -> void
+    def self.integer: (String | Symbol name, ?Hash[Symbol, untyped] options) -> void
+    def self.bit_string: (String | Symbol name, ?Hash[Symbol, untyped] options) -> void
+    def self.octet_string: (String | Symbol name, ?Hash[Symbol, untyped] options) -> void
+    def self.null: (String | Symbol name, ?Hash[Symbol, untyped] options) -> void
+    def self.enumerated: (String | Symbol name, ?Hash[Symbol, untyped] options) -> void
+    def self.utf8_string: (String | Symbol name, ?Hash[Symbol, untyped] options) -> void
+    def self.numeric_string: (String | Symbol name, ?Hash[Symbol, untyped] options) -> void
+    def self.printable_string: (String | Symbol name, ?Hash[Symbol, untyped] options) -> void
+    def self.visible_string: (String | Symbol name, ?Hash[Symbol, untyped] options) -> void
+    def self.ia5_string: (String | Symbol name, ?Hash[Symbol, untyped] options) -> void
+    def self.objectid: (String | Symbol name, ?Hash[Symbol, untyped] options) -> void
+    def self.any: (String | Symbol name, ?Hash[Symbol, untyped] options) -> void
+    def self.type: -> String
+    def self.parse: (String str, ?ber: false) -> Model
+
+    def initialize: (?Hash[Symbol, untyped] args) -> void
+    def []: (String | Symbol name) -> (Model | Types::Base)
+    def []=: (String | Symbol name, untyped value) -> untyped
+    def name: -> (String | Symbol)
+    def keys: -> Array[String | Symbol]
+    def to_h: -> Hash[String | Symbol, untyped]
+    def root: -> (Model | Types::Base)
+    def to_der: -> String
+    def type: -> String
+    def parse!: (String str, ?ber: false) -> Integer
+    def value: () -> untyped |
+               (String | Symbol name, *untyped args) -> untyped
+    def method_missing: (Symbol meth, *untyped args) -> untyped
+    def respond_to_missing?: (Symbol meth, *untyped noname) -> bool
+    def inspect: (?Integer level) -> String
+    def ==: (untyped other) -> bool
+
+    def by_name: (String | Symbol name) -> (Model | Types::Base)?
+
+    private
+    def composed?: (untyped elt) -> bool
+    def get_type: ((^(Hash[Symbol, untyped]) -> Types::Base) | Class proc_or_class, ?Hash[Symbol, untyped] options) -> (Types::Base | Model)
+    def generate_root: -> Elem
+    def set_elements: (Elem element) -> void
+    def initialize_elements: (Model obj, Hash[Symbol, untyped] args) -> void
+    def initialize_element_from_array: (Model | Types::Base obj, Array[untyped] value) -> void
+    def private_to_h: (?(Model | Types::Base) element) -> Hash[String | Symbol, untyped]
+    def sequence_of_to_h: (Types::SequenceOf elt) -> Hash[String | Symbol, untyped]
+    def sequence_to_h: (Types::Sequence seq) -> Hash[String | Symbol, untyped]
+  end
+end

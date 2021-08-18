@@ -1,0 +1,47 @@
+module RASN1
+  module Types
+    class OctetString < Primitive
+      ID: Integer
+
+      def inspect: (?level: Integer) -> String
+    end
+
+    class IA5String < OctetString
+      def self.type: -> String
+
+      private
+      def value_to_der: -> String
+      def der_to_value: (String der, ?ber: false) -> void
+    end
+
+    class NumericString < OctetString
+      def self.type: -> String
+
+      private
+      def value_to_der: -> String
+      def der_to_value: (String der, ?ber: false) -> void
+      def check_characters: -> void
+    end
+
+    class PrintableString < OctetString
+      def self.type: -> String
+
+      private
+      def value_to_der: -> String
+      def der_to_value: (String der, ?ber: false) -> void
+      def check_characters: -> void
+    end
+
+    class Utf8String < OctetString
+      def self.type: -> String
+
+      private
+      def value_to_der: -> String
+      def der_to_value: (String der, ?ber: false) -> void
+    end
+
+    class VisibleString < IA5String
+      def self.type: -> String
+    end
+  end
+end

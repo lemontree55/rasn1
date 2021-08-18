@@ -1,0 +1,59 @@
+module RASN1
+  module Types
+    type sequenceContent = (Base | Model | String)?
+    type sequenceOfContent = (Base | Model)?
+    type sequenceRubyTypes = (Integer | String | DateTime | true | false)
+
+    class Sequence < Constructed
+      ID: Integer
+      @value: Array[sequenceContent]
+
+      def initialize: (?Hash[Symbol, untyped] options) -> void
+      def initialize_copy: (untyped other) -> void
+      def void_value: -> Array[sequenceContent]
+      def []: (Integer | String | Symbol idx_or_name) -> sequenceContent
+
+      private
+      def value_to_der: -> String
+      def der_to_value: (String der, ?ber: false) -> void
+      def explicit_type: -> Sequence
+    end
+
+    class SequenceOf < Constructed
+      ID: Integer
+      @value: Array[sequenceOfContent]
+      self.@type: String
+
+      attr_reader of_type: Class | Constructed
+      def self.encoded_type: -> String
+      def initialize: (Class | Constructed of_type, ?Hash[Symbol, bot] options) -> void
+      def initialize_copy: (untyped other) -> void
+      def void_value: -> Array[sequenceOfContent]
+      def <<: (Array[sequenceRubyTypes] | Hash[Symbol | String, untyped] obj) -> self
+      def []: (Integer idx) -> sequenceOfContent
+      def length: -> Integer
+      def inspect: (?Integer level) -> String
+
+      private
+      def of_type_class: -> Class
+      def composed_of_type?: -> bool
+      def value_to_der: -> String
+      def der_to_value: (String der, ?ber: false) -> void
+      def explicit_type: -> SequenceOf
+      def push_array_of_primitive: (Array[sequenceRubyTypes] obj) -> void
+      def push_composed_array: (Array[sequenceRubyTypes] obj) -> void
+      def push_model: (Hash[Symbol | String, untyped] | Class obj) -> void
+    end
+
+    class Set < Sequence
+      ID: Integer
+      self.@type: String
+    end
+
+    class SetOf < SequenceOf
+      ID: Integer
+
+      def self.encoded_type: -> String
+    end
+  end
+end

@@ -1,0 +1,13 @@
+module RASN1
+  module Types
+    self.@primitives: Array[Class]
+    self.@constructed: Array[Class]
+    self.@id2types: Hash[::Integer, Base]
+
+    def self.primitives: -> Array[Class]
+    def self.constructed: -> Array[Class]
+    def self.decode_identifier_octets: (String der) -> ([:application | :context | :private | :universal, :constructed | :primitive, Integer, Integer])
+    def self.id2type: (String der) -> Base
+    def self.generate_id2type_cache: -> Hash[::Integer, Base]
+  end
+end

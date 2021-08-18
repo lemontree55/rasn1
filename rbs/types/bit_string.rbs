@@ -1,0 +1,22 @@
+module RASN1
+  module Types
+    class BitString < Primitive
+      ID: Integer
+      @id_value: Integer
+      @no_value: bool
+      @value: String
+      @default_bit_length: Integer?
+
+      attr_writer bit_length: Integer
+      def initialize: (?Hash[Symbol, untyped] options) -> void
+      def bit_length: -> Integer
+      def inspect: (?Integer level) -> String
+
+      private
+      def can_build?: -> bool
+      def value_to_der: -> String
+      def generate_value_with_correct_length: -> String
+      def der_to_value: (String der, ?ber: false) -> String
+    end
+  end
+end

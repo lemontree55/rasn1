@@ -1,0 +1,85 @@
+module RASN1
+  module Types
+    class Base
+      CLASSES: {universal: Integer, application: Integer, context: Integer, private: Integer}
+      CLASS_MASK: Integer
+      MULTI_OCTETS_ID: Integer
+      INDEFINITE_LENGTH: Integer
+
+      @constructed: bool?
+      @optional: bool
+      @tag: (:explicit | :implicit)?
+      @id_value: Integer?
+      @no_value: bool
+      @value: untyped
+      @options: Hash[Symbol, untyped]
+      self.@type: String
+
+      attr_reader name: String?
+      attr_reader asn1_class: :application | :context | :private | :universal
+      attr_reader default: untyped
+      def self.type: -> String
+      def self.encoded_type: -> String
+      def self.parse: (String der_or_ber, ?Hash[Symbol, untyped] options) -> Base
+      def initialize: (?Hash[Symbol, untyped] options) -> void
+      def initialize_copy: (untyped _other) -> nil
+      def value: -> untyped
+      def value=: (untyped val) -> untyped
+      def void_value: -> String
+      def optional?: -> bool?
+      def tagged?: -> bool
+      def explicit?: -> bool?
+      def implicit?: -> bool?
+      def to_der: -> String
+      def primitive?: -> bool
+      def constructed?: -> bool
+      def type: -> String?
+      def id: -> Integer?
+      def parse!: (String der, ?ber: false?) -> Integer
+      def value_size: -> Integer
+      def inspect: (?Integer level) -> String
+      def ==: (untyped other) -> bool
+
+      private
+      def pc_bit: -> Integer
+      def common_inspect: (Integer level) -> String
+      def inspect_value: -> String
+      def value_to_der: -> String
+      def der_to_value: (String der, ?ber: false?) -> String
+      def set_options: (Hash[Symbol, untyped] options) -> Hash[Symbol, untyped]
+      def set_class: ((:application | :context | :private | :universal)? asn1_class) -> ((:application | :context | :private | :universal)?)
+      def set_optional: (bool? optional) -> bool
+      def set_default: (untyped default) -> untyped
+      def set_tag: (Hash[Symbol, untyped] options) -> void
+      def set_value: (untyped value) -> untyped
+      def value?: -> bool
+      def can_build?: -> bool
+      def build: -> String
+      def id_value: -> Integer?
+      def encode_identifier_octets: -> String
+      def id2octets: -> Array[Integer]
+      def unsigned_to_chained_octets: (Integer value) -> Array[Integer]
+      def encode_size: (Integer size) -> String
+      def check_id: (String der) -> bool
+      def get_data: (String der, false? ber) -> [Integer, String]
+      def raise_on_indefinite_length: (false? ber) -> untyped
+      def explicit_type: -> Base
+      def raise_id_error: (String der) -> untyped
+      def class_from_numeric_id: (Integer id) -> ((:application | :context | :private | :universal)?)
+      def self2name: -> String
+      def der2name: (String der) -> String
+      def find_type: (Integer id) -> Class
+      def bin2hex: (String str) -> String
+    end
+
+    class Primitive < Base
+      ASN1_PC: Integer
+    end
+
+    class Constructed < Base
+      ASN1_PC: Integer
+
+      def inspect: (?Integer level) -> String
+    end
+  end
+end
