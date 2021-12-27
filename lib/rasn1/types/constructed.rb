@@ -19,8 +19,6 @@ module RASN1
           @value.each do |item|
             case item
             when Base, Model
-              next if item.optional? && item.value.nil?
-
               str << "#{item.inspect(level)}\n"
             else
               str << '  ' * level

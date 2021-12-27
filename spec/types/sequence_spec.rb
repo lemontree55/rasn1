@@ -14,7 +14,7 @@ module RASN1
           @no_bool_der = binary("\x30\x09\x02\x01\x2A\x03\x04\x01\x01\x04\x06")
           @der = binary("\x30\x0c\x01\x01\x00\x02\x01\x2A\x03\x04\x01\x01\x04\x06")
         end
-        
+
       describe '.type' do
         it 'gets ASN.1 type' do
           expect(Sequence.type).to eq('SEQUENCE')
@@ -68,6 +68,19 @@ module RASN1
           seq2 = Sequence.new
           seq2.parse!(@der)
           expect(seq2.value).to eq(@der[2, @der.length])
+        end
+      end
+
+      describe '#inspect' do
+        let(:inspect_str) { @seq.inspect }
+
+        it 'prints a line per value' do
+          expect(inspect_str.split("\n").size).to eq(4)
+        end
+
+        it 'prints optional values' do
+          @seq.value[1] = Integer.new(optional: true)
+          expect(@seq.inspect.split("\n").size).to eq(4)
         end
       end
     end

@@ -17,6 +17,7 @@
 * Fix Types::Utf8String#der_to_value by setting @value.
 * Fix some minor issues due to type handling (Types::Base, Types::BitString,
   Types::GeneralizedTime, Types::ObjectIf, Types::Sequence and Types::SequenceOf)
+* Types::Constructed#inspect: always show optional fields
 
 ## 0.8.0 - 2020-12-04
 
