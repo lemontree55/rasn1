@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.10.0 - 2022-03-11
+
+### Changed
+
+* API break: behavior change of `Types::SequenceOf#<<` when it is a sequence of primitives (in ASN.1 context). Now, `#<<` acts as `Array#<<` by appending only one item to the sequence. It accepts either a primitive type object or its ruby equivalent one.
+
+### Fixed
+
+* Fix `Types::Sequence#[]` when indexing with an integer. It always returned nil.
+
 ## 0.9.0 - 2021-12-27
 
 ### Changed
@@ -18,6 +28,10 @@
 * Fix some minor issues due to type handling (Types::Base, Types::BitString,
   Types::GeneralizedTime, Types::ObjectIf, Types::Sequence and Types::SequenceOf)
 * Types::Constructed#inspect: always show optional fields
+
+### Removed
+
+* Remove support for Ruby 2.4.
 
 ## 0.8.0 - 2020-12-04
 
