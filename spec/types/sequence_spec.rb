@@ -31,6 +31,21 @@ module RASN1
         end
       end
 
+      describe '#initialize_copy' do
+        it 'deeply copie self' do
+          seq = Sequence.new
+          rand(10).times do
+            seq.value << Integer.new(value: rand(1_000_000))
+          end
+
+          seq2 = seq.dup
+          expect(seq2).to eq(seq)
+          seq.value.size.times do |idx|
+            expect(seq2[idx]).to_not eql(seq[idx])
+          end
+        end
+      end
+
       describe '#to_der' do
         it 'generates a DER string' do
           @int.value = 42

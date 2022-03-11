@@ -58,7 +58,7 @@ module RASN1
         return unless @value.is_a?(Array)
 
         case idx_or_name
-        when Integer
+        when ::Integer
           @value[idx_or_name.to_i]
         when String, Symbol
           @value.find { |elt| elt.name == idx_or_name }
