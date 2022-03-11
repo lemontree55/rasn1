@@ -36,7 +36,7 @@ module RASN1::Types
         end
 
         it 'raises if chosen is not set' do
-          expect { @choice.set_chosen_value 45 }.to raise_error(RASN1::ChoiceError)
+          expect { @choice.set_chosen_value 45 }.to raise_error(RASN1::ChoiceError).with_message(/#chosen not set$/)
         end
       end
 

@@ -50,6 +50,10 @@ module RASN1::Types
         utc.parse!(binary("\x17\x13990101020304+0100"))
         expect(utc.value).to eq(Time.utc(2099, 1, 1, 1, 3, 4))
       end
+
+      it 'raises ASN1Error on unknown format' do
+        expect { utc.parse!("\x17\x05aaaaa") }.to raise_error(RASN1::ASN1Error).with_message(/unrecognized format/)
+      end
     end
   end
 end

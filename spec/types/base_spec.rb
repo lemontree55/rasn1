@@ -22,7 +22,7 @@ module RASN1::Types
       end
 
       it 'raises on unknown class' do
-        expect { Base.new(class: :unknown) }.to raise_error(RASN1::ClassError)
+        expect { Base.new(class: :unknown) }.to raise_error(RASN1::ClassError).with_message(/^Tag class should be a symbol among/)
         expect { Base.new(class: 'not a symbol') }.to raise_error(RASN1::ClassError)
       end
 

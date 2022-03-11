@@ -17,7 +17,7 @@ module RASN1
   class ClassError < Error
     # @return [String]
     def message
-      "Tag class should be a symbol: #{Types::Base::CLASSES.keys.join(', ')}"
+      "Tag class should be a symbol among: #{Types::Base::CLASSES.keys.join(', ')}"
     end
   end
 

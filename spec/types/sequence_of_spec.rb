@@ -30,6 +30,12 @@ module RASN1
         end
       end
 
+      describe '.encoded_type' do
+        it '.encoded_type returns same type as Sequence' do
+          expect(SequenceOf.encoded_type).to eq('SEQUENCE')
+        end
+      end
+
       describe '#initialize' do
         it 'creates an SequenceOf with default values' do
           seqof = SequenceOf.new(Types::Integer)

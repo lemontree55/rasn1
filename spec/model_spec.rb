@@ -53,6 +53,8 @@ module RASN1
   DEFAULT_VALUE = "\x30\x08\x02\x03\x01\x00\x01\x80\x01\x2b".force_encoding('BINARY')
   NESTED_VALUE = "\x30\x0d\x01\x01\xff\x30\x08\x02\x03\x01\x00\x01\x80\x01\x2b".force_encoding('BINARY')
   ERRORED_VALUE = "\x01\x01\x00"
+  CHOICE_INTEGER = "\x02\x01\x10".force_encoding('BINARY')
+  CHOICE_SEQUENCE = SIMPLE_VALUE
 
   describe Model do
     describe '.root_options' do
@@ -215,6 +217,19 @@ module RASN1
         expect(exp[:extern_id]).to be_a(Types::Integer)
         expect(exp[:id].value).to eq(1)
         expect(exp[:extern_id].value).to eq(0x10)
+      end
+
+      it 'parses a DER string with a CHOICE' do
+        choice = ModelChoice.parse(CHOICE_INTEGER)
+        expect(choice.chosen).to eq(0)
+        expect(choice[:id].value).to eq(16)
+        expect(choice.chosen_value).to eq(16)
+
+        choice = ModelChoice.parse(CHOICE_SEQUENCE)
+        expect(choice.chosen).to eq(1)
+        expect(choice[:a_record][:id].value).to eq(65537)
+        expect(choice[:a_record][:room].value).to eq(43)
+        expect(choice[:a_record][:house].value).to eq(0x1234)
       end
     end
 
