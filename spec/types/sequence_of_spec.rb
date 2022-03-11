@@ -55,10 +55,26 @@ module RASN1
         end
       end
 
+      describe '#initialize_copy' do
+        it 'deeply copie self' do
+          seqof = SequenceOf.new(Types::Integer)
+          rand(10).times do
+            seqof << Integer.new(value: rand(1_000_000))
+          end
+          seqof << rand(1_000_000) # infer an Integer from a ruby integer
+
+          seqof2 = seqof.dup
+          expect(seqof2).to eq(seqof)
+          seqof.value.size.times do |idx|
+            expect(seqof2[idx]).to_not eql(seqof[idx])
+          end
+        end
+      end
+
       describe '#to_der' do
         it 'generates a DER string for a primitive type' do
           seqof = SequenceOf.new(Integer)
-          seqof << (0..7).to_a
+          seqof.value = (0..7).to_a.map { |i| Integer.new(value: i) }
           expect(seqof.to_der).to eq(@integer_der)
         end
 

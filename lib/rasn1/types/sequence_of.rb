@@ -13,7 +13,8 @@ module RASN1
     #  # Create a SEQUENCE OF INTEGER
     #  seqof = RASN1::Types::SequenceOf.new(RASN1::Types::Integer)
     #  # Set integer values
-    #  seqof.value = [1, 2, 3, 4]
+    #  seqof.value = [1, 2, 3, 4].map { |i| RASN1::Types::Integer.new(value: i) }
+    #  seqof << 5   # infer a RASN1::Types::Integer with given value
     #
     # == Use with {Constructed} types
     # SEQUENCE OF may be used to create sequence of composed types. For example:
@@ -79,9 +80,13 @@ module RASN1
       end
 
       # Add an item to SEQUENCE OF
-      # @param [Array,Hash, Model]
+      # @param [Object] obj
+      # @note
+      #   * if a SEQUENCE OF primitive type, +obj+ is an instance of primitive type or equivalent Ruby type
+      #   * if a SEQUENCE OF composed type, +obj+ is an array of ruby type instances
+      #   * if a SEQUENCE OF model, +obj+ is either a Model or a Hash
       def <<(obj)
-        return push_array_of_primitive(obj) if of_type_class < Primitive
+        return push_primitive(obj) if of_type_class < Primitive
         return push_composed_array(obj) if composed_of_type?
 
         push_model(obj)
@@ -112,7 +117,7 @@ module RASN1
             str << item.inspect(level)
             str << "\n" unless str.end_with?("\n")
           else
-            str << '  ' * level + "#{item.inspect}\n"
+            str << ('  ' * level) << "#{item.inspect}\n"
           end
         end
         str
@@ -151,10 +156,14 @@ module RASN1
         self.class.new(self.of_type)
       end
 
-      def push_array_of_primitive(obj)
-        raise ASN1Error, 'object to add should be an Array' unless obj.is_a?(Array)
-
-        @value += obj.map { |item| of_type_class.new(value: item) }
+      def push_primitive(obj)
+        @value <<
+          case obj
+          when Primitive
+            obj
+          else
+            of_type_class.new(value: obj)
+          end
       end
 
       def push_composed_array(obj)
