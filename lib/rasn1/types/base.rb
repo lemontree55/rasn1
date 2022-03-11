@@ -455,7 +455,7 @@ module RASN1
       def raise_on_indefinite_length(ber)
         if primitive?
           raise ASN1Error, "malformed #{type}: indefinite length " \
-            'forbidden for primitive types'
+                           'forbidden for primitive types'
         elsif ber
           raise NotImplementedError, 'indefinite length not supported'
         else

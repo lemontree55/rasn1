@@ -77,15 +77,13 @@ module RASN1
       def parse!(der, ber: false)
         parsed = false
         @value.each_with_index do |element, i|
-          begin
-            @chosen = i
-            nb_bytes = element.parse!(der, ber: ber)
-            parsed = true
-            return nb_bytes
-          rescue ASN1Error
-            @chosen = nil
-            next
-          end
+          @chosen = i
+          nb_bytes = element.parse!(der, ber: ber)
+          parsed = true
+          return nb_bytes
+        rescue ASN1Error
+          @chosen = nil
+          next
         end
         raise ASN1Error, "CHOICE #{@name}: no type matching #{der.inspect}" unless parsed
       end
