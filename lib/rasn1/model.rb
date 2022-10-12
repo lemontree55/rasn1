@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'types/constrained'
+
 module RASN1
   # @abstract
   # {Model} class is a base class to define ASN.1 models.
@@ -53,7 +55,7 @@ module RASN1
   #
   # == Delegation
   # {Model} may delegate some methods to its root element. Thus, if root element
-  # is, for example, a {Types::Choice}, model may delegate +#chosen+ and +#chosen_value+.
+  # is, for example, a {TypeInts::Choice}, model may delegate +#chosen+ and +#chosen_value+.
   #
   # All methods defined by root may be delegated by model, unless model also defines
   # this method.
@@ -62,7 +64,8 @@ module RASN1
     # @private
     Elem = Struct.new(:name, :proc_or_class, :content)
 
-    class << self
+    # @private
+    module Accel
       # @return [Hash]
       attr_reader :options
 
@@ -100,120 +103,39 @@ module RASN1
         klass.class_eval { @root = root }
       end
 
-      # @method sequence(name, options)
-      #  @param [Symbol,String] name name of object in model
-      #  @param [Hash] options
-      #  @return [Elem]
-      #  @see Types::Sequence#initialize
-      # @method set(name, options)
-      #  @param [Symbol,String] name name of object in model
-      #  @param [Hash] options
-      #  @return [Elem]
-      #  @see Types::Set#initialize
-      # @method choice(name, options)
-      #  @param [Symbol,String] name name of object in model
-      #  @param [Hash] options
-      #  @return [Elem]
-      #  @see Types::Choice#initialize
-      %w[sequence set choice].each do |type|
-        class_eval "def #{type}(name, options={})\n" \
-                   "  options.merge!(name: name)\n" \
-                   "  proc = proc do |opts|\n" \
-                   "    Types::#{type.capitalize}.new(options.merge(opts))\n" \
-                   "  end\n" \
-                   "  @root = Elem.new(name, proc, options[:content])\n" \
-                   'end'
+      def define_type_accel_base(accel_name, klass)
+        singleton_class.class_eval(
+          "def #{accel_name}(name, options={})\n" \
+          "  options[:name] = name\n" \
+          "  proc = proc do |opts|\n" \
+          "    #{klass}.new(options.merge(opts))\n" \
+          "  end\n" \
+          "  @root = Elem.new(name, proc, options[:content])\n" \
+          'end'
+        )
       end
 
-      # @method sequence_of(name, type, options)
-      #  @param [Symbol,String] name name of object in model
-      #  @param [Model, Types::Base] type type for SEQUENCE OF
-      #  @param [Hash] options
-      #  @return [Elem]
-      #  @see Types::SequenceOf#initialize
-      # @method set_of(name, type, options)
-      #  @param [Symbol,String] name name of object in model
-      #  @param [Model, Types::Base] type type for SET OF
-      #  @param [Hash] options
-      #  @return [Elem]
-      #  @see Types::SetOf#initialize
-      %w[sequence set].each do |type|
-        klass_name = "Types::#{type.capitalize}Of"
-        class_eval "def #{type}_of(name, type, options={})\n" \
-                   "  options.merge!(name: name)\n" \
-                   "  proc = proc do |opts|\n" \
-                   "    #{klass_name}.new(type, options.merge(opts))\n" \
-                   "  end\n" \
-                   "  @root = Elem.new(name, proc, nil)\n" \
-                   'end'
+      def define_type_accel_of(accel_name, klass)
+        singleton_class.class_eval(
+          "def #{accel_name}_of(name, type, options={})\n" \
+          "  options[:name] = name\n" \
+          "  proc = proc do |opts|\n" \
+          "    #{klass}.new(type, options.merge(opts))\n" \
+          "  end\n" \
+          "  @root = Elem.new(name, proc, nil)\n" \
+          'end'
+        )
       end
 
-      # @method boolean(name, options)
-      #  @param [Symbol,String] name name of object in model
-      #  @param [Hash] options
-      #  @return [Elem]
-      #  @see Types::Boolean#initialize
-      # @method integer(name, options)
-      #  @param [Symbol,String] name name of object in model
-      #  @param [Hash] options
-      #  @return [Elem]
-      #  @see Types::Integer#initialize
-      # @method bit_string(name, options)
-      #  @param [Symbol,String] name name of object in model
-      #  @param [Hash] options
-      #  @return [Elem]
-      #  @see Types::BitString#initialize
-      # @method octet_string(name, options)
-      #  @param [Symbol,String] name name of object in model
-      #  @param [Hash] options
-      #  @return [Elem]
-      #  @see Types::OctetString#initialize
-      # @method null(name, options)
-      #  @param [Symbol,String] name name of object in model
-      #  @param [Hash] options
-      #  @return [Elem]
-      #  @see Types::Null#initialize
-      # @method enumerated(name, options)
-      #  @param [Symbol,String] name name of object in model
-      #  @param [Hash] options
-      #  @return [Elem]
-      #  @see Types::Enumerated#initialize
-      # @method utf8_string(name, options)
-      #  @param [Symbol,String] name name of object in model
-      #  @param [Hash] options
-      #  @return [Elem]
-      #  @see Types::Utf8String#initialize
-      # @method numeric_string(name, options)
-      #  @param [Symbol,String] name name of object in model
-      #  @param [Hash] options
-      #  @return [Elem]
-      #  @see Types::NumericString#initialize
-      # @method printable_string(name, options)
-      #  @param [Symbol,String] name name of object in model
-      #  @param [Hash] options
-      #  @return [Elem]
-      #  @see Types::PrintableString#initialize
-      # @method visible_string(name, options)
-      #  @param [Symbol,String] name name of object in model
-      #  @param [Hash] options
-      #  @return [Elem]
-      #  @see Types::VisibleString#initialize
-      # @method ia5_string(name, options)
-      #  @param [Symbol,String] name name of object in model
-      #  @param [Hash] options
-      #  @return [Elem]
-      #  @see Types::IA5String#initialize
-      Types.primitives.each do |prim|
-        next if prim == Types::ObjectId
-
-        method_name = prim.type.gsub(/([a-z0-9])([A-Z])/, '\1_\2').downcase.gsub(/\s+/, '_')
-        class_eval "def #{method_name}(name, options={})\n" \
-                   "  options.merge!(name: name)\n" \
-                   "  proc = proc do |opts|\n" \
-                   "    #{prim}.new(options.merge(opts))\n" \
-                   "  end\n" \
-                   "  @root = Elem.new(name, proc, nil)\n" \
-                   'end'
+      # Define an accelarator to access a type in a model definition
+      # @param [String] accel_name
+      # @param [Class] klass
+      def define_type_accel(accel_name, klass)
+        if klass < Types::SequenceOf
+          define_type_accel_of(accel_name, klass)
+        else
+          define_type_accel_base(accel_name, klass)
+        end
       end
 
       # @param [Symbol,String] name name of object in model
@@ -256,6 +178,105 @@ module RASN1
         model.parse!(str, ber: ber)
         model
       end
+    end
+
+    extend Accel
+
+    # @method sequence(name, options)
+    #  @param [Symbol,String] name name of object in model
+    #  @param [Hash] options
+    #  @return [Elem]
+    #  @see Types::Sequence#initialize
+    # @method set(name, options)
+    #  @param [Symbol,String] name name of object in model
+    #  @param [Hash] options
+    #  @return [Elem]
+    #  @see Types::Set#initialize
+    # @method choice(name, options)
+    #  @param [Symbol,String] name name of object in model
+    #  @param [Hash] options
+    #  @return [Elem]
+    #  @see Types::Choice#initialize
+    %w[sequence set choice].each do |type|
+      self.define_type_accel_base(type, Types.const_get(type.capitalize))
+    end
+
+    # @method sequence_of(name, type, options)
+    #  @param [Symbol,String] name name of object in model
+    #  @param [Model, Types::Base] type type for SEQUENCE OF
+    #  @param [Hash] options
+    #  @return [Elem]
+    #  @see Types::SequenceOf#initialize
+    # @method set_of(name, type, options)
+    #  @param [Symbol,String] name name of object in model
+    #  @param [Model, Types::Base] type type for SET OF
+    #  @param [Hash] options
+    #  @return [Elem]
+    #  @see Types::SetOf#initialize
+    %w[sequence set].each do |type|
+      define_type_accel_of(type, Types.const_get("#{type.capitalize}Of"))
+    end
+
+    # @method boolean(name, options)
+    #  @param [Symbol,String] name name of object in model
+    #  @param [Hash] options
+    #  @return [Elem]
+    #  @see Types::Boolean#initialize
+    # @method integer(name, options)
+    #  @param [Symbol,String] name name of object in model
+    #  @param [Hash] options
+    #  @return [Elem]
+    #  @see Types::Integer#initialize
+    # @method bit_string(name, options)
+    #  @param [Symbol,String] name name of object in model
+    #  @param [Hash] options
+    #  @return [Elem]
+    #  @see Types::BitString#initialize
+    # @method octet_string(name, options)
+    #  @param [Symbol,String] name name of object in model
+    #  @param [Hash] options
+    #  @return [Elem]
+    #  @see Types::OctetString#initialize
+    # @method null(name, options)
+    #  @param [Symbol,String] name name of object in model
+    #  @param [Hash] options
+    #  @return [Elem]
+    #  @see Types::Null#initialize
+    # @method enumerated(name, options)
+    #  @param [Symbol,String] name name of object in model
+    #  @param [Hash] options
+    #  @return [Elem]
+    #  @see Types::Enumerated#initialize
+    # @method utf8_string(name, options)
+    #  @param [Symbol,String] name name of object in model
+    #  @param [Hash] options
+    #  @return [Elem]
+    #  @see Types::Utf8String#initialize
+    # @method numeric_string(name, options)
+    #  @param [Symbol,String] name name of object in model
+    #  @param [Hash] options
+    #  @return [Elem]
+    #  @see Types::NumericString#initialize
+    # @method printable_string(name, options)
+    #  @param [Symbol,String] name name of object in model
+    #  @param [Hash] options
+    #  @return [Elem]
+    #  @see Types::PrintableString#initialize
+    # @method visible_string(name, options)
+    #  @param [Symbol,String] name name of object in model
+    #  @param [Hash] options
+    #  @return [Elem]
+    #  @see Types::VisibleString#initialize
+    # @method ia5_string(name, options)
+    #  @param [Symbol,String] name name of object in model
+    #  @param [Hash] options
+    #  @return [Elem]
+    #  @see Types::IA5String#initialize
+    Types.primitives.each do |prim|
+      next if prim == Types::ObjectId
+
+      method_name = prim.type.gsub(/([a-z0-9])([A-Z])/, '\1_\2').downcase.gsub(/\s+/, '_')
+      self.define_type_accel_base(method_name, prim)
     end
 
     # Create a new instance of a {Model}
@@ -425,7 +446,7 @@ module RASN1
       when Proc
         proc_or_class.call(options)
       when Class
-        proc_or_class.new
+        proc_or_class.new(options)
       end
     end
 

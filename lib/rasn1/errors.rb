@@ -22,4 +22,20 @@ module RASN1
       "CHOICE #{@name}: #chosen not set"
     end
   end
+
+  # Exception raised when a constraint is not verified on a constrained type.
+  # @version 0.11.0
+  # @author Sylvain Daubert
+  class ConstraintError < Error
+    # @param [Types::Base] object
+    def initialize(object)
+      @object = object
+      super()
+    end
+
+    # @return [String]
+    def message
+      "Constraint not verified on #{object.inspect}"
+    end
+  end
 end

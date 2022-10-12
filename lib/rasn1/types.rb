@@ -73,6 +73,29 @@ module RASN1
       @id2types.default = Types::Base
       @id2types.freeze
     end
+
+    # Define a new ASN.1 type from a base one.
+    # This new type may have a constraint defines on it.
+    # @param [Symbol,String] name New type name. Must start with a capital letter.
+    # @param [Types::Base] from
+    # @return [Class] newly created class
+    def self.define_type(name, from:, &block)
+      constraint = block.nil? ? nil : block.to_proc
+
+      new_klass = Class.new(from) do
+        include Constrained
+      end
+      new_klass.constraint = constraint
+
+      self.const_set(name, new_klass)
+      Model.define_type_accel(name.downcase, new_klass)
+
+      # Empty type caches
+      @primitives = nil
+      @constructed = nil
+
+      new_klass
+    end
   end
 end
 

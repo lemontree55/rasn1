@@ -95,6 +95,13 @@ module RASN1
         obj
       end
 
+      # Say if a type is constrained.
+      # Always return +false+ for predefined types
+      # @return [Booleran]
+      def self.constrained?
+        false
+      end
+
       # @param [Hash] options
       # @option options [Symbol] :class ASN.1 class. Default value is +:universal+.
       #  If +:explicit+ or +:implicit:+ is defined, default value is +:context+.
@@ -110,7 +117,11 @@ module RASN1
       def initialize(options={})
         @constructed = nil
         set_options options
+        specific_initializer
       end
+
+      # @abstract To help subclass initialize itself. Default implementation do nothing.
+      def specific_initializer; end
 
       # Used by +#dup+ and +#clone+. Deep copy @value and @default.
       def initialize_copy(_other)
