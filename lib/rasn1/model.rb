@@ -20,6 +20,8 @@ module RASN1
   #                       integer(:house, explicit: 1, default: 0)])
   #  end
   #
+  # In a model, each element must have a unique name.
+  #
   # === Parse a DER-encoded string
   #  record = Record.parse(der_string)
   #  record[:id]             # => RASN1::Types::Integer
