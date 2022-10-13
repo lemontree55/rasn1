@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.11.0 - 2022-10-13
+
+### Added
+
+* Add custom types. A custom type is an ASN.1 type with a custom name. Furthermore, a custom type may be constrained.
+
+### Fixed
+
+* Fix Model doc: specify each element in a model must have a unique name.
+
 ## 0.10.0 - 2022-03-11
 
 ### Changed
