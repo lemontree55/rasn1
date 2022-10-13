@@ -62,7 +62,7 @@ module RASN1
   # All methods defined by root may be delegated by model, unless model also defines
   # this method.
   # @author Sylvain Daubert
-  class Model # rubocop:disable Metrics/ClassLength
+  class Model
     # @private
     Elem = Struct.new(:name, :proc_or_class, :content)
 

@@ -30,7 +30,7 @@ module RASN1
         end
       end
 
-      class <<self
+      class << self
         attr_reader :constraint
 
         def included(base)

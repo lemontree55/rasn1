@@ -44,6 +44,9 @@ Style/FormatStringToken:
   MaxUnannotatedPlaceholdersAllowed: 3
 Style/PerlBackrefs:
   Enabled: false
+Style/RaiseArgs:
+  EnforcedStyle: exploded
+  AllowedCompactTypes: ['ConstraintError']
 Style/RedundantSelf:
   Enabled: false
 Style/StructInheritance:
