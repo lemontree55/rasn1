@@ -48,6 +48,11 @@ module RASN1
              content: [integer(:id), integer(:extern_id)]
   end
 
+  class ModelExplicitBitString < Model
+    sequence :bit_string,
+             content: [bit_string(:flags, explicit: 0, constructed: true, bit_length: 32)]
+  end
+
   SIMPLE_VALUE = "\x30\x0e\x02\x03\x01\x00\x01\x80\x01\x2b\x81\x04\x02\x02\x12\x34".force_encoding('BINARY')
   OPTIONAL_VALUE = "\x30\x0b\x02\x03\x01\x00\x01\x81\x04\x02\x02\x12\x34".force_encoding('BINARY')
   DEFAULT_VALUE = "\x30\x08\x02\x03\x01\x00\x01\x80\x01\x2b".force_encoding('BINARY')
@@ -166,6 +171,11 @@ module RASN1
       it 'generates a DER string from a nested model' do
         test2 = ModelTest2.new(rented: true, a_record: { id: 65537, room: 43 })
         expect(test2.to_der).to eq(NESTED_VALUE)
+      end
+
+      it 'generates a DER string from a model with bit string' do
+        test = ModelExplicitBitString.new(flags: "\x50\xa0\x00\x00".b)
+        expect(test.to_der).to eq("\x30\x09\xa0\x07\x03\x05\x00\x50\xa0\x00\x00".b)
       end
     end
 

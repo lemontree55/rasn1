@@ -85,6 +85,10 @@ module RASN1
         @bit_length = value.length * 8 - unused
         @value = value
       end
+
+      def explicit_type
+        self.class.new(value: @value, bit_length: @bit_length)
+      end
     end
   end
 end
