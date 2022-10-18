@@ -24,6 +24,13 @@ module RASN1
       # GeneralizedTime id value
       ID = 24
 
+      # @private
+      HOUR_TO_DAY = Rational(1, 24).freeze
+      # @private
+      MINUTE_TO_DAY = Rational(1, 24 * 60).freeze
+      # @private
+      SECOND_TO_DAY = Rational(1, 24 * 60 * 60).freeze
+
       # Get ASN.1 type
       # @return [String]
       def self.type
@@ -38,11 +45,12 @@ module RASN1
       private
 
       def value_to_der
-        if @value.nsec.positive?
-          der = @value.getutc.strftime('%Y%m%d%H%M%S.%9NZ')
+        utc_value = @value.new_offset(0)
+        if utc_value.sec_fraction.positive?
+          der = utc_value.strftime('%Y%m%d%H%M%S.%9NZ')
           der.sub(/0+Z/, 'Z')
         else
-          @value.getutc.strftime('%Y%m%d%H%M%SZ')
+          utc_value.strftime('%Y%m%d%H%M%SZ')
         end
       end
 
@@ -104,45 +112,46 @@ module RASN1
 
       def value_from(date_hour)
         format, frac_base = strformat(date_hour)
-        @value = DateTime.strptime(date_hour, format).to_time
+        @value = DateTime.strptime(date_hour, format)
         frac_base
       end
 
       # Check DST. There may be a shift of one hour...
       def fix_dst
-        compare_time = Time.new(*@value.to_a[0..5].reverse)
-        @value = compare_time if compare_time.utc_offset != @value.utc_offset
+        compare_time = Time.new(@value.year, @value.month, @value.mday, @value.hour, @value.minute, @value.sec)
+        @value = compare_time.to_datetime if compare_time.utc_offset != @value.to_time.utc_offset
       end
 
       def fix_value(fraction, frac_base)
-        @value += ".#{fraction}".to_r * frac_base unless fraction.nil?
+        frac = ".#{fraction}".to_r * frac_base
+        @value = (@value + frac).to_datetime unless fraction.nil?
       end
 
       def strformat(date_hour) # rubocop:disable Metrics/CyclomaticComplexity, Metrics/MethodLength
         case date_hour.size
         when 11
-          frac_base = 60 * 60
+          frac_base = HOUR_TO_DAY
           format = '%Y%m%d%HZ'
         when 13
-          frac_base = 60
+          frac_base = MINUTE_TO_DAY
           format = '%Y%m%d%H%MZ'
         when 15
           if date_hour[-1] == 'Z'
-            frac_base = 1
+            frac_base = SECOND_TO_DAY
             format = '%Y%m%d%H%M%SZ'
           else
-            frac_base = 60 * 60
+            frac_base = HOUR_TO_DAY
             format = '%Y%m%d%H%z'
           end
         when 17
-          frac_base = 60
+          frac_base = MINUTE_TO_DAY
           format = '%Y%m%d%H%M%z'
         when 19
-          frac_base = 1
+          frac_base = SECOND_TO_DAY
           format = '%Y%m%d%H%M%S%z'
         else
           prefix = @name.nil? ? type : "tag #{@name}"
-          raise ASN1Error, "#{prefix}: unrecognized format: #{der}"
+          raise ASN1Error, "#{prefix}: unrecognized format: #{date_hour}"
         end
 
         [format, frac_base]
