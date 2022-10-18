@@ -70,9 +70,8 @@ module RASN1
       end
 
       def generate_value_with_correct_length
-        value = @value || ''
-        value << "\x00" while value.length * 8 < @bit_length.to_i
-        value.force_encoding('BINARY')
+        value = (@value || '').dup.force_encoding('BINARY')
+        value << "\x00".b while value.length * 8 < @bit_length.to_i
         return value unless value.length * 8 > @bit_length.to_i
 
         max_len = @bit_length.to_i / 8 + ((@bit_length.to_i % 8).positive? ? 1 : 0)
