@@ -113,6 +113,30 @@ module RASN1
         expect(model[:of][:seqof][1][:room].value).to eq(43)
         expect(model[:of][:seqof][1][:house].to_i).to eq(21)
       end
+
+      context 'when there are duplicate names present in the model' do
+        it 'raises an exception when the sequence name is the same as the content name' do
+          expect do
+            Class.new(described_class) do
+              sequence :foo,
+                       content: [integer(:foo),
+                                 integer(:bar)]
+            end
+          end.to raise_error(ModelValidationError).with_message('Duplicate name foo found')
+        end
+
+        it 'raises an exception when the content has duplicate names' do
+          expect do
+            Class.new(described_class) do
+              sequence :model,
+                       content: [integer(:foo),
+                                 objectid(:bar),
+                                 integer(:baz),
+                                 bit_string(:bar)]
+            end
+          end.to raise_error(ModelValidationError).with_message('Duplicate name bar found')
+        end
+      end
     end
 
     describe '#name' do

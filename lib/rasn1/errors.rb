@@ -40,4 +40,8 @@ module RASN1
       "Constraint not verified on #{@object.inspect}"
     end
   end
+
+  # Exception raised when model validation fails
+  class ModelValidationError < Error
+  end
 end
