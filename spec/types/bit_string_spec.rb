@@ -37,6 +37,13 @@ module RASN1::Types
         expect(bs.to_der).to eq(binary("\x03\x04\x04NOP"))
       end
 
+      it 'generates a DER string with frozen strings' do
+        bs = BitString.new
+        bs.value = 'NOP'.freeze
+        bs.bit_length = 20
+        expect(bs.to_der).to eq(binary("\x03\x04\x04NOP"))
+      end
+
       it 'adds zero bits if value size is lesser than bit length' do
         bs = BitString.new
         bs.value = 'abc'
