@@ -71,6 +71,26 @@ module RASN1
       end
     end
 
+    [
+      :sequence,
+      :sequence_of,
+      :set,
+      :set_of,
+      :choice,
+    ].each do |method_name|
+      describe ".#{method_name}" do
+        it 'has a line number and source location associated with the rasn1 namespace' do
+          method = described_class.method(method_name)
+          method_source_file, method_source_line = method.source_location
+
+          # By default this will be `["(eval)", 1]` if line/source are not passed to eval
+          # This verifies it is located within the rasn1 namespace
+          expect(method_source_file).to match /rasn1/
+          expect(method_source_line).to be_an_instance_of(Integer)
+        end
+      end
+    end
+
     describe '#initialize' do
       it 'creates a class from a Model' do
         expect { ModelTest.new }.to_not raise_error
