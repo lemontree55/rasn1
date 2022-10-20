@@ -37,7 +37,7 @@ module RASN1
 
     # @return [String]
     def message
-      "Constraint not verified on #{object.inspect}"
+      "Constraint not verified on #{@object.inspect}"
     end
   end
 end

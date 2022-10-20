@@ -133,8 +133,9 @@ module RASN1
         return if @enum.empty?
 
         int_value = @value
+        raise EnumeratedError, "#{@name}: value #{int_value} not in enumeration" unless @enum.value?(@value)
+
         @value = @enum.key(@value)
-        raise EnumeratedError, "#{@name}: value #{int_value} not in enumeration" unless value?
       end
 
       def explicit_type

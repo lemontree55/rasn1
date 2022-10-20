@@ -4,18 +4,25 @@ module RASN1
   # This modules is a namesapce for all ASN.1 type classes.
   # @author Sylvain Daubert
   module Types
+    @primitives = []
+    @constructed = []
+
     # Give all primitive types
     # @return [Array<Types::Primitive>]
     def self.primitives
-      @primitives ||= self.constants.map { |c| Types.const_get(c) }
-                          .select { |klass| klass < Primitive }
+      return @primitives unless @primitives.empty?
+
+      @primitives = self.constants.map { |c| Types.const_get(c) }
+                        .select { |klass| klass < Primitive }
     end
 
     # Give all constructed types
     # @return [Array<Types::Constructed>]
     def self.constructed
-      @constructed ||= self.constants.map { |c| Types.const_get(c) }
-                           .select { |klass| klass < Constructed }
+      return @constructed unless @constructed.empty?
+
+      @constructed = self.constants.map { |c| Types.const_get(c) }
+                         .select { |klass| klass < Constructed }
     end
 
     # @private
@@ -91,8 +98,8 @@ module RASN1
       Model.define_type_accel(name.downcase, new_klass)
 
       # Empty type caches
-      @primitives = nil
-      @constructed = nil
+      @primitives = []
+      @constructed = []
 
       new_klass
     end

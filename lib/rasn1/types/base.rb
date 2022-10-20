@@ -257,7 +257,7 @@ module RASN1
 
       def pc_bit
         if @constructed.nil?
-          self.class::ASN1_PC
+          self.class.const_get(:ASN1_PC)
         elsif @constructed # true
           Constructed::ASN1_PC
         else # false
@@ -384,7 +384,7 @@ module RASN1
       def id_value
         return @id_value if defined? @id_value
 
-        self.class::ID
+        self.class.const_get(:ID)
       end
 
       def encode_identifier_octets
