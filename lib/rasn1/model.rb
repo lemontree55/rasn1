@@ -106,27 +106,27 @@ module RASN1
       end
 
       def define_type_accel_base(accel_name, klass)
-        singleton_class.class_eval(
-          "def #{accel_name}(name, options={})\n" \
-          "  options[:name] = name\n" \
-          "  proc = proc do |opts|\n" \
-          "    #{klass}.new(options.merge(opts))\n" \
-          "  end\n" \
-          "  @root = Elem.new(name, proc, options[:content])\n" \
-          'end'
-        )
+        singleton_class.class_eval <<-EVAL, __FILE__, __LINE__ + 1
+          def #{accel_name}(name, options={}) # def sequence(name, type, options)
+            options[:name] = name
+            proc = proc do |opts|
+              #{klass}.new(options.merge(opts)) # Sequence.new(options.merge(opts))
+            end
+            @root = Elem.new(name, proc, options[:content])
+          end
+        EVAL
       end
 
       def define_type_accel_of(accel_name, klass)
-        singleton_class.class_eval(
-          "def #{accel_name}_of(name, type, options={})\n" \
-          "  options[:name] = name\n" \
-          "  proc = proc do |opts|\n" \
-          "    #{klass}.new(type, options.merge(opts))\n" \
-          "  end\n" \
-          "  @root = Elem.new(name, proc, nil)\n" \
-          'end'
-        )
+        singleton_class.class_eval <<-EVAL, __FILE__, __LINE__ + 1
+          def #{accel_name}_of(name, type, options={}) # def sequence_of(name, type, options)
+            options[:name] = name
+            proc = proc do |opts|
+              #{klass}.new(type, options.merge(opts)) # SequenceOf.new(type, options.merge(opts))
+            end
+            @root = Elem.new(name, proc, nil)
+          end
+        EVAL
       end
 
       # Define an accelarator to access a type in a model definition
