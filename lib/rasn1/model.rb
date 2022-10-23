@@ -64,7 +64,26 @@ module RASN1
   # @author Sylvain Daubert
   class Model
     # @private
-    Elem = Struct.new(:name, :proc_or_class, :content)
+    Elem = Struct.new(:name, :proc_or_class, :content) do
+      def initialize(name, proc_or_class, content)
+        if content
+          duplicate_names = find_all_duplicate_names(content.map(&:name) + [name])
+          raise ModelValidationError, "Duplicate name #{duplicate_names.first} found" if duplicate_names.any?
+        end
+
+        super
+      end
+
+      private
+
+      # @param [Array<String>] names
+      # @return [Array<String>] The duplicate names found in the array
+      def find_all_duplicate_names(names)
+        names.group_by { |name| name }
+             .select { |_name, values| values.length > 1 }
+             .keys
+      end
+    end
 
     # @private
     module Accel
