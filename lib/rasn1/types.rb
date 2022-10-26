@@ -74,8 +74,8 @@ module RASN1
     def self.generate_id2type_cache
       constructed = self.constructed - [Types::SequenceOf, Types::SetOf]
       primitives = self.primitives - [Types::Enumerated]
-      ary = (primitives + constructed).select { |type| type.const_defined? :ID }
-                                      .map { |type| [type::ID, type] }
+      ary = (primitives + constructed).select { |type| type.const_defined?(:ID) }
+                                      .map { |type| [type.const_get(:ID), type] }
       @id2types = ary.to_h
       @id2types.default = Types::Base
       @id2types.freeze
@@ -95,7 +95,7 @@ module RASN1
       new_klass.constraint = constraint
 
       self.const_set(name, new_klass)
-      Model.define_type_accel(name.downcase, new_klass)
+      Model.define_type_accel(name.to_s.downcase, new_klass)
 
       # Empty type caches
       @primitives = []

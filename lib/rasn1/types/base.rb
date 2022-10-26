@@ -382,7 +382,7 @@ module RASN1
       end
 
       def id_value
-        return @id_value if defined? @id_value
+        return @id_value if defined?(@id_value) && !@id_value.nil?
 
         self.class.const_get(:ID)
       end
