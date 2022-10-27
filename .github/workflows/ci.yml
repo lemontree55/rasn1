@@ -21,6 +21,7 @@ jobs:
     - name: Run tests
       run: |
         bundle config set path 'vendor/bundle'
-        bundle config set --local without noci
+        bundle config set --local without development rubocop
+        bundle config set --local with test
         bundle install
         bundle exec rake
