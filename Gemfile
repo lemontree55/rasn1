@@ -18,6 +18,10 @@ group :test do
   gem 'rspec', '~> 3.0'
 end
 
+group :development, :test do
+  gem 'rake', '~> 12.3'
+end
+
 group :rubocop do
   gem 'rubocop', '~> 1.0'
   gem 'rubocop-performance', '~> 1.0'

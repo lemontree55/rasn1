@@ -35,6 +35,4 @@ Gem::Specification.new do |spec|
     '--quiet'
   ]
   spec.required_ruby_version = '>= 2.5.0'
-
-  spec.add_development_dependency 'rake', '~> 12.3'
 end
