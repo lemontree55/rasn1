@@ -108,7 +108,8 @@ module RASN1
       # Use a {Wrapper} around a {Types::Base} or a {Model} object
       # @param [Types::Base,Model] element
       # @param [Hash] options
-      # @return [Elem]
+      # @return [WrapElem]
+      # @since 0.12
       def wrapper(element, options={})
         @root = WrapElem.new(element, options)
       end
