@@ -13,7 +13,7 @@ end
 $LOAD_PATH.unshift File.join(File.dirname(__FILE__), '..', 'lib')
 require 'rasn1'
 
-Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
+Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].sort.each { |f| require f }
 
 RSpec.configure do |config|
   config.include Binary
@@ -63,7 +63,7 @@ module TestModel
 
   class ExplicitTaggedSeq < RASN1::Model
     sequence :seq, explicit: 0, class: :application,
-             content: [integer(:id), integer(:extern_id)]
+                   content: [integer(:id), integer(:extern_id)]
   end
 
   class ModelExplicitBitString < RASN1::Model
