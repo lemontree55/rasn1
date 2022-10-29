@@ -21,7 +21,7 @@ module RASN1
   #   # explicit wrapper
   #   wrapper = RASN1::Wrapper.new(int, explicit: 4)  # int tag is always 0x81, but it is wrapped in a 0x84 tag
   # @since 0.12.0
-  class Wrapper < Delegator
+  class Wrapper < SimpleDelegator
     # @private Private class used to build/parse explicit wrappers
     class ExplicitWrapper < Types::Base
       ID = 0 # not used
@@ -77,7 +77,7 @@ module RASN1
         element = generate_implicit_element
         element.to_der
       else
-        @element.to_der
+        __getobj__.to_der
       end
     end
 
@@ -90,37 +90,33 @@ module RASN1
       if implicit?
         element = generate_implicit_element
         parsed = element.parse!(der, ber: ber)
-        @element.value = element.value
+        __getobj__.value = element.value
         parsed
       elsif explicit?
-        real_element = @element.value
-        parsed = @element.parse!(der, ber: ber)
-        real_element.parse!(@element.value, ber: ber)
-        @element.value = real_element
+        real_element = __getobj__.value
+        parsed = __getobj__.parse!(der, ber: ber)
+        real_element.parse!(__getobj__.value, ber: ber)
+        __getobj__.value = real_element
         parsed
       else
-        @element.parse!(der, ber: ber)
+        __getobj__.parse!(der, ber: ber)
       end
     end
+
+    #def inspect
+    #  __getobj__.inspect
+    #end
 
     private
 
     def generate_implicit_element
-      element = @element.dup
+      element = __getobj__.dup
       if element.explicit?
         element.options = element.options.merge(explicit: @implicit)
       elsif element.implicit?
         element.options = element.options.merge(implicit: @implicit)
       end
       element
-    end
-
-    def __getobj__
-      @element
-    end
-
-    def __setobj__(obj)
-      @element = obj
     end
   end
 end
