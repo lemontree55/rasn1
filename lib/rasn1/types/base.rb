@@ -69,6 +69,8 @@ module RASN1
       attr_reader :asn1_class
       # @return [Object,nil] default value, if defined
       attr_reader :default
+      # @return [Hash[Symbol, Object]]
+      attr_reader :options
 
       # Get ASN.1 type
       # @return [String]
@@ -116,7 +118,7 @@ module RASN1
       # @option options [::String] :name name for this node
       def initialize(options={})
         @constructed = nil
-        set_options options
+        self.options = options
         specific_initializer
       end
 
@@ -253,6 +255,16 @@ module RASN1
         (other.class == self.class) && (other.to_der == self.to_der)
       end
 
+      def options=(options)
+        set_class options[:class]
+        set_optional options[:optional]
+        set_default options[:default]
+        set_tag options
+        set_value options[:value]
+        @name = options[:name]
+        @options = options
+      end
+
       private
 
       def pc_bit
@@ -296,16 +308,6 @@ module RASN1
         @value = der
       end
 
-      def set_options(options) # rubocop:disable Naming/AccessorMethodName
-        set_class options[:class]
-        set_optional options[:optional]
-        set_default options[:default]
-        set_tag options
-        set_value options[:value]
-        @name = options[:name]
-        @options = options
-      end
-
       def set_class(asn1_class) # rubocop:disable Naming/AccessorMethodName
         case asn1_class
         when nil
@@ -330,17 +332,15 @@ module RASN1
       # handle undocumented option +:tag_value+, used internally by
       # {RASN1.parse} to parse non-universal class tags.
       def set_tag(options) # rubocop:disable Naming/AccessorMethodName
+        @constructed = options[:constructed]
         if options[:explicit]
           @tag = :explicit
           @id_value = options[:explicit]
-          @constructed = options[:constructed]
         elsif options[:implicit]
           @tag = :implicit
           @id_value = options[:implicit]
-          @constructed = options[:constructed]
         elsif options[:tag_value]
           @id_value = options[:tag_value]
-          @constructed = options[:constructed]
         end
 
         @asn1_class = :context if defined?(@tag) && (@asn1_class == :universal)
