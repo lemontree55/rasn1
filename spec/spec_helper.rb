@@ -70,4 +70,14 @@ module TestModel
     sequence :bit_string,
              content: [bit_string(:flags, explicit: 0, constructed: true, bit_length: 32)]
   end
+
+  class ModelWithImplicitWrapper < RASN1::Model
+    sequence :seq,
+             content: [wrapper(model(:a_record, ModelTest3), implicit: 5)]
+  end
+
+  class ModelWithExplicitWrapper < RASN1::Model
+    sequence :seq,
+             content: [wrapper(model(:a_record, ModelTest3), explicit: 6)]
+  end
 end

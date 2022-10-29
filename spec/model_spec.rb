@@ -3,13 +3,15 @@ require 'spec_helper'
 module RASN1
   include TestModel
 
-  SIMPLE_VALUE = "\x30\x0e\x02\x03\x01\x00\x01\x80\x01\x2b\x81\x04\x02\x02\x12\x34".force_encoding('BINARY')
-  OPTIONAL_VALUE = "\x30\x0b\x02\x03\x01\x00\x01\x81\x04\x02\x02\x12\x34".force_encoding('BINARY')
-  DEFAULT_VALUE = "\x30\x08\x02\x03\x01\x00\x01\x80\x01\x2b".force_encoding('BINARY')
-  NESTED_VALUE = "\x30\x0d\x01\x01\xff\x30\x08\x02\x03\x01\x00\x01\x80\x01\x2b".force_encoding('BINARY')
-  ERRORED_VALUE = "\x01\x01\x00"
-  CHOICE_INTEGER = "\x02\x01\x10".force_encoding('BINARY')
+  SIMPLE_VALUE = "\x30\x0e\x02\x03\x01\x00\x01\x80\x01\x2b\x81\x04\x02\x02\x12\x34".b.freeze
+  OPTIONAL_VALUE = "\x30\x0b\x02\x03\x01\x00\x01\x81\x04\x02\x02\x12\x34".b.freeze
+  DEFAULT_VALUE = "\x30\x08\x02\x03\x01\x00\x01\x80\x01\x2b".b.freeze
+  NESTED_VALUE = "\x30\x0d\x01\x01\xff\x30\x08\x02\x03\x01\x00\x01\x80\x01\x2b".b.freeze
+  ERRORED_VALUE = "\x01\x01\x00".b.freeze
+  CHOICE_INTEGER = "\x02\x01\x10".b.freeze
   CHOICE_SEQUENCE = SIMPLE_VALUE
+  IMPLICIT_WRAPPED_SUBMODEL = "\x30\x0a\xa5\x08\x02\x01\x0a\x81\x03\x02\x01\x33".b.freeze
+  EXPLICIT_WRAPPED_SUBMODEL = "\x30\x0c\x86\x0a\xa4\x08\x02\x01\x0a\x81\x03\x02\x01\x33".b.freeze
 
   describe Model do
     describe '.root_options' do
@@ -43,6 +45,24 @@ module RASN1
           expect(method_source_file).to match /rasn1/
           expect(method_source_line).to be_an_instance_of(Integer)
         end
+      end
+    end
+
+    describe '.wrapper' do
+      it 'implicitly wraps a submodel' do
+        model = ModelWithImplicitWrapper.new(a_record: { id: 10, house: 51 })
+        expect(model.to_der).to eq(IMPLICIT_WRAPPED_SUBMODEL)
+
+        model = ModelWithImplicitWrapper.new
+        expect { model.parse!(IMPLICIT_WRAPPED_SUBMODEL) }.to_not raise_error
+      end
+
+      it 'explicitly wraps a submodel' do
+        model = ModelWithExplicitWrapper.new(a_record: { id: 10, house: 51 })
+        expect(model.to_der).to eq(EXPLICIT_WRAPPED_SUBMODEL)
+
+        model = ModelWithExplicitWrapper.new
+        expect { model.parse!(EXPLICIT_WRAPPED_SUBMODEL) }.to_not raise_error
       end
     end
 

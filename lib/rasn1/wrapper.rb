@@ -41,16 +41,17 @@ module RASN1
     # @param [Class] klass a Types::Base or Model class
     # @param [Hash] options
     def initialize(element, options={})
-      @explicit = options.delete(:explicit)
-      @implicit = options.delete(:implicit)
+      opts = options.dup
+      @explicit = opts.delete(:explicit)
+      @implicit = opts.delete(:implicit)
       if explicit?
-        @options = options
+        @options = opts
         # ExplicitWrapper is a hand-made explicit tag, but we have to use its implicit option
         # to force its tag value.
-        element = ExplicitWrapper.new(options.merge(implicit: @explicit, value: element))
+        element = ExplicitWrapper.new(opts.merge(implicit: @explicit, value: element))
       else
-        options[:value] = element.value
-        element.options = element.options.merge(options)
+        opts[:value] = element.value
+        element.options = element.options.merge(opts)
         @options = {}
       end
       raise RASN1::Error, 'Cannot be implicit and explicit' if explicit? && implicit?
@@ -102,10 +103,6 @@ module RASN1
         __getobj__.parse!(der, ber: ber)
       end
     end
-
-    #def inspect
-    #  __getobj__.inspect
-    #end
 
     private
 
