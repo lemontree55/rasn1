@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
-require 'rasn1/version'
-require 'rasn1/errors'
-require 'rasn1/types'
-require 'rasn1/model'
+require_relative 'rasn1/version'
+require_relative 'rasn1/errors'
+require_relative 'rasn1/types'
+require_relative 'rasn1/model'
+require_relative 'rasn1/wrapper'
 
 # Rasn1 is a pure ruby library to parse, decode and encode ASN.1 data.
 # @author Sylvain Daubert

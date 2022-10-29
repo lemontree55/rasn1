@@ -62,11 +62,11 @@ module RASN1
   # All methods defined by root may be delegated by model, unless model also defines
   # this method.
   # @author Sylvain Daubert
-  class Model
+  class Model # rubocop:disable Metrics/ClassLength
     # @private
     Elem = Struct.new(:name, :proc_or_class, :content) do
       def initialize(name, proc_or_class, content)
-        if content
+        if content.is_a?(Array)
           duplicate_names = find_all_duplicate_names(content.map(&:name) + [name])
           raise ModelValidationError, "Duplicate name #{duplicate_names.first} found" if duplicate_names.any?
         end
@@ -86,6 +86,13 @@ module RASN1
     end
 
     # @private
+    WrapElem = Struct.new(:element, :options) do
+      def name
+        "#{element.name}_wrapper"
+      end
+    end
+
+    # @private
     module Accel
       # @return [Hash]
       attr_reader :options
@@ -96,6 +103,15 @@ module RASN1
       # @return [Elem]
       def model(name, model_klass)
         @root = Elem.new(name, model_klass, nil)
+      end
+
+      # Use a {Wrapper} around a {Types::Base} or a {Model} object
+      # @param [Types::Base,Model] element
+      # @param [Hash] options
+      # @return [WrapElem]
+      # @since 0.12
+      def wrapper(element, options={})
+        @root = WrapElem.new(element, options)
       end
 
       # Update options of root element.
@@ -304,7 +320,7 @@ module RASN1
     # @param [Hash] args
     def initialize(args={})
       root = generate_root
-      set_elements(root)
+      generate_elements(root)
       initialize_elements(self, args)
     end
 
@@ -479,14 +495,33 @@ module RASN1
       class_element
     end
 
-    def set_elements(element) # rubocop:disable Naming/AccessorMethodName
+    def generate_elements(element)
+      if element.is_a?(WrapElem)
+        generate_wrapper(element)
+        return
+      end
       return unless element.content.is_a? Array
 
       @elements[name].value = element.content.map do |another_element|
-        subel = get_type(another_element.proc_or_class)
-        @elements[another_element.name] = subel
-        set_elements(another_element) if composed?(subel) && another_element.content.is_a?(Array)
+        add_subelement(another_element)
+      end
+    end
+
+    def generate_wrapper(wrap_elem)
+      inner_elem = wrap_elem.element
+      subel = add_subelement(inner_elem)
+      Wrapper.new(subel, wrap_elem.options)
+    end
+
+    def add_subelement(subelement)
+      case subelement
+      when Elem
+        subel = get_type(subelement.proc_or_class)
+        @elements[subelement.name] = subel
+        generate_elements(subelement) if composed?(subel) && subelement.content.is_a?(Array)
         subel
+      when WrapElem
+        generate_wrapper(subelement)
       end
     end
 

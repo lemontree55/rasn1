@@ -1,65 +1,17 @@
 require 'spec_helper'
 
 module RASN1
+  include TestModel
 
-  class ModelTest < Model
-    sequence :record,
-             content: [integer(:id),
-                       integer(:room, implicit: 0, optional: true),
-                       integer(:house, explicit: 1, default: 0)]
-  end
-
-  class ModelTest2 < Model
-    sequence :record2,
-             content: [boolean(:rented),
-                       model(:a_record, ModelTest)]
-  end
-
-  class ModelTest3 < ModelTest
-    root_options implicit: 4
-  end
-
-  class OfModel < Model
-    sequence_of :seqof, ModelTest
-  end
-
-  class SuperOfModel < Model
-    sequence :super,
-             content: [model(:of, OfModel)]
-  end
-
-  class VoidSeq < Model
-    sequence :voidseq
-  end
-
-  class VoidSeq2 < Model
-    sequence :voidseq2,
-             content: [boolean(:bool), sequence(:seq)]
-  end
-
-  class ModelChoice < Model
-    choice :choice,
-           content: [integer(:id),
-                     model(:a_record, ModelTest)]
-  end
-
-  class ExplicitTaggedSeq < Model
-    sequence :seq, explicit: 0, class: :application,
-             content: [integer(:id), integer(:extern_id)]
-  end
-
-  class ModelExplicitBitString < Model
-    sequence :bit_string,
-             content: [bit_string(:flags, explicit: 0, constructed: true, bit_length: 32)]
-  end
-
-  SIMPLE_VALUE = "\x30\x0e\x02\x03\x01\x00\x01\x80\x01\x2b\x81\x04\x02\x02\x12\x34".force_encoding('BINARY')
-  OPTIONAL_VALUE = "\x30\x0b\x02\x03\x01\x00\x01\x81\x04\x02\x02\x12\x34".force_encoding('BINARY')
-  DEFAULT_VALUE = "\x30\x08\x02\x03\x01\x00\x01\x80\x01\x2b".force_encoding('BINARY')
-  NESTED_VALUE = "\x30\x0d\x01\x01\xff\x30\x08\x02\x03\x01\x00\x01\x80\x01\x2b".force_encoding('BINARY')
-  ERRORED_VALUE = "\x01\x01\x00"
-  CHOICE_INTEGER = "\x02\x01\x10".force_encoding('BINARY')
+  SIMPLE_VALUE = "\x30\x0e\x02\x03\x01\x00\x01\x80\x01\x2b\x81\x04\x02\x02\x12\x34".b.freeze
+  OPTIONAL_VALUE = "\x30\x0b\x02\x03\x01\x00\x01\x81\x04\x02\x02\x12\x34".b.freeze
+  DEFAULT_VALUE = "\x30\x08\x02\x03\x01\x00\x01\x80\x01\x2b".b.freeze
+  NESTED_VALUE = "\x30\x0d\x01\x01\xff\x30\x08\x02\x03\x01\x00\x01\x80\x01\x2b".b.freeze
+  ERRORED_VALUE = "\x01\x01\x00".b.freeze
+  CHOICE_INTEGER = "\x02\x01\x10".b.freeze
   CHOICE_SEQUENCE = SIMPLE_VALUE
+  IMPLICIT_WRAPPED_SUBMODEL = "\x30\x0a\xa5\x08\x02\x01\x0a\x81\x03\x02\x01\x33".b.freeze
+  EXPLICIT_WRAPPED_SUBMODEL = "\x30\x0c\x86\x0a\xa4\x08\x02\x01\x0a\x81\x03\x02\x01\x33".b.freeze
 
   describe Model do
     describe '.root_options' do
@@ -93,6 +45,24 @@ module RASN1
           expect(method_source_file).to match /rasn1/
           expect(method_source_line).to be_an_instance_of(Integer)
         end
+      end
+    end
+
+    describe '.wrapper' do
+      it 'implicitly wraps a submodel' do
+        model = ModelWithImplicitWrapper.new(a_record: { id: 10, house: 51 })
+        expect(model.to_der).to eq(IMPLICIT_WRAPPED_SUBMODEL)
+
+        model = ModelWithImplicitWrapper.new
+        expect { model.parse!(IMPLICIT_WRAPPED_SUBMODEL) }.to_not raise_error
+      end
+
+      it 'explicitly wraps a submodel' do
+        model = ModelWithExplicitWrapper.new(a_record: { id: 10, house: 51 })
+        expect(model.to_der).to eq(EXPLICIT_WRAPPED_SUBMODEL)
+
+        model = ModelWithExplicitWrapper.new
+        expect { model.parse!(EXPLICIT_WRAPPED_SUBMODEL) }.to_not raise_error
       end
     end
 
