@@ -60,11 +60,11 @@ module RASN1::Types
         it 'generates DER string corresponding to chosen type' do
           @choice.chosen = 0
           @choice.set_chosen_value 45
-          expect(@choice.to_der).to eq(binary("\x02\x01\x2d"))
+          expect(@choice.to_der).to eq("\x02\x01\x2d".b)
 
           @choice.chosen = 1
           @choice.set_chosen_value "abcd"
-          expect(@choice.to_der).to eq(binary("\x04\x04abcd"))
+          expect(@choice.to_der).to eq("\x04\x04abcd".b)
         end
 
         it 'raises if chosen is not set' do

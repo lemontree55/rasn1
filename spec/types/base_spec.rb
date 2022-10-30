@@ -49,19 +49,19 @@ module RASN1::Types
     describe '#to_der' do
       it 'should encode long length' do
         os = OctetString.new
-        os.value = binary("\x00") * 65_537
+        os.value = "\x00".b * 65_537
         os_der = os.to_der
-        expect(os_der[1, 4]).to eq(binary("\x83\x01\x00\x01"))
+        expect(os_der[1, 4]).to eq("\x83\x01\x00\x01".b)
         expect(os_der[5, os_der.length]).to eq(os.value)
       end
 
       it 'should encode long ID' do
         int = Integer.new(value: 0, implicit: 43)
-        expect(int.to_der).to eq(binary("\x9f\x2b\x01\x00"))
+        expect(int.to_der).to eq("\x9f\x2b\x01\x00".b)
         int = Integer.new(value: 1, implicit: 255)
-        expect(int.to_der).to eq(binary("\x9f\x81\x7f\x01\x01"))
+        expect(int.to_der).to eq("\x9f\x81\x7f\x01\x01".b)
         int = Integer.new(value: 2, implicit: 60_000)
-        expect(int.to_der).to eq(binary("\x9f\x83\xd4\x60\x01\2"))
+        expect(int.to_der).to eq("\x9f\x83\xd4\x60\x01\2".b)
       end
     end
 
@@ -78,7 +78,7 @@ module RASN1::Types
     end
 
     describe '#parse!' do
-      let(:unexpected_der) { binary("\x02\x02\xca\xfe") }
+      let(:unexpected_der) { "\x02\x02\xca\xfe".b }
 
       it 'raises on unexpected ID value' do
         bool = Boolean.new
@@ -105,14 +105,14 @@ module RASN1::Types
 
       it 'parses tags with multi-byte ID' do
         int = Integer.new(implicit: 43)
-        int.parse!(binary("\x9f\x2b\x01\x00"))
+        int.parse!("\x9f\x2b\x01\x00".b)
         expect(int.id).to eq(43)
         expect(int.value).to eq(0)
 
         #int = Integer.new(value: 1, implicit: 255)
-        #expect(int.to_der).to eq(binary("\x9f\x81\x7f\x01\x01"))
+        #expect(int.to_der).to eq("\x9f\x81\x7f\x01\x01".b)
         #int = Integer.new(value: 2, implicit: 60_000)
-        #expect(int.to_der).to eq(binary("\x9f\x83\xd4\x60\x01\2"))
+        #expect(int.to_der).to eq("\x9f\x83\xd4\x60\x01\2".b)
       end
 
       it 'parses tags with multi-byte length' do
@@ -126,23 +126,23 @@ module RASN1::Types
 
       it 'returns total number of parsed bytes' do
         int = Integer.new
-        bytes = int.parse!(binary("\x02\x01\x01"))
+        bytes = int.parse!("\x02\x01\x01".b)
         expect(bytes).to eq(3)
         expect(int.value).to eq(1)
-        bytes = int.parse!(binary("\x02\x01\x01\x02"))
+        bytes = int.parse!("\x02\x01\x01\x02".b)
         expect(bytes).to eq(3)
         expect(int.value).to eq(1)
       end
 
       it 'raises on indefinite length with primitive types' do
         bool = Boolean.new
-        der = binary("\x01\x80\xff\x00\x00")
+        der = "\x01\x80\xff\x00\x00".b
         expect { bool.parse!(der) }.to raise_error(RASN1::ASN1Error).
           with_message('malformed BOOLEAN: indefinite length forbidden for primitive types')
       end
 
       context 'raises on indefinite length with constructed types' do
-        let(:der) { binary("\x30\x80\x01\x01\xFF\x00\x00") }
+        let(:der) { "\x30\x80\x01\x01\xFF\x00\x00".b }
         let(:seq) { seq = Sequence.new; seq.value = [Boolean.new]; seq }
 
         it 'on DER encoding' do
@@ -221,29 +221,29 @@ module RASN1::Types
       describe '#to_der' do
         it 'creates a DER string with explicit tagged type' do
           type = Integer.new(explicit: 5, value: 48)
-          expect(type.to_der).to eq(binary("\x85\x03\x02\x01\x30"))
+          expect(type.to_der).to eq("\x85\x03\x02\x01\x30".b)
 
           type = Integer.new(explicit: 5, constructed: true, value: 48)
-          expect(type.to_der).to eq(binary("\xa5\x03\x02\x01\x30"))
+          expect(type.to_der).to eq("\xa5\x03\x02\x01\x30".b)
         end
 
         it 'creates a DER string with implicit tagged type' do
           type = Integer.new(implicit: 5)
           type.value = 48
-          expect(type.to_der).to eq(binary("\x85\x01\x30"))
+          expect(type.to_der).to eq("\x85\x01\x30".b)
         end
       end
 
       describe '#parse!' do
         it 'parses a DER string with explicit tagged type' do
           type = Integer.new(explicit: 5)
-          type.parse!(binary("\x85\x03\x02\x01\x30"))
+          type.parse!("\x85\x03\x02\x01\x30".b)
           expect(type.value).to eq(48)
         end
 
         it 'parses a DER string with explicit constructed tagged type' do
           type = Integer.new(explicit: 5, constructed: true)
-          type.parse!(binary("\xa5\x03\x02\x01\x30"))
+          type.parse!("\xa5\x03\x02\x01\x30".b)
           expect(type.value).to eq(48)
         end
 
@@ -251,7 +251,7 @@ module RASN1::Types
           type = Enumerated.new(explicit: 0, constructed: true,
                                 enum: { 'v1' => 0, 'v2' => 1, 'v3' => 2 },
                                 default: 0)
-          type.parse!(binary("\xa0\x03\x0a\x01\x02"))
+          type.parse!("\xa0\x03\x0a\x01\x02".b)
           expect(type.value).to eq('v3')
           type.parse!('')
           expect(type.value).to eq('v1')
@@ -259,7 +259,7 @@ module RASN1::Types
 
         it 'parses a DER string with implicit tagged type' do
           type = Integer.new(implicit: 5)
-          type.parse!(binary("\x85\x01\x30"))
+          type.parse!("\x85\x01\x30".b)
           expect(type.value).to eq(48)
         end
       end

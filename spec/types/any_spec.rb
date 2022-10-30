@@ -12,14 +12,11 @@ class AnyModelOptional < RASN1::Model
 end
 
 module RASN1::Types
-
-
   describe Any do
-
-    let(:os_der) { binary("\x30\x0a\x04\x03abc\x06\x03\x2a\x03\x04") }
-    let(:int_der) { binary("\x30\x09\x02\x02\x00\x80\x06\x03\x2a\x03\x05") }
-    let(:null_der) { binary("\x30\x07\x05\x00\x06\x03\x2a\x03\x06") }
-    let(:void_der) { binary("\x30\x05\x06\x03\x2a\x03\x07") }
+    let(:os_der) { "\x30\x0a\x04\x03abc\x06\x03\x2a\x03\x04".b }
+    let(:int_der) { "\x30\x09\x02\x02\x00\x80\x06\x03\x2a\x03\x05".b }
+    let(:null_der) { "\x30\x07\x05\x00\x06\x03\x2a\x03\x06".b }
+    let(:void_der) { "\x30\x05\x06\x03\x2a\x03\x07".b }
 
     describe '.type' do
       it 'gets ASN.1 type' do
@@ -57,13 +54,13 @@ module RASN1::Types
     describe '#parse!' do
       it 'parses any sequence with 2 elements and the first one is an OCTET STRING' do
         anymodel = AnyModel.parse(os_der)
-        expect(anymodel[:data].value).to eq(binary("\x04\x03abc"))
+        expect(anymodel[:data].value).to eq("\x04\x03abc".b)
         expect(anymodel[:id].value).to eq('1.2.3.4')
       end
 
       it 'parses any sequence with 2 elements and the first one is an INTEGER' do
         anymodel = AnyModel.parse(int_der)
-        expect(anymodel[:data].value).to eq(binary("\x02\x02\x00\x80"))
+        expect(anymodel[:data].value).to eq("\x02\x02\x00\x80".b)
         expect(anymodel[:id].value).to eq('1.2.3.5')
       end
 

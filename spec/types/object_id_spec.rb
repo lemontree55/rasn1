@@ -21,14 +21,14 @@ module RASN1::Types
     describe '#to_der' do
       it 'generates a DER string' do
         oi = ObjectId.new(value: '1.2.3.4')
-        expect(oi.to_der).to eq(binary("\x06\x03\x2a\x03\x04"))
+        expect(oi.to_der).to eq("\x06\x03\x2a\x03\x04".b)
         oi.value = '2.999.3'
-        expect(oi.to_der).to eq(binary("\x06\x03\x88\x37\x03"))
+        expect(oi.to_der).to eq("\x06\x03\x88\x37\x03".b)
       end
 
       it 'generates a DER string according to ASN.1 class' do
         oi = ObjectId.new(value: '1.2.3.4', class: :context)
-        expect(oi.to_der).to eq(binary("\x86\x03\x2a\x03\x04"))
+        expect(oi.to_der).to eq("\x86\x03\x2a\x03\x04".b)
       end
 
       it 'generates a DER string according to default' do
@@ -36,7 +36,7 @@ module RASN1::Types
         oi.value = '1.2'
         expect(oi.to_der).to eq('')
         oi.value = '1.2.3'
-        expect(oi.to_der).to eq(binary("\x06\x02\x2a\x03"))
+        expect(oi.to_der).to eq("\x06\x02\x2a\x03".b)
       end
 
       it 'generates a DER string according to optional' do
@@ -44,7 +44,7 @@ module RASN1::Types
         oi.value = nil
         expect(oi.to_der).to eq('')
         oi.value = '1.2.3'
-        expect(oi.to_der).to eq(binary("\x06\x02\x2a\x03"))
+        expect(oi.to_der).to eq("\x06\x02\x2a\x03".b)
       end
 
       it 'raises if first subidentifier is greater than 2' do
@@ -70,14 +70,14 @@ module RASN1::Types
       let(:oi) { ObjectId.new }
 
       it 'parses a DER OCTET STRING' do
-        oi.parse!(binary("\x06\x03\x2a\x03\x04"))
-        expect(oi.value).to eq(binary('1.2.3.4'))
-        oi.parse!(binary("\x06\x06\x7f\x81\x00\x83\xfb\x68"))
-        expect(oi.value).to eq(binary('2.47.128.65000'))
-        oi.parse!(binary("\x06\x03\x88\x37\x03"))
-        expect(oi.value).to eq(binary('2.999.3'))
-        oi.parse!(binary("\x06\x04\x86\x8d\x1f\x03"))
-        expect(oi.value).to eq(binary('2.99919.3'))
+        oi.parse!("\x06\x03\x2a\x03\x04".b)
+        expect(oi.value).to eq('1.2.3.4'.b)
+        oi.parse!("\x06\x06\x7f\x81\x00\x83\xfb\x68".b)
+        expect(oi.value).to eq('2.47.128.65000'.b)
+        oi.parse!("\x06\x03\x88\x37\x03".b)
+        expect(oi.value).to eq('2.999.3'.b)
+        oi.parse!("\x06\x04\x86\x8d\x1f\x03".b)
+        expect(oi.value).to eq('2.99919.3'.b)
       end
     end
   end

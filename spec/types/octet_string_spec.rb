@@ -23,13 +23,13 @@ module RASN1::Types
       it 'generates a DER string' do
         os = OctetString.new
         os.value = 'NOP'
-        expect(os.to_der).to eq(binary("\x04\x03NOP"))
+        expect(os.to_der).to eq("\x04\x03NOP".b)
       end
 
       it 'generates a DER string according to ASN.1 class' do
         os = OctetString.new(class: :context)
         os.value = 'a'
-        expect(os.to_der).to eq(binary("\x84\x01a"))
+        expect(os.to_der).to eq("\x84\x01a".b)
       end
 
       it 'generates a DER string according to default' do
@@ -37,7 +37,7 @@ module RASN1::Types
         os.value = 'NOP'
         expect(os.to_der).to eq('')
         os.value = 'N'
-        expect(os.to_der).to eq(binary("\x04\x01N"))
+        expect(os.to_der).to eq("\x04\x01N".b)
       end
 
       it 'generates a DER string according to optional' do
@@ -45,7 +45,7 @@ module RASN1::Types
         os.value = nil
         expect(os.to_der).to eq('')
         os.value = 'abc'
-        expect(os.to_der).to eq(binary("\x04\x03abc"))
+        expect(os.to_der).to eq("\x04\x03abc".b)
       end
 
       it 'serializes a Types::Base object when set as value' do
@@ -53,7 +53,7 @@ module RASN1::Types
         int = Integer.new
         int.value = 12
         os.value = int
-        expect(os.to_der).to eq(binary("\x04\x03\x02\x01\x0c"))
+        expect(os.to_der).to eq("\x04\x03\x02\x01\x0c".b)
       end
     end
 
@@ -61,8 +61,8 @@ module RASN1::Types
       let(:os) { OctetString.new }
 
       it 'parses a DER OCTET STRING' do
-        os.parse!(binary("\x04\x02\x01\x02"))
-        expect(os.value).to eq(binary("\x01\x02"))
+        os.parse!("\x04\x02\x01\x02".b)
+        expect(os.value).to eq("\x01\x02".b)
       end
     end
   end

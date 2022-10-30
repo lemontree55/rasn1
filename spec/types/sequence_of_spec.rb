@@ -17,12 +17,12 @@ module RASN1
         @seq.value = [@bool, @int, @os]
         @seqof = SequenceOf.new(@seq)
 
-        @composed_der = binary("\x30\x1a" +
-                               "\x30\x09\x02\x01\x0c\x04\x04abcd" +
-                               "\x30\x0d\x01\x01\x00\x02\x03\x00\xff\xfe\x04\x03nop")
-        @integer_der = binary("\x30\x18" +
-                              (0..7).map { |v| Integer.new(value: v).to_der }.join)
-        end
+        @composed_der = "\x30\x1a" \
+                        "\x30\x09\x02\x01\x0c\x04\x04abcd" \
+                        "\x30\x0d\x01\x01\x00\x02\x03\x00\xff\xfe\x04\x03nop".b
+        @integer_der = "\x30\x18".b +
+                       (0..7).map { |v| Integer.new(value: v).to_der }.join
+      end
 
       describe '.type' do
         it 'gets ASN.1 type' do
@@ -91,9 +91,9 @@ module RASN1
           seqof = SequenceOf.new(SimpleModel)
           seqof << { bool: true, int: 12 }
           seqof << { bool: false, int: 65535 }
-          expected_der = binary("\x30\x12" \
-                                "\x30\x06\x01\x01\xff\x02\x01\x0c" \
-                                "\x30\x08\x01\x01\x00\x02\x03\x00\xff\xff")
+          expected_der = "\x30\x12" \
+                         "\x30\x06\x01\x01\xff\x02\x01\x0c" \
+                         "\x30\x08\x01\x01\x00\x02\x03\x00\xff\xff".b
           expect(seqof.to_der).to eq(expected_der)
         end
       end
@@ -119,9 +119,9 @@ module RASN1
 
         it 'parses DER string for a model type' do
           seqof = SequenceOf.new(SimpleModel)
-          der = binary("\x30\x11" \
-                       "\x30\x06\x01\x01\xff\x02\x01\x7f" \
-                       "\x30\x07\x01\x01\x00\x02\x02\x7f\xff")
+          der = "\x30\x11" \
+                "\x30\x06\x01\x01\xff\x02\x01\x7f" \
+                "\x30\x07\x01\x01\x00\x02\x02\x7f\xff".b
           seqof.parse!(der)
           golden = []
           golden << SimpleModel.new(bool: true, int: 127)
@@ -131,7 +131,7 @@ module RASN1
 
         it 'parses DER string with explicit option' do
           seqof = SequenceOf.new(Integer, explicit: 3)
-          seqof.parse!(binary("\xa3\x1a" + @integer_der))
+          seqof.parse!("\xa3\x1a".b + @integer_der)
           expect(seqof.value).to eq((0..7).to_a.map { |v| Integer.new(value: v)})
         end
       end

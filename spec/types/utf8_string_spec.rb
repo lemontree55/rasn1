@@ -23,12 +23,12 @@ module RASN1::Types
     describe '#to_der' do
       it 'generates a DER string' do
         utf8 = Utf8String.new(value: 'azertyù€')
-        expect(utf8.to_der).to eq(binary("\x0c\x0bazertyù€"))
+        expect(utf8.to_der).to eq("\x0c\x0bazertyù€".b)
       end
 
       it 'generates a DER string according to ASN.1 class' do
         utf8 = Utf8String.new(value: 'a', class: :context)
-        expect(utf8.to_der).to eq(binary("\x8c\x01a"))
+        expect(utf8.to_der).to eq("\x8c\x01a".b)
       end
 
       it 'generates a DER string according to default' do
@@ -36,7 +36,7 @@ module RASN1::Types
         utf8.value = 'NOP'
         expect(utf8.to_der).to eq('')
         utf8.value = 'N'
-        expect(utf8.to_der).to eq(binary("\x0c\x01N"))
+        expect(utf8.to_der).to eq("\x0c\x01N".b)
       end
 
       it 'generates a DER string according to optional' do
@@ -44,7 +44,7 @@ module RASN1::Types
         utf8.value = nil
         expect(utf8.to_der).to eq('')
         utf8.value = 'abc'
-        expect(utf8.to_der).to eq(binary("\x0c\x03abc"))
+        expect(utf8.to_der).to eq("\x0c\x03abc".b)
       end
     end
 
@@ -52,7 +52,7 @@ module RASN1::Types
       let(:utf8) { Utf8String.new }
 
       it 'parses a DER UTF8 STRING' do
-        utf8.parse!(binary("\x0c\x04\x31\xe2\x82\xac"))
+        utf8.parse!("\x0c\x04\x31\xe2\x82\xac".b)
         expect(utf8.value).to eq('1€')
       end
     end

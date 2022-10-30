@@ -23,15 +23,15 @@ module RASN1::Types
       it 'generates a DER string' do
         bool = Boolean.new
         bool.value = true
-        expect(bool.to_der).to eq(binary("\x01\x01\xff"))
+        expect(bool.to_der).to eq("\x01\x01\xff".b)
         bool.value = false
-        expect(bool.to_der).to eq(binary("\x01\x01\x00"))
+        expect(bool.to_der).to eq("\x01\x01\x00".b)
       end
 
       it 'generates a DER string according to ASN.1 class' do
         bool = Boolean.new(class: :private)
         bool.value = true
-        expect(bool.to_der).to eq(binary("\xC1\x01\xff"))
+        expect(bool.to_der).to eq("\xC1\x01\xff".b)
       end
 
       it 'generates a DER string according to default' do
@@ -39,7 +39,7 @@ module RASN1::Types
         bool.value = true
         expect(bool.to_der).to eq('')
         bool.value = false
-        expect(bool.to_der).to eq(binary("\x01\x01\x00"))
+        expect(bool.to_der).to eq("\x01\x01\x00".b)
       end
 
       it 'generates a DER string according to optional' do
@@ -47,18 +47,18 @@ module RASN1::Types
         bool.value = nil
         expect(bool.to_der).to eq('')
         bool.value = true
-        expect(bool.to_der).to eq(binary("\x01\x01\xff"))
+        expect(bool.to_der).to eq("\x01\x01\xff".b)
       end
     end
 
     describe '#parse!' do
       let(:bool) { Boolean.new }
-      let(:ber) { binary("\x01\x01\x56") }
+      let(:ber) { "\x01\x01\x56".b }
 
       it 'parses a DER BOOLEAN string' do
-        bool.parse!(binary("\x01\x01\x00"))
+        bool.parse!("\x01\x01\x00".b)
         expect(bool.value).to be(false)
-        bool.parse!(binary("\x01\x01\xFF"))
+        bool.parse!("\x01\x01\xFF".b)
         expect(bool.value).to be(true)
       end
 
@@ -72,9 +72,9 @@ module RASN1::Types
       end
 
       it 'raises on malformed BOOLEAN (size not equak 1)' do
-        ber = binary("\x01\x00")
+        ber = "\x01\x00".b
         expect {bool.parse!(ber) }.to raise_error(RASN1::ASN1Error, /length of 1/)
-        ber = binary("\x01\x02\xff\xff")
+        ber = "\x01\x02\xff\xff".b
         expect {bool.parse!(ber) }.to raise_error(RASN1::ASN1Error, /length of 1/)
       end
     end

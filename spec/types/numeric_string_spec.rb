@@ -19,18 +19,18 @@ module RASN1::Types
         expect(numeric.default).to eq(nil)
       end
     end
-    
+
     describe '#to_der' do
       it 'generates a DER string' do
         numeric = NumericString.new
         numeric.value = '20 12'
-        expect(numeric.to_der).to eq(binary("\x12\x0520 12"))
+        expect(numeric.to_der).to eq("\x12\x0520 12".b)
       end
 
       it 'generates a DER string according to ASN.1 class' do
         numeric = NumericString.new(class: :context)
         numeric.value = '8'
-        expect(numeric.to_der).to eq(binary("\x92\x018"))
+        expect(numeric.to_der).to eq("\x92\x018".b)
       end
 
       it 'generates a DER string according to default' do
@@ -38,7 +38,7 @@ module RASN1::Types
         numeric.value = '123'
         expect(numeric.to_der).to eq('')
         numeric.value = '12'
-        expect(numeric.to_der).to eq(binary("\x12\x0212"))
+        expect(numeric.to_der).to eq("\x12\x0212".b)
       end
 
       it 'generates a DER string according to optional' do
@@ -46,7 +46,7 @@ module RASN1::Types
         numeric.value = nil
         expect(numeric.to_der).to eq('')
         numeric.value = '123'
-        expect(numeric.to_der).to eq(binary("\x12\x03123"))
+        expect(numeric.to_der).to eq("\x12\x03123".b)
       end
 
       it 'raises on illegal character' do
@@ -60,12 +60,12 @@ module RASN1::Types
       let(:numeric) { NumericString.new }
 
       it 'parses a DER NUMERIC STRING' do
-        numeric.parse!(binary("\x12\x0412 3"))
+        numeric.parse!("\x12\x0412 3".b)
         expect(numeric.value).to eq('12 3')
       end
 
       it 'raises on illegal character' do
-        expect { numeric.parse!(binary("\x12\x0312x")) }.
+        expect { numeric.parse!("\x12\x0312x".b) }.
           to raise_error(RASN1::ASN1Error, /invalid char.*'x'$/)
       end
     end

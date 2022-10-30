@@ -1,7 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 module RASN1
-
   describe Types do
     describe '.primitives' do
       it 'gives all subclasses of Primitive' do

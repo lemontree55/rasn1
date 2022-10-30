@@ -67,26 +67,26 @@ module RASN1::Types
       it 'generates a DER string' do
         int = Integer.new
         int.value = 42
-        expect(int.to_der).to eq(binary("\x02\x01\x2a"))
+        expect(int.to_der).to eq("\x02\x01\x2a".b)
         int.value = 65536
-        expect(int.to_der).to eq(binary("\x02\x03\x01\x00\x00"))
+        expect(int.to_der).to eq("\x02\x03\x01\x00\x00".b)
         int.value = 255
-        expect(int.to_der).to eq(binary("\x02\x02\x00\xff"))
+        expect(int.to_der).to eq("\x02\x02\x00\xff".b)
         int.value = -1
-        expect(int.to_der).to eq(binary("\x02\x01\xff"))
+        expect(int.to_der).to eq("\x02\x01\xff".b)
         int.value = -543210
-        expect(int.to_der).to eq(binary("\x02\x03\xf7\xb6\x16"))
+        expect(int.to_der).to eq("\x02\x03\xf7\xb6\x16".b)
       end
 
       it 'generates a DER string with enum' do
         int = Integer.new(value: :two, enum: hsh)
-        expect(int.to_der).to eq(binary("\x02\x01\x02"))
+        expect(int.to_der).to eq("\x02\x01\x02".b)
       end
 
       it 'generates a DER string according to ASN.1 class' do
         int = Integer.new(class: :application)
         int.value = 16
-        expect(int.to_der).to eq(binary("\x42\x01\x10"))
+        expect(int.to_der).to eq("\x42\x01\x10".b)
       end
 
       it 'generates a DER string according to default' do
@@ -94,7 +94,7 @@ module RASN1::Types
         int.value = 545
         expect(int.to_der).to eq('')
         int.value = 65000
-        expect(int.to_der).to eq(binary("\x02\x03\x00\xfd\xe8"))
+        expect(int.to_der).to eq("\x02\x03\x00\xfd\xe8".b)
       end
 
       it 'generates a DER string according to optional' do
@@ -102,17 +102,17 @@ module RASN1::Types
         int.value = nil
         expect(int.to_der).to eq('')
         int.value = 545
-        expect(int.to_der).to eq(binary("\x02\x02\x02\x21"))
+        expect(int.to_der).to eq("\x02\x02\x02\x21".b)
       end
 
       it 'generates a DER string with named explicit tagged type' do
         int = Integer.new(name: 'int', explicit: 3, value: 5)
-        expect(int.to_der).to eq(binary("\x83\x03\x02\x01\x05"))
+        expect(int.to_der).to eq("\x83\x03\x02\x01\x05".b)
       end
 
       it 'generates a DER string with named explicit tagged type and enum (bug #6)' do
         int = Integer.new(name: 'int', explicit: 3, value: :one, enum: hsh)
-        expect(int.to_der).to eq(binary("\x83\x03\x02\x01\x01"))
+        expect(int.to_der).to eq("\x83\x03\x02\x01\x01".b)
       end
     end
 
@@ -120,21 +120,21 @@ module RASN1::Types
      let(:int) { Integer.new }
 
      it 'parses a DER INTEGER string' do
-       int.parse!(binary("\x02\x01\x00"))
+       int.parse!("\x02\x01\x00".b)
        expect(int.value).to eq(0)
-       int.parse!(binary("\x02\x02\x00\xff"))
+       int.parse!("\x02\x02\x00\xff".b)
        expect(int.value).to eq(255)
-       int.parse!(binary("\x02\x03\x01\x00\x00"))
+       int.parse!("\x02\x03\x01\x00\x00".b)
        expect(int.value).to eq(65536)
-       int.parse!(binary("\x02\x01\xFF"))
+       int.parse!("\x02\x01\xFF".b)
        expect(int.value).to eq(-1)
-       int.parse!(binary("\x02\x03\xf7\xb6\x16"))
+       int.parse!("\x02\x03\xf7\xb6\x16".b)
        expect(int.value).to eq(-543210)
      end
 
      it 'parses a DER string for named explicit tagged integer with enum (bug #6)' do
       int = Integer.new(name: 'int', explicit: 3, enum: hsh)
-      expect { int.parse!(binary("\x83\x03\x02\x01\x01")) }.to_not raise_error
+      expect { int.parse!("\x83\x03\x02\x01\x01".b) }.to_not raise_error
     end
    end
   end

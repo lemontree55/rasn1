@@ -23,13 +23,13 @@ module RASN1::Types
       it 'generates a DER string' do
         gt = GeneralizedTime.new
         gt.value = DateTime.new(2017, 12, 30, 16, 30, 0, 0)
-        expect(gt.to_der).to eq(binary("\x18\x0f20171230163000Z"))
+        expect(gt.to_der).to eq("\x18\x0f20171230163000Z".b)
       end
 
       it 'generates a DER string with fragments of a second' do
         gt = GeneralizedTime.new
         gt.value = DateTime.new(2017, 12, 30, 16, 30, 23.55, 0)
-        expect(gt.to_der).to eq(binary("\x18\x1220171230163023.55Z"))
+        expect(gt.to_der).to eq("\x18\x1220171230163023.55Z".b)
       end
     end
 

@@ -273,56 +273,8 @@ module RASN1
     end
 
     context 'complex example' do
-      class AttributeTypeAndValue < Model
-        sequence :attributeTypeAndValue,
-                 content: [objectid(:type),
-                           any(:value)]
-      end
-
-      class AlgorithmIdentifier < Model
-        sequence :algorithmIdentifier
-      end
-
-      class RelativeDN < Model
-        set_of :relativeDN, AttributeTypeAndValue
-      end
-
-      class X509Name < Model
-        sequence_of :rdnSequence, RelativeDN
-      end
-
-      class Extension < Model
-        sequence :extension,
-                 content: [objectid(:extnID),
-                           boolean(:critical, default: false),
-                           octet_string(:extnValue)]
-      end
-
-      class TBSCertificate < Model
-        sequence :tbsCertificate,
-                 content: [integer(:version, explicit: 0, constructed: true,
-                                   default: 0, enum: { v1: 0, v2: 1, v3: 2 }),
-                           integer(:serialNumber),
-                           model(:signature, AlgorithmIdentifier),
-                           model(:issuer, X509Name),
-                           sequence(:validity),
-                           model(:subject, X509Name),
-                           sequence(:subjectPublicKeyInfo),
-                           bit_string(:issuerUniqueID, implicit: 1, optional: true),
-                           bit_string(:subjectUniqueID, implicit: 2, optional: true),
-                           sequence_of(:extensions, Extension, explicit: 3,
-                                       optional: true)]
-      end
-
-      class X509Certificate < Model
-        sequence :certificate,
-                 content: [model(:tbsCertificate, TBSCertificate),
-                           model(:signatureAlgorithm, AlgorithmIdentifier),
-                           bit_string(:signatureValue)]
-      end
-
       it 'may parse a X.509 certificate' do
-        der = binary(File.read(File.join(__dir__, 'cert_example.der')))
+        der = File.read(File.join(__dir__, 'cert_example.der')).b
         cert = X509Certificate.parse(der)
         expect(cert[:tbsCertificate][:version].value).to eq(:v3)
         expect(cert[:tbsCertificate][:serialNumber].value).to eq(0x123456789123456789)
@@ -336,23 +288,23 @@ module RASN1
         expect(cert[:signatureValue].value).to eq(der[0x1b6, 128])
 
         issuer = cert[:tbsCertificate][:issuer].to_h
-        expect(issuer[:rdnSequence][0][0][:value]).to eq(binary("\x13\x03org"))
+        expect(issuer[:rdnSequence][0][0][:value]).to eq("\x13\x03org".b)
       end
 
       it 'may generate a X.509 certificate' do
-        der = binary(File.read(File.join(__dir__, 'cert_example.der')))
+        der = File.read(File.join(__dir__, 'cert_example.der')).b
         cert = X509Certificate.parse(der)
         expect(cert.to_der).to eq(der)
       end
 
       it 'may directly access an inner element' do
-        der = binary(File.read(File.join(__dir__, 'cert_example.der')))
-        cert = X509Certificate.parse(der)
+        der = File.read(File.join(__dir__, 'cert_example.der')).b
+        cert = RASN1Test::X509Example::X509Certificate.parse(der)
 
         expect(cert.value(:version)).to eq(:v3)
         expect(cert.value(:serialNumber)).to eq(0x123456789123456789)
         expect(cert.value(:issuer, 0, 0, :type)).to eq('2.5.4.46')
-        expect(cert.value(:issuer, 0, 0, :value)).to eq(binary("\x13\x03org"))
+        expect(cert.value(:issuer, 0, 0, :value)).to eq("\x13\x03org".b)
       end
     end
   end

@@ -24,13 +24,13 @@ module RASN1::Types
       it 'generates a DER string' do
         printable = PrintableString.new
         printable.value = 'azerty'
-        expect(printable.to_der).to eq(binary("\x13\x06azerty"))
+        expect(printable.to_der).to eq("\x13\x06azerty".b)
       end
 
       it 'generates a DER string according to ASN.1 class' do
         printable = PrintableString.new(class: :context)
         printable.value = 'a'
-        expect(printable.to_der).to eq(binary("\x93\x01a"))
+        expect(printable.to_der).to eq("\x93\x01a".b)
       end
 
       it 'generates a DER string according to default' do
@@ -38,7 +38,7 @@ module RASN1::Types
         printable.value = 'NOP'
         expect(printable.to_der).to eq('')
         printable.value = 'N'
-        expect(printable.to_der).to eq(binary("\x13\x01N"))
+        expect(printable.to_der).to eq("\x13\x01N".b)
       end
 
       it 'generates a DER string according to optional' do
@@ -46,7 +46,7 @@ module RASN1::Types
         printable.value = nil
         expect(printable.to_der).to eq('')
         printable.value = 'abc'
-        expect(printable.to_der).to eq(binary("\x13\x03abc"))
+        expect(printable.to_der).to eq("\x13\x03abc".b)
       end
 
       it 'raises on illegal character' do
@@ -60,12 +60,12 @@ module RASN1::Types
       let(:printable) { PrintableString.new }
 
       it 'parses a DER PRINTABLE STRING' do
-        printable.parse!(binary("\x13\x031a="))
+        printable.parse!("\x13\x031a=".b)
         expect(printable.value).to eq('1a=')
       end
 
       it 'raises on illegal character' do
-        expect { printable.parse!(binary("\x13\x03ab;")) }
+        expect { printable.parse!("\x13\x03ab;".b) }
           .to raise_error(RASN1::ASN1Error, /invalid char.*';'$/)
       end
     end

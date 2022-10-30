@@ -24,7 +24,7 @@ module RASN1::Types
       it 'generates a DER string' do
         utc = UtcTime.new
         utc.value = Time.utc(2017, 12, 30, 16, 30)
-        expect(utc.to_der).to eq(binary("\x17\x0d171230163000Z"))
+        expect(utc.to_der).to eq("\x17\x0d171230163000Z".b)
       end
     end
 
@@ -32,22 +32,22 @@ module RASN1::Types
       let(:utc) { UtcTime.new }
 
       it 'parses a DER UTCTime (without second, Zulu)' do
-        utc.parse!(binary("\x17\x0b9901010203Z"))
+        utc.parse!("\x17\x0b9901010203Z".b)
         expect(utc.value).to eq(Time.utc(2099, 1, 1, 2, 3))
       end
 
       it 'parses a DER UTCTime (with seconds, Zulu)' do
-        utc.parse!(binary("\x17\x0d990101020304Z"))
+        utc.parse!("\x17\x0d990101020304Z".b)
         expect(utc.value).to eq(Time.utc(2099, 1, 1, 2, 3, 4))
       end
 
       it 'parses a DER UTCTime (without second, local time)' do
-        utc.parse!(binary("\x17\x119901010203-0100"))
+        utc.parse!("\x17\x119901010203-0100".b)
         expect(utc.value).to eq(Time.utc(2099, 1, 1, 3, 3))
       end
 
       it 'parses a DER UTCTime (with seconds, local time)' do
-        utc.parse!(binary("\x17\x13990101020304+0100"))
+        utc.parse!("\x17\x13990101020304+0100".b)
         expect(utc.value).to eq(Time.utc(2099, 1, 1, 1, 3, 4))
       end
 

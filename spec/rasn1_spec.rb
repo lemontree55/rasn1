@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe RASN1 do
@@ -6,7 +8,7 @@ describe RASN1 do
       it '(INTEGER)' do
         obj = RASN1.parse("\x02\x02\x80\x79")
         expect(obj).to be_a(RASN1::Types::Integer)
-        expect(obj.value).to eq(-32647)
+        expect(obj.value).to eq(-32_647)
       end
 
       it '(BIT STRING)' do
@@ -19,7 +21,7 @@ describe RASN1 do
       it '(OCTET STRING)' do
         obj = RASN1.parse("\x04\x05abcde")
         expect(obj).to be_a(RASN1::Types::OctetString)
-        expect(obj.value).to eq("abcde")
+        expect(obj.value).to eq('abcde')
       end
 
       it '(OBJECT ID)' do
@@ -148,10 +150,9 @@ describe RASN1 do
         expect(obj.value).to eq(RASN1::Types::Sequence.new(value: [@bool, @int]).to_der)
       end
 
-      context "(complex example)" do
+      context '(complex example)' do
         it 'decodes a complex example' do
-          der = File.read(File.join(__dir__, 'cert_example.der'))
-          der.force_encoding('BINARY')
+          der = File.read(File.join(__dir__, 'cert_example.der')).b
           cert = RASN1.parse(der)
           expect(cert).to be_a(RASN1::Types::Sequence)
           expect(cert.value.size).to eq(3)
@@ -159,7 +160,7 @@ describe RASN1 do
           expect(cert.value[1]).to be_a(RASN1::Types::Sequence)
           expect(cert.value[2]).to be_a(RASN1::Types::BitString)
 
-          expected_str = "\x4d\x52\xbf\xb1\x08\xe6\xc2\xb0".force_encoding('BINARY')
+          expected_str = "\x4d\x52\xbf\xb1\x08\xe6\xc2\xb0".b
           expect(cert.value[2].value[0..7]).to eq(expected_str)
           expect(cert.value[2].bit_length).to eq(1024)
 
@@ -178,7 +179,7 @@ describe RASN1 do
           expect(cert.value[0].value[1]).to be_instance_of(RASN1::Types::Integer)
           expect(cert.value[0].value[1].value).to eq(0x123456789123456789)
           expect(cert.value[0].value[3]).to be_instance_of(RASN1::Types::Sequence)
-          dn = %w(org example www)
+          dn = %w[org example www]
           cert.value[0].value[3].value.each_with_index do |obj, i|
             expect(obj).to be_a(RASN1::Types::Set)
             expect(obj.value.size).to eq(1)
