@@ -1,5 +1,58 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
+module RASN1Test
+  module X509Example
+    class AttributeTypeAndValue < RASN1::Model
+      sequence :attributeTypeAndValue,
+               content: [objectid(:type),
+                         any(:value)]
+    end
+
+    class AlgorithmIdentifier < RASN1::Model
+      sequence :algorithmIdentifier
+    end
+
+    class RelativeDN < RASN1::Model
+      set_of :relativeDN, AttributeTypeAndValue
+    end
+
+    class X509Name < RASN1::Model
+      sequence_of :rdnSequence, RelativeDN
+    end
+
+    class Extension < RASN1::Model
+      sequence :extension,
+               content: [objectid(:extnID),
+                         boolean(:critical, default: false),
+                         octet_string(:extnValue)]
+    end
+
+    class TBSCertificate < RASN1::Model
+      sequence :tbsCertificate,
+               content: [integer(:version, explicit: 0, constructed: true,
+                                           default: 0, enum: { v1: 0, v2: 1, v3: 2 }),
+                         integer(:serialNumber),
+                         model(:signature, AlgorithmIdentifier),
+                         model(:issuer, X509Name),
+                         sequence(:validity),
+                         model(:subject, X509Name),
+                         sequence(:subjectPublicKeyInfo),
+                         bit_string(:issuerUniqueID, implicit: 1, optional: true),
+                         bit_string(:subjectUniqueID, implicit: 2, optional: true),
+                         sequence_of(:extensions, Extension, explicit: 3,
+                                                             optional: true)]
+    end
+
+    class X509Certificate < RASN1::Model
+      sequence :certificate,
+               content: [model(:tbsCertificate, TBSCertificate),
+                         model(:signatureAlgorithm, AlgorithmIdentifier),
+                         bit_string(:signatureValue)]
+    end
+  end
+end
 module RASN1
   include TestModel
 
@@ -28,13 +81,7 @@ module RASN1
       end
     end
 
-    [
-      :sequence,
-      :sequence_of,
-      :set,
-      :set_of,
-      :choice,
-    ].each do |method_name|
+    %i[sequence sequence_of set set_of choice].each do |method_name|
       describe ".#{method_name}" do
         it 'has a line number and source location associated with the rasn1 namespace' do
           method = described_class.method(method_name)
@@ -42,7 +89,7 @@ module RASN1
 
           # By default this will be `["(eval)", 1]` if line/source are not passed to eval
           # This verifies it is located within the rasn1 namespace
-          expect(method_source_file).to match /rasn1/
+          expect(method_source_file).to match(/rasn1/)
           expect(method_source_line).to be_an_instance_of(Integer)
         end
       end
@@ -72,7 +119,7 @@ module RASN1
       end
 
       it 'initializes a model from a parameter hash' do
-        model = SuperOfModel.new(of: [{id: 1234}, {id: 4567, room: 43, house: 21}])
+        model = SuperOfModel.new(of: [{ id: 1234 }, { id: 4567, room: 43, house: 21 }])
         expect(model[:of][:seqof].length).to eq(2)
         expect(model[:of][:seqof][0]).to be_a(ModelTest)
         expect(model[:of][:seqof][0][:id].to_i).to eq(1234)
@@ -152,9 +199,7 @@ module RASN1
         test2[:a_record][:house].value = 1
         expect(test2.to_h).to eq({ record2: { rented: true,
                                               a_record:
-                                                { id: 12, house: 1 }
-                                            }
-                                 })
+                                                { id: 12, house: 1 } } })
       end
 
       it 'generates a Hash image of a model with a SequenceOf' do
@@ -162,28 +207,27 @@ module RASN1
         model[:seqof] << { id: 1, house: 1 }
         model[:seqof] << { id: 2, house: 1 }
         expect(model.to_h).to eq({ seqof: [{ id: 1, house: 1 },
-                                           { id: 2, house: 1 }]
-                                 })
+                                           { id: 2, house: 1 }] })
       end
     end
 
     describe '#to_der' do
       it 'generates a DER string from a simple model' do
-        test = ModelTest.new(id: 65537, room: 43, house: 0x1234)
+        test = ModelTest.new(id: 65_537, room: 43, house: 0x1234)
         expect(test.to_der).to eq(SIMPLE_VALUE)
       end
 
       it 'generates a DER string from a simple model, without optional value' do
-        test = ModelTest.new(id: 65537, house: 0x1234)
+        test = ModelTest.new(id: 65_537, house: 0x1234)
         expect(test.to_der).to eq(OPTIONAL_VALUE)
       end
 
       it 'generates a DER string from a simple model, without default value' do
-        test = ModelTest.new(id: 65537, room: 43)
+        test = ModelTest.new(id: 65_537, room: 43)
         expect(test.to_der).to eq(DEFAULT_VALUE)
       end
       it 'generates a DER string from a nested model' do
-        test2 = ModelTest2.new(rented: true, a_record: { id: 65537, room: 43 })
+        test2 = ModelTest2.new(rented: true, a_record: { id: 65_537, room: 43 })
         expect(test2.to_der).to eq(NESTED_VALUE)
       end
 
@@ -196,21 +240,21 @@ module RASN1
     describe '.parse' do
       it 'parses a DER string from a simple model' do
         test = ModelTest.parse(SIMPLE_VALUE)
-        expect(test[:id].value).to eq(65537)
+        expect(test[:id].value).to eq(65_537)
         expect(test[:room].value).to eq(43)
         expect(test[:house].value).to eq(0x1234)
       end
 
       it 'parses a DER string from a simple model, optional value being not present' do
         test = ModelTest.parse(OPTIONAL_VALUE)
-        expect(test[:id].value).to eq(65537)
+        expect(test[:id].value).to eq(65_537)
         expect(test[:room].value).to eq(nil)
         expect(test[:house].value).to eq(0x1234)
       end
 
       it 'parses a DER string from a simple model, default value being not present' do
         test = ModelTest.parse(DEFAULT_VALUE)
-        expect(test[:id].value).to eq(65537)
+        expect(test[:id].value).to eq(65_537)
         expect(test[:room].value).to eq(43)
         expect(test[:house].value).to eq(0)
       end
@@ -218,10 +262,9 @@ module RASN1
       it 'parses a DER string from a nested model' do
         test2 = ModelTest2.parse(NESTED_VALUE)
         expect(test2.to_h).to eq(record2: { rented: true,
-                                            a_record: { id: 65537,
+                                            a_record: { id: 65_537,
                                                         room: 43,
-                                                        house: 0 }
-                                          })
+                                                        house: 0 } })
       end
 
       it 'parses a DER string with a model containing a void SEQUENCE' do
@@ -251,7 +294,7 @@ module RASN1
 
         choice = ModelChoice.parse(CHOICE_SEQUENCE)
         expect(choice.chosen).to eq(1)
-        expect(choice[:a_record][:id].value).to eq(65537)
+        expect(choice[:a_record][:id].value).to eq(65_537)
         expect(choice[:a_record][:room].value).to eq(43)
         expect(choice[:a_record][:house].value).to eq(0x1234)
       end
@@ -275,7 +318,7 @@ module RASN1
     context 'complex example' do
       it 'may parse a X.509 certificate' do
         der = File.read(File.join(__dir__, 'cert_example.der')).b
-        cert = X509Certificate.parse(der)
+        cert = RASN1Test::X509Example::X509Certificate.parse(der)
         expect(cert[:tbsCertificate][:version].value).to eq(:v3)
         expect(cert[:tbsCertificate][:serialNumber].value).to eq(0x123456789123456789)
         validity = [0x17, 0x0d, 0x31, 0x37, 0x30, 0x38, 0x30, 0x37, 0x31, 0x33, 0x30,
@@ -293,7 +336,7 @@ module RASN1
 
       it 'may generate a X.509 certificate' do
         der = File.read(File.join(__dir__, 'cert_example.der')).b
-        cert = X509Certificate.parse(der)
+        cert = RASN1Test::X509Example::X509Certificate.parse(der)
         expect(cert.to_der).to eq(der)
       end
 
