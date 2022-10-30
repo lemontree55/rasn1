@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require_relative '../spec_helper'
 
-module RASN1::Types
-
+# rubocop:disable Metrics/BlockLength
+module RASN1::Types # rubocop:disable Metrics/ModuleLength
   describe Integer do
     let(:hsh) { { one: 1, two: 2 } }
 
@@ -31,12 +33,12 @@ module RASN1::Types
       end
 
       it 'raises when default value is not in enum' do
-        expect { Integer.new(default: :three, enum: hsh) }.
-          to raise_error(RASN1::EnumeratedError, /default value/)
-        expect { Integer.new(default: 3, enum: hsh) }.
-          to raise_error(RASN1::EnumeratedError, /default value/)
-        expect { Integer.new(default: Object.new, enum: hsh) }.
-          to raise_error(TypeError, /default value/)
+        expect { Integer.new(default: :three, enum: hsh) }
+          .to raise_error(RASN1::EnumeratedError, /default value/)
+        expect { Integer.new(default: 3, enum: hsh) }
+          .to raise_error(RASN1::EnumeratedError, /default value/)
+        expect { Integer.new(default: Object.new, enum: hsh) }
+          .to raise_error(TypeError, /default value/)
       end
     end
 
@@ -47,8 +49,8 @@ module RASN1::Types
       end
 
       it 'gets default value is one is defined and not value was set' do
-        int = Integer.new(default: 123456)
-        expect(int.to_i).to eq(123456)
+        int = Integer.new(default: 123_456)
+        expect(int.to_i).to eq(123_456)
         int.value = 12
         expect(int.to_i).to eq(12)
       end
@@ -68,13 +70,13 @@ module RASN1::Types
         int = Integer.new
         int.value = 42
         expect(int.to_der).to eq("\x02\x01\x2a".b)
-        int.value = 65536
+        int.value = 65_536
         expect(int.to_der).to eq("\x02\x03\x01\x00\x00".b)
         int.value = 255
         expect(int.to_der).to eq("\x02\x02\x00\xff".b)
         int.value = -1
         expect(int.to_der).to eq("\x02\x01\xff".b)
-        int.value = -543210
+        int.value = -543_210
         expect(int.to_der).to eq("\x02\x03\xf7\xb6\x16".b)
       end
 
@@ -93,7 +95,7 @@ module RASN1::Types
         int = Integer.new(default: 545)
         int.value = 545
         expect(int.to_der).to eq('')
-        int.value = 65000
+        int.value = 65_000
         expect(int.to_der).to eq("\x02\x03\x00\xfd\xe8".b)
       end
 
@@ -116,26 +118,27 @@ module RASN1::Types
       end
     end
 
-   describe '#parse!' do
-     let(:int) { Integer.new }
+    describe '#parse!' do
+      let(:int) { Integer.new }
 
-     it 'parses a DER INTEGER string' do
-       int.parse!("\x02\x01\x00".b)
-       expect(int.value).to eq(0)
-       int.parse!("\x02\x02\x00\xff".b)
-       expect(int.value).to eq(255)
-       int.parse!("\x02\x03\x01\x00\x00".b)
-       expect(int.value).to eq(65536)
-       int.parse!("\x02\x01\xFF".b)
-       expect(int.value).to eq(-1)
-       int.parse!("\x02\x03\xf7\xb6\x16".b)
-       expect(int.value).to eq(-543210)
-     end
+      it 'parses a DER INTEGER string' do
+        int.parse!("\x02\x01\x00".b)
+        expect(int.value).to eq(0)
+        int.parse!("\x02\x02\x00\xff".b)
+        expect(int.value).to eq(255)
+        int.parse!("\x02\x03\x01\x00\x00".b)
+        expect(int.value).to eq(65_536)
+        int.parse!("\x02\x01\xFF".b)
+        expect(int.value).to eq(-1)
+        int.parse!("\x02\x03\xf7\xb6\x16".b)
+        expect(int.value).to eq(-543_210)
+      end
 
-     it 'parses a DER string for named explicit tagged integer with enum (bug #6)' do
-      int = Integer.new(name: 'int', explicit: 3, enum: hsh)
-      expect { int.parse!("\x83\x03\x02\x01\x01".b) }.to_not raise_error
+      it 'parses a DER string for named explicit tagged integer with enum (bug #6)' do
+        int = Integer.new(name: 'int', explicit: 3, enum: hsh)
+        expect { int.parse!("\x83\x03\x02\x01\x01".b) }.to_not raise_error
+      end
     end
-   end
   end
 end
+# rubocop:enable Metrics/BlockLength

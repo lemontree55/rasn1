@@ -53,7 +53,9 @@ module RASN1Test
     end
   end
 end
-module RASN1
+
+# rubocop:disable Metrics/BlockLength
+module RASN1 # rubocop:disable Metrics/moduleLength
   include TestModel
 
   SIMPLE_VALUE = "\x30\x0e\x02\x03\x01\x00\x01\x80\x01\x2b\x81\x04\x02\x02\x12\x34".b.freeze
@@ -352,3 +354,4 @@ module RASN1
     end
   end
 end
+# rubocop:enable Metrics/BlockLength

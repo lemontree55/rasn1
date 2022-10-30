@@ -2,7 +2,8 @@
 
 require_relative 'spec_helper'
 
-module RASN1
+# rubocop:disable Metrics/BlockLength
+module RASN1 # rubocop:disable Metrics/ModuleLength
   include TestModel
 
   module TestWrapper
@@ -138,3 +139,4 @@ module RASN1
     end
   end
 end
+# rubocop:enable Metrics/BlockLength

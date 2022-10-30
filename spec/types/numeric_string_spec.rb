@@ -1,8 +1,10 @@
 # coding: utf-8
+# frozen_string_literal: true
+
 require_relative '../spec_helper'
 
+# rubocop:disable Metrics/BlockLength
 module RASN1::Types
-
   describe NumericString do
     describe '.type' do
       it 'gets ASN.1 type' do
@@ -52,7 +54,7 @@ module RASN1::Types
       it 'raises on illegal character' do
         numeric = NumericString.new
         numeric.value = 'a'
-        expect {numeric.to_der }.to raise_error(RASN1::ASN1Error, /invalid char.*'a'$/)
+        expect { numeric.to_der }.to raise_error(RASN1::ASN1Error, /invalid char.*'a'$/)
       end
     end
 
@@ -65,9 +67,10 @@ module RASN1::Types
       end
 
       it 'raises on illegal character' do
-        expect { numeric.parse!("\x12\x0312x".b) }.
-          to raise_error(RASN1::ASN1Error, /invalid char.*'x'$/)
+        expect { numeric.parse!("\x12\x0312x".b) }
+          .to raise_error(RASN1::ASN1Error, /invalid char.*'x'$/)
       end
     end
   end
 end
+# rubocop:enable Metrics/BlockLength

@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 require_relative '../spec_helper'
 
-module RASN1::Types
-  describe Base do
-    describe '#initialize' do
+module RASN1::Types # rubocop:disable Metrics/ModuleLength
+  describe Base do # rubocop:disable Metrics/BlockLength
+    describe '#initialize' do # rubocop:disable Metrics/BlockLength
       it 'sets value' do
         base = Base.new(value: 'value')
         expect(base.value).to eq('value')
@@ -77,13 +79,13 @@ module RASN1::Types
       end
     end
 
-    describe '#parse!' do
+    describe '#parse!' do # rubocop:disable Metrics/BlockLength
       let(:unexpected_der) { "\x02\x02\xca\xfe".b }
 
       it 'raises on unexpected ID value' do
         bool = Boolean.new
-        expect { bool.parse!(unexpected_der) }.to raise_error(RASN1::ASN1Error).
-          with_message('Expected UNIVERSAL PRIMITIVE BOOLEAN but get UNIVERSAL PRIMITIVE INTEGER')
+        expect { bool.parse!(unexpected_der) }.to raise_error(RASN1::ASN1Error)
+          .with_message('Expected UNIVERSAL PRIMITIVE BOOLEAN but get UNIVERSAL PRIMITIVE INTEGER')
       end
 
       it 'does not raise on unexpected ID value with OPTIONAL tag' do
@@ -109,16 +111,16 @@ module RASN1::Types
         expect(int.id).to eq(43)
         expect(int.value).to eq(0)
 
-        #int = Integer.new(value: 1, implicit: 255)
-        #expect(int.to_der).to eq("\x9f\x81\x7f\x01\x01".b)
-        #int = Integer.new(value: 2, implicit: 60_000)
-        #expect(int.to_der).to eq("\x9f\x83\xd4\x60\x01\2".b)
+        # int = Integer.new(value: 1, implicit: 255)
+        # expect(int.to_der).to eq("\x9f\x81\x7f\x01\x01".b)
+        # int = Integer.new(value: 2, implicit: 60_000)
+        # expect(int.to_der).to eq("\x9f\x83\xd4\x60\x01\2".b)
       end
 
       it 'parses tags with multi-byte length' do
         bs = BitString.new
 
-        der = "\x03\x82\x01\x03\x00" + 'a' * 0x102
+        der = "\x03\x82\x01\x03\x00".b + 'a'.b * 0x102
         expect(bs.parse!(der)).to eq(0x107)
         expect(bs.value).to eq('a' * 0x102)
         expect(bs.bit_length).to eq(0x102 * 8)
@@ -137,13 +139,13 @@ module RASN1::Types
       it 'raises on indefinite length with primitive types' do
         bool = Boolean.new
         der = "\x01\x80\xff\x00\x00".b
-        expect { bool.parse!(der) }.to raise_error(RASN1::ASN1Error).
-          with_message('malformed BOOLEAN: indefinite length forbidden for primitive types')
+        expect { bool.parse!(der) }.to raise_error(RASN1::ASN1Error)
+          .with_message('malformed BOOLEAN: indefinite length forbidden for primitive types')
       end
 
       context 'raises on indefinite length with constructed types' do
         let(:der) { "\x30\x80\x01\x01\xFF\x00\x00".b }
-        let(:seq) { seq = Sequence.new; seq.value = [Boolean.new]; seq }
+        let(:seq) { Sequence.new.tap { |s| s.value = [Boolean.new] } }
 
         it 'on DER encoding' do
           expect { seq.parse!(der) }.to raise_error(RASN1::ASN1Error)
@@ -155,8 +157,8 @@ module RASN1::Types
       end
     end
 
-    context 'tagged types' do
-      describe '#initialize' do
+    context 'tagged types' do # rubocop:disable Metrics/BlockLength
+      describe '#initialize' do # rubocop:disable Metrics/BlockLength
         it 'creates an explicit tagged type' do
           type = Integer.new(explicit: 5)
           expect(type.tagged?).to be(true)
@@ -289,21 +291,21 @@ module RASN1::Types
 
     describe '#inspect' do
       it 'returns TYPE: VALUE for child classes' do
-        expect(Integer.new.inspect).to eq("INTEGER: (NO VALUE)")
-        expect(Integer.new(value: 0).inspect).to eq("INTEGER: 0")
+        expect(Integer.new.inspect).to eq('INTEGER: (NO VALUE)')
+        expect(Integer.new(value: 0).inspect).to eq('INTEGER: 0')
       end
 
       it 'prints name is object has a name' do
-        expect(Integer.new(name: :int, value: 0).inspect).to eq("int INTEGER: 0")
+        expect(Integer.new(name: :int, value: 0).inspect).to eq('int INTEGER: 0')
       end
 
       it 'gives OPTIONAL information' do
-        expect(Integer.new(value: 0, optional: true).inspect).to eq("INTEGER: 0 OPTIONAL")
+        expect(Integer.new(value: 0, optional: true).inspect).to eq('INTEGER: 0 OPTIONAL')
       end
 
       it 'gives DEFAULT information' do
-        expect(Integer.new(value: 0, default: 0).inspect).to eq("INTEGER: 0 DEFAULT 0")
-        expect(Integer.new(value: 1, default: 0).inspect).to eq("INTEGER: 1 DEFAULT 0")
+        expect(Integer.new(value: 0, default: 0).inspect).to eq('INTEGER: 0 DEFAULT 0')
+        expect(Integer.new(value: 1, default: 0).inspect).to eq('INTEGER: 1 DEFAULT 0')
       end
     end
 

@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+
 require_relative '../spec_helper'
 
+# rubocop:disable Metrics/BlockLength
 module RASN1::Types
   describe ObjectId do
     describe '.type' do
@@ -82,3 +85,4 @@ module RASN1::Types
     end
   end
 end
+# rubocop:enble Metrics/BlockLength

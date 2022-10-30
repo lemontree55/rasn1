@@ -17,12 +17,12 @@ module RASN1
       private
 
       def value_to_der
-        @value.to_s.force_encoding('US-ASCII').force_encoding('BINARY')
+        @value.to_s.dup.force_encoding('US-ASCII').b
       end
 
       def der_to_value(der, ber: false)
         super
-        @value.to_s.force_encoding('US-ASCII')
+        @value.to_s.dup.force_encoding('US-ASCII')
       end
     end
   end

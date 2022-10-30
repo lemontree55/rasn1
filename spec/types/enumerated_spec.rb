@@ -1,9 +1,10 @@
+# frozen_string_literal: true
+
 require_relative '../spec_helper'
 
-module RASN1::Types
-
+# rubocop:disable Metrics/BlockLength
+module RASN1::Types # rubocop:disable Metrics/ModuleLength
   describe Enumerated do
-
     let(:enumerated) { { a: 0, b: 1, c: 2 } }
 
     describe '.type' do
@@ -27,12 +28,12 @@ module RASN1::Types
       end
 
       it 'raises on unknown default value' do
-        expect { Enumerated.new(enum: enumerated, default: 53)}.
-          to raise_error(RASN1::EnumeratedError, /default value/)
-        expect { Enumerated.new(enum: enumerated, default: :e)}.
-          to raise_error(RASN1::EnumeratedError, /default value/)
-        expect { Enumerated.new(enum: enumerated, default: Object.new)}.
-          to raise_error(TypeError, /default value/)
+        expect { Enumerated.new(enum: enumerated, default: 53) }
+          .to raise_error(RASN1::EnumeratedError, /default value/)
+        expect { Enumerated.new(enum: enumerated, default: :e) }
+          .to raise_error(RASN1::EnumeratedError, /default value/)
+        expect { Enumerated.new(enum: enumerated, default: Object.new) }
+          .to raise_error(TypeError, /default value/)
       end
 
       it 'records integer default value as name' do
@@ -132,15 +133,16 @@ module RASN1::Types
       end
     end
 
-   describe '#parse!' do
-     let(:enum) { Enumerated.new(enum: enumerated) }
+    describe '#parse!' do
+      let(:enum) { Enumerated.new(enum: enumerated) }
 
-     it 'parses a DER ENUMERATED string' do
-       enum.to_h.each do |name, int|
-         enum.parse!([10, 1, int].pack('C3'))
-         expect(enum.value).to eq(name)
-       end
-     end
-   end
+      it 'parses a DER ENUMERATED string' do
+        enum.to_h.each do |name, int|
+          enum.parse!([10, 1, int].pack('C3'))
+          expect(enum.value).to eq(name)
+        end
+      end
+    end
   end
 end
+# rubocop:enable Metrics/BlockLength

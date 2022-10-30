@@ -1,8 +1,10 @@
 # coding: utf-8
+# frozen_string_literal: true
+
 require_relative '../spec_helper'
 
+# rubocop:disable Metrics/BlockLength
 module RASN1::Types
-
   describe Utf8String do
     describe '.type' do
       it 'gets ASN.1 type' do
@@ -58,3 +60,4 @@ module RASN1::Types
     end
   end
 end
+# rubocop:enable Metrics/BlockLength

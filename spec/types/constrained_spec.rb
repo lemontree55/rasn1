@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+
 require_relative '../spec_helper'
 
+# rubocop:disable Metrics/BlockLength
 module RASN1::Types
   describe Constrained do
     before(:all) do
@@ -17,7 +20,7 @@ module RASN1::Types
       expect(RASN1::Types.constructed).to include(MySeq)
     end
 
-    describe ".constrained?" do
+    describe '.constrained?' do
       it 'returns true for contrained type' do
         expect(UInt32.constrained?).to be(true)
       end
@@ -92,12 +95,14 @@ end
 module RASN1
   describe Model do
     before(:all) do
-      Types.define_type "Int32", from: Types::Integer do |value|
+      Types.define_type 'Int32', from: Types::Integer do |value|
         (value >= -2**31) && (value < 2**31)
       end
-      Types.define_type "LocalSeq", from: Types::Sequence
+      Types.define_type 'LocalSeq', from: Types::Sequence
 
-      class MyDefinedModel < Model
+      # Have to be defined here to known .int32 and .localseq,
+      # as these methods are only defined in these before block.
+      class MyDefinedModel < RASN1::Model # rubocop:disable Lint/ConstantDefinitionInBlock
         localseq :myseq, content: [
           int32(:id),
           integer(:normal_integer)
@@ -113,3 +118,4 @@ module RASN1
     end
   end
 end
+# rubocop:enable Metrics/BlockLength

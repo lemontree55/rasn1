@@ -1,8 +1,9 @@
+# frozen_string_literal: true
+
 require_relative '../spec_helper'
 
-module RASN1::Types
-
-  describe BitString do
+module RASN1::Types # rubocop:disable Metrics/ModuleLength
+  describe BitString do # rubocop:disable Metrics/BlockLength
     describe '.type' do
       it 'gets ASN.1 type' do
         expect(BitString.type).to eq('BIT STRING')
@@ -23,23 +24,23 @@ module RASN1::Types
       end
     end
 
-    describe '#to_der' do
+    describe '#to_der' do # rubocop:disable Metrics/BlockLength
       it 'raises if bit length is not set' do
         bs = BitString.new
         bs.value = 'NOP'
         expect { bs.to_der }.to raise_error(RASN1::ASN1Error)
       end
 
-      it 'generates a DER string' do
+      it 'generates a DER string with unfrozen strings' do
         bs = BitString.new
-        bs.value = 'NOP'
+        bs.value = +'NOP'
         bs.bit_length = 20
         expect(bs.to_der).to eq("\x03\x04\x04NOP".b)
       end
 
       it 'generates a DER string with frozen strings' do
         bs = BitString.new
-        bs.value = 'NOP'.freeze
+        bs.value = 'NOP'
         bs.bit_length = 20
         expect(bs.to_der).to eq("\x03\x04\x04NOP".b)
       end

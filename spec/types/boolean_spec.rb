@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require_relative '../spec_helper'
 
+# rubocop:disable Metrics/BlockLength
 module RASN1::Types
-
   describe Boolean do
     describe '.type' do
       it 'gets ASN.1 type' do
@@ -73,10 +75,11 @@ module RASN1::Types
 
       it 'raises on malformed BOOLEAN (size not equak 1)' do
         ber = "\x01\x00".b
-        expect {bool.parse!(ber) }.to raise_error(RASN1::ASN1Error, /length of 1/)
+        expect { bool.parse!(ber) }.to raise_error(RASN1::ASN1Error, /length of 1/)
         ber = "\x01\x02\xff\xff".b
-        expect {bool.parse!(ber) }.to raise_error(RASN1::ASN1Error, /length of 1/)
+        expect { bool.parse!(ber) }.to raise_error(RASN1::ASN1Error, /length of 1/)
       end
     end
   end
 end
+# rubocop:enable Metrics/BlockLength

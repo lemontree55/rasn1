@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require_relative '../spec_helper'
 
+# rubocop:disable Metrics/BlockLength
 module RASN1::Types
-
   describe Choice do
     describe '.type' do
       it 'gets ASN.1 type' do
@@ -27,11 +29,11 @@ module RASN1::Types
       describe '#set_chosen_value' do
         it 'sets a value to chosen type' do
           @choice.chosen = 0
-          @choice.set_chosen_value 45
+          @choice.set_chosen_value(45)
           expect(@choice.value[0].value).to eq(45)
 
           @choice.chosen = 1
-          @choice.set_chosen_value "abcd"
+          @choice.set_chosen_value('abcd')
           expect(@choice.value[1].value).to eq('abcd')
         end
 
@@ -43,11 +45,11 @@ module RASN1::Types
       describe '#chosen_value' do
         it 'gets value from chosen type' do
           @choice.chosen = 0
-          @choice.set_chosen_value 45
+          @choice.set_chosen_value(45)
           expect(@choice.chosen_value).to eq(45)
 
           @choice.chosen = 1
-          @choice.set_chosen_value "abcd"
+          @choice.set_chosen_value('abcd')
           expect(@choice.chosen_value).to eq('abcd')
         end
 
@@ -59,11 +61,11 @@ module RASN1::Types
       describe '#to_der' do
         it 'generates DER string corresponding to chosen type' do
           @choice.chosen = 0
-          @choice.set_chosen_value 45
+          @choice.set_chosen_value(45)
           expect(@choice.to_der).to eq("\x02\x01\x2d".b)
 
           @choice.chosen = 1
-          @choice.set_chosen_value "abcd"
+          @choice.set_chosen_value('abcd')
           expect(@choice.to_der).to eq("\x04\x04abcd".b)
         end
 
@@ -118,3 +120,4 @@ module RASN1::Types
     end
   end
 end
+# rubocop:enable Metrics/BlockLength
