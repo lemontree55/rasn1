@@ -561,6 +561,8 @@ module RASN1
                 sequence_of_to_h(my_element)
               when Types::Sequence
                 sequence_to_h(my_element)
+              when Wrapper
+                wrapper_to_h(my_element)
               else
                 my_element.value
               end
@@ -583,11 +585,20 @@ module RASN1
       ary = seq.value.map do |el|
         next if el.optional? && el.value.nil?
 
-        name = el.is_a?(Model) ? @elements.key(el) : el.name
+        name = case el
+               when Model
+                 @elements.key(el)
+               else
+                 el.name
+               end
         [name, private_to_h(el)]
       end
       ary.compact!
       ary.to_h
+    end
+
+    def wrapper_to_h(wrap)
+      private_to_h(wrap.element)
     end
   end
 end

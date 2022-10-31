@@ -104,6 +104,18 @@ module RASN1
       end
     end
 
+    # Return Wrapped element
+    # @return [Types::Base,Model]
+    def element
+      explicit? ? __getobj__.value : __getobj__
+    end
+
+    # Return wrapped object's name
+    # return [String]
+    def name
+      element.name
+    end
+
     private
 
     def generate_implicit_element

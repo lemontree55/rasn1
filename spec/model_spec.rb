@@ -211,6 +211,20 @@ module RASN1 # rubocop:disable Metrics/moduleLength
         expect(model.to_h).to eq({ seqof: [{ id: 1, house: 1 },
                                            { id: 2, house: 1 }] })
       end
+
+      it 'generates a Hash image of a model with an implicit wrapped submodel' do
+        model = ModelWithImplicitWrapper.new
+        model[:a_record][:id] = 2
+        model[:a_record][:house] = 3
+        expect(model.to_h).to eq({ seq: { record: { id: 2, house: 3 } } })
+      end
+
+      it 'generates a Hash image of a model with an explicit wrapped submodel' do
+        model = ModelWithExplicitWrapper.new
+        model[:a_record][:id] = 4
+        model[:a_record][:house] = 5
+        expect(model.to_h).to eq({ seq: { record: { id: 4, house: 5 } } })
+      end
     end
 
     describe '#to_der' do
