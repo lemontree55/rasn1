@@ -588,6 +588,8 @@ module RASN1
         name = case el
                when Model
                  @elements.key(el)
+               when Wrapper
+                 @elements.key(el.element)
                else
                  el.name
                end
