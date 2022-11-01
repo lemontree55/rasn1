@@ -531,7 +531,7 @@ module RASN1
 
         case value
         when Hash
-          raise ArgumentError, "element #{name}: may only pass a Hash for Model elements" unless obj[name].is_a? Model
+          raise ArgumentError, "element #{name}: may only pass a Hash for Model elements" unless obj[name].is_a?(Model)
 
           initialize_elements obj[name], value
         when Array

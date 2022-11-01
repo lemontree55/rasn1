@@ -133,6 +133,20 @@ module RASN1 # rubocop:disable Metrics/moduleLength
         expect(model[:of][:seqof][1][:house].to_i).to eq(21)
       end
 
+      it 'initializes a model with an implicit wrapper from a parameter hash' do
+        model = ModelWithImplicitWrapper.new(a_record: { id: 12_345, room: 42, house: 19 })
+        expect(model[:a_record][:id].value).to eq(12_345)
+        expect(model[:a_record][:room].value).to eq(42)
+        expect(model[:a_record][:house].value).to eq(19)
+      end
+
+      it 'initializes a model with an explicit wrapper from a parameter hash' do
+        model = ModelWithExplicitWrapper.new(a_record: { id: 52, room: 41, house: 18 })
+        expect(model[:a_record][:id].value).to eq(52)
+        expect(model[:a_record][:room].value).to eq(41)
+        expect(model[:a_record][:house].value).to eq(18)
+      end
+
       context 'when there are duplicate names present in the model' do
         it 'raises an exception when the sequence name is the same as the content name' do
           expect do
