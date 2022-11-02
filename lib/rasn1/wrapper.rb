@@ -34,7 +34,7 @@ module RASN1
       private
 
       def value_to_der
-        @value.to_der
+        @value.is_a?(String) ? @value : @value.to_der
       end
     end
 
@@ -48,7 +48,8 @@ module RASN1
         @options = opts
         # ExplicitWrapper is a hand-made explicit tag, but we have to use its implicit option
         # to force its tag value.
-        element = ExplicitWrapper.new(opts.merge(implicit: @explicit, value: element))
+        @explicit_wrapper = ExplicitWrapper.new(opts.merge(implicit: @explicit))
+        #element = ExplicitWrapper.new(opts.merge(implicit: @explicit, value: element))
       else
         opts[:value] = element.value
         element.options = element.options.merge(opts)
@@ -75,10 +76,13 @@ module RASN1
     # @return [String]
     def to_der
       if implicit?
-        element = generate_implicit_element
-        element.to_der
+        el = generate_implicit_element
+        el.to_der
+      elsif explicit?
+        @explicit_wrapper.value = element
+        @explicit_wrapper.to_der
       else
-        __getobj__.to_der
+        element.to_der
       end
     end
 
@@ -89,43 +93,65 @@ module RASN1
     # @raise [ASN1Error] error on parsing
     def parse!(der, ber: false)
       if implicit?
-        element = generate_implicit_element
-        parsed = element.parse!(der, ber: ber)
-        __getobj__.value = element.value
+        el = generate_implicit_element
+        parsed = el.parse!(der, ber: ber)
+        element.value = el.value
         parsed
       elsif explicit?
-        real_element = __getobj__.value
-        parsed = __getobj__.parse!(der, ber: ber)
-        real_element.parse!(__getobj__.value, ber: ber)
-        __getobj__.value = real_element
+        parsed = @explicit_wrapper.parse!(der, ber: ber)
+        element.parse!(@explicit_wrapper.value, ber: ber)
         parsed
       else
-        __getobj__.parse!(der, ber: ber)
+        element.parse!(der, ber: ber)
       end
     end
 
     # Return Wrapped element
     # @return [Types::Base,Model]
     def element
-      explicit? ? __getobj__.value : __getobj__
+      __getobj__
     end
 
-    # Return wrapped object's name
-    # return [String]
-    def name
-      element.name
+    # @return [::Integer]
+    def id
+      if implicit?
+        @implicit
+      elsif explicit?
+        @explicit
+      else
+        element.id
+      end
+    end
+
+    # @return [Symbol]
+    def asn1_class
+      return element.asn1_class unless @options.key?(:class)
+
+      @options[:class]
+    end
+
+    # @return [Boolean]
+    def constructed?
+      return element.constructed? unless @options.key?(:constructed)
+
+      @options[:constructed]
+    end
+
+    # @return [Boolean]
+    def primitive?
+      !constructed?
     end
 
     private
 
     def generate_implicit_element
-      element = __getobj__.dup
-      if element.explicit?
-        element.options = element.options.merge(explicit: @implicit)
-      elsif element.implicit?
-        element.options = element.options.merge(implicit: @implicit)
+      el = element.dup
+      if el.explicit?
+        el.options = el.options.merge(explicit: @implicit)
+      elsif el.implicit?
+        el.options = el.options.merge(implicit: @implicit)
       end
-      element
+      el
     end
   end
 end

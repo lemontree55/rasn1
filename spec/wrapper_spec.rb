@@ -36,9 +36,9 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
       end
 
       it "accepts options to supersede its element's options" do
-        wrapper = Wrapper.new(Types::SequenceOf.new(Integer, explicit: 4), explicit: 12, class: :private, constructed: true)
+        wrapper = Wrapper.new(Types::SequenceOf.new(Integer, explicit: 4), explicit: 12, class: :private, constructed: false)
         expect(wrapper).to be_explicit
-        expect(wrapper).to be_constructed
+        expect(wrapper).to_not be_constructed
         expect(wrapper).to_not be_optional
         expect(wrapper.id).to eq(12)
         expect(wrapper.asn1_class).to eq(:private)
@@ -106,7 +106,7 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
       it 'parses a DER string for an explicitly wrapped explicit base type' do
         wrapper = Wrapper.new(Types::Integer.new(name: :int, explicit: 4), explicit: 12, class: :private)
         expect { wrapper.parse!(TestWrapper::DER_EXPLICIT_WRAPPED_INTEGER) }.not_to raise_error
-        expect(wrapper.value).to eq(Types::Integer.new(name: :int, explicit: 4, value: -1))
+        expect(wrapper.value).to eq(-1)
       end
 
       it 'parses a DER string for a wrapped explicit model' do
@@ -133,8 +133,8 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
       it 'parses a DER string for an explicitly wrapped explicit model' do
         wrapper = Wrapper.new(ExplicitTaggedSeq.new, explicit: 9, class: :context)
         expect { wrapper.parse!(TestWrapper::DER_EXPLICITLY_WRAPPED_EXPLICIT_MODEL) }.not_to raise_error
-        expect(wrapper.value[:id].value).to eq(1)
-        expect(wrapper.value[:extern_id].value).to eq(65_536)
+        expect(wrapper[:id].value).to eq(1)
+        expect(wrapper[:extern_id].value).to eq(65_536)
       end
     end
   end
