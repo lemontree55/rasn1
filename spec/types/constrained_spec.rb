@@ -103,7 +103,7 @@ module RASN1
       # Have to be defined here to known .int32 and .localseq,
       # as these methods are only defined in these before block.
       class MyDefinedModel < RASN1::Model # rubocop:disable Lint/ConstantDefinitionInBlock
-        localseq :myseq, content: [
+        local_seq :myseq, content: [
           int32(:id),
           integer(:normal_integer)
         ]

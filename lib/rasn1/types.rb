@@ -95,7 +95,8 @@ module RASN1
       new_klass.constraint = constraint
 
       self.const_set(name, new_klass)
-      Model.define_type_accel(name.to_s.downcase, new_klass)
+      accel_name = name.to_s.gsub(/([a-z])([A-Z])/, '\1_\2').downcase
+      Model.define_type_accel(accel_name, new_klass)
 
       # Empty type caches
       @primitives = []
