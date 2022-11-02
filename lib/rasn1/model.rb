@@ -585,22 +585,29 @@ module RASN1
       ary = seq.value.map do |el|
         next if el.optional? && el.value.nil?
 
-        name = case el
-               when Model
-                 @elements.key(el)
-               when Wrapper
-                 @elements.key(el.element)
-               else
-                 el.name
-               end
-        [name, private_to_h(el)]
+        case el
+        when Model
+          hsh = el.to_h
+          hsh = hsh[hsh.keys.first]
+          [@elements.key(el), hsh]
+        when Wrapper
+          [@elements.key(el.element), wrapper_to_h(el)]
+        else
+          [el.name, private_to_h(el)]
+        end
       end
       ary.compact!
       ary.to_h
     end
 
     def wrapper_to_h(wrap)
-      private_to_h(wrap.element)
+      case wrap.element
+      when Model
+        hsh = wrap.element.to_h
+        hsh[hsh.keys.first]
+      else
+        private_to_h(wrap.element)
+      end
     end
   end
 end
