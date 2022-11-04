@@ -118,6 +118,7 @@ module RASN1
       # @option options [::String] :name name for this node
       def initialize(options={})
         @constructed = nil
+        set_value(options.delete(:value))
         self.options = options
         specific_initializer
       end
@@ -255,14 +256,31 @@ module RASN1
         (other.class == self.class) && (other.to_der == self.to_der)
       end
 
+      # Set options to this object
+      # @param [Hash] options
+      # @return [void]
+      # @since 0.12
       def options=(options)
         set_class options[:class]
         set_optional options[:optional]
         set_default options[:default]
         set_tag options
-        set_value options[:value]
         @name = options[:name]
         @options = options
+      end
+
+      # Say if a value is set
+      # @return [Boolean]
+      # @since 0.12
+      def value?
+        !@no_value
+      end
+
+      # @return [Boolean]
+      # @since 0.12
+      def can_build?
+        (@default.nil? || (value? && (@value != @default))) &&
+          (!optional? || value?)
       end
 
       private
@@ -355,15 +373,6 @@ module RASN1
           @value = value
         end
         value
-      end
-
-      def value?
-        !@no_value
-      end
-
-      def can_build?
-        (@default.nil? || (value? && (@value != @default))) &&
-          (!optional? || value?)
       end
 
       def build

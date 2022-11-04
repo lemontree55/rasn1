@@ -42,13 +42,13 @@ module RASN1
         str << " #{value.inspect} (bit length: #{bit_length})"
       end
 
-      private
-
       def can_build?
         !(!@default.nil? && (!value? || (@value == @default) &&
                               (@bit_length == @default_bit_length))) &&
           !(optional? && !value?)
       end
+
+      private
 
       def value_to_der
         raise ASN1Error, "#{@name}: bit length is not set" if bit_length.nil?
