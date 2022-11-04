@@ -276,6 +276,7 @@ module RASN1
         !@no_value
       end
 
+      # Say if DER can be built (not default value, not optional without value, has a value)
       # @return [Boolean]
       # @since 0.12
       def can_build?

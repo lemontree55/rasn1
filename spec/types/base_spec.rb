@@ -91,6 +91,7 @@ module RASN1::Types # rubocop:disable Metrics/ModuleLength
       it 'does not raise on unexpected ID value with OPTIONAL tag' do
         bool = Boolean.new(optional: true)
         expect { bool.parse!(unexpected_der) }.to_not raise_error
+        expect(bool.value?).to be(false)
         expect(bool.value).to be(nil)
       end
 

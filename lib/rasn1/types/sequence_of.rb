@@ -59,7 +59,6 @@ module RASN1
         Sequence.encoded_type
       end
 
-      # @param [Symbol, String] name name for this tag in grammar
       # @param [Class, Base] of_type base type for sequence of
       # @see Base#initialize
       def initialize(of_type, options={})
@@ -105,6 +104,7 @@ module RASN1
         @value.length
       end
 
+      # @return [String]
       def inspect(level=0)
         str = common_inspect(level)
         str << "\n"
@@ -121,6 +121,15 @@ module RASN1
           end
         end
         str
+      end
+
+      # @return [Boolean]
+      # @since 0.12.0
+      # @see Base#can_build?
+      def can_build?
+        return super unless optional?
+
+        super && !@value.empty? && @value.all? { |el| el.default.nil? || (el.value != el.default) }
       end
 
       private

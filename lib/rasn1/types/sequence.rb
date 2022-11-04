@@ -65,6 +65,20 @@ module RASN1
         end
       end
 
+      # @return [Boolean]
+      # @since 0.12.0
+      # @see Base#can_build?
+      def can_build?
+        case @value
+        when Array
+          return super unless optional?
+
+          super && @value.all? { |el| el.default.nil? || (el.value != el.default) }
+        else
+          super
+        end
+      end
+
       private
 
       def value_to_der

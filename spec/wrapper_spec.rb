@@ -13,6 +13,7 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
     DER_IMPLICITLY_WRAPPED_EXPLICIT_MODEL = "\xe8\x0a\x30\x08\x02\x01\x01\x02\x03\x01\x00\x00".b.freeze
     DER_IMPLICITLY_WRAPPED_IMPLICIT_MODEL = "\xe8\x08\x02\x01\x01\x81\x03\x02\x01\x02".b.freeze
     DER_EXPLICITLY_WRAPPED_EXPLICIT_MODEL = "\x89\x0c\x60\x0a\x30\x08\x02\x01\x01\x02\x03\x01\x00\x00".b.freeze
+    DER_OPTIONAL_EXPLICITLY_WRAPPED_MODEL = "\x87\x0a\x30\x08\x02\x01\x01\x81\x03\x02\x01\x02".b.freeze
   end
 
   describe Wrapper do
@@ -94,6 +95,13 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
         wrapper = Wrapper.new(ExplicitTaggedSeq.new(id: 1, extern_id: 65_536), explicit: 9, class: :context)
         expect(wrapper.to_der).to eq(TestWrapper::DER_EXPLICITLY_WRAPPED_EXPLICIT_MODEL)
       end
+
+      it 'generates a DER string for an optional explicitly wrapped model' do
+        wrapper = Wrapper.new(ModelTest.new, explicit: 7, optional: true)
+        expect(wrapper.to_der).to eq('')
+        wrapper = Wrapper.new(ModelTest.new(id: 1, house: 2), explicit: 7, optional: true)
+        expect(wrapper.to_der).to eq(TestWrapper::DER_OPTIONAL_EXPLICITLY_WRAPPED_MODEL)
+      end
     end
 
     describe '#parse!' do
@@ -135,6 +143,14 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
         expect { wrapper.parse!(TestWrapper::DER_EXPLICITLY_WRAPPED_EXPLICIT_MODEL) }.not_to raise_error
         expect(wrapper[:id].value).to eq(1)
         expect(wrapper[:extern_id].value).to eq(65_536)
+      end
+
+      it 'parses a DER string for an optional explicitly wrapped model' do
+        wrapper = Wrapper.new(ModelTest.new, explicit: 7, optional: true)
+        expect { wrapper.parse!('') }.to_not raise_error
+        expect(wrapper.value?).to be(false)
+        wrapper = Wrapper.new(ModelTest.new(id: 1, house: 2), explicit: 7, optional: true)
+        expect(wrapper.to_der).to eq(TestWrapper::DER_OPTIONAL_EXPLICITLY_WRAPPED_MODEL)
       end
     end
   end

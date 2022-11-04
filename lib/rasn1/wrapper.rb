@@ -31,6 +31,15 @@ module RASN1
         ''
       end
 
+      # @return [Boolean]
+      # @see Types::Base#can_build?
+      def can_build?
+        ok = super
+        return ok unless optional?
+
+        ok && @value.can_build?
+      end
+
       private
 
       def value_to_der
@@ -49,7 +58,10 @@ module RASN1
         # ExplicitWrapper is a hand-made explicit tag, but we have to use its implicit option
         # to force its tag value.
         @explicit_wrapper = ExplicitWrapper.new(opts.merge(implicit: @explicit))
-        #element = ExplicitWrapper.new(opts.merge(implicit: @explicit, value: element))
+        new_opts = {}
+        new_opts[:default] = opts[:default] if opts.key?(:default)
+        new_opts[:optional] = opts[:optional] if opts.key?(:optional)
+        element.options = element.options.merge(new_opts)
       else
         opts[:value] = element.value
         element.options = element.options.merge(opts)
@@ -99,10 +111,18 @@ module RASN1
         parsed
       elsif explicit?
         parsed = @explicit_wrapper.parse!(der, ber: ber)
-        element.parse!(@explicit_wrapper.value, ber: ber)
+        element.parse!(@explicit_wrapper.value, ber: ber) if parsed.positive?
         parsed
       else
         element.parse!(der, ber: ber)
+      end
+    end
+
+    def value?
+      if explicit?
+        @explicit_wrapper.value?
+      else
+        __getobj__.value?
       end
     end
 

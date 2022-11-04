@@ -52,6 +52,11 @@ module RASN1Test
                          bit_string(:signatureValue)]
     end
   end
+
+  class OptionalWrappedSubModel < RASN1::Model
+    sequence :s, content: [integer(:superid),
+                           wrapper(model(:submodel, TestModel::ModelTest), optional: true, explicit: 5)]
+  end
 end
 
 # rubocop:disable Metrics/BlockLength
@@ -67,6 +72,8 @@ module RASN1 # rubocop:disable Metrics/moduleLength
   CHOICE_SEQUENCE = SIMPLE_VALUE
   IMPLICIT_WRAPPED_SUBMODEL = "\x30\x0a\xa5\x08\x02\x01\x0a\x81\x03\x02\x01\x33".b.freeze
   EXPLICIT_WRAPPED_SUBMODEL = "\x30\x0c\x86\x0a\xa4\x08\x02\x01\x0a\x81\x03\x02\x01\x33".b.freeze
+  OPTIONAL_VOID_WRAPPED_SUBMODEL = "\x30\x03\x02\x01\x01".b.freeze
+  OPTIONAL_PLAIN_WRAPPED_SUBMODEL = "\x30\x0f\x02\x01\x01\x85\x0a\x30\x08\x02\x01\x0a\x81\x03\x02\x01\x33".b.freeze
 
   describe Model do
     describe '.root_options' do
@@ -112,6 +119,14 @@ module RASN1 # rubocop:disable Metrics/moduleLength
 
         model = ModelWithExplicitWrapper.new
         expect { model.parse!(EXPLICIT_WRAPPED_SUBMODEL) }.to_not raise_error
+      end
+
+      it 'optionally wraps a submodel' do
+        model = RASN1Test::OptionalWrappedSubModel.new(superid: 1)
+        expect(model.to_der).to eq(OPTIONAL_VOID_WRAPPED_SUBMODEL)
+
+        model = RASN1Test::OptionalWrappedSubModel.new(superid: 1, submodel: { id: 10, house: 51 })
+        expect(model.to_der).to eq(OPTIONAL_PLAIN_WRAPPED_SUBMODEL)
       end
     end
 
