@@ -84,9 +84,10 @@ module RASN1
     # Define a new ASN.1 type from a base one.
     # This new type may have a constraint defines on it.
     # @param [Symbol,String] name New type name. Must start with a capital letter.
-    # @param [Types::Base] from
+    # @param [Types::Base] from class from which inherits
+    # @param [Module] in_module module in which creates new type (default to {RASN1::Types})
     # @return [Class] newly created class
-    def self.define_type(name, from:, &block)
+    def self.define_type(name, from:, in_module: self, &block)
       constraint = block.nil? ? nil : block.to_proc
 
       new_klass = Class.new(from) do
@@ -94,7 +95,7 @@ module RASN1
       end
       new_klass.constraint = constraint
 
-      self.const_set(name, new_klass)
+      in_module.const_set(name, new_klass)
       accel_name = name.to_s.gsub(/([a-z])([A-Z])/, '\1_\2').downcase
       Model.define_type_accel(accel_name, new_klass)
 
