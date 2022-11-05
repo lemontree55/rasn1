@@ -2,23 +2,25 @@
 
 require_relative '../spec_helper'
 
-module RASN1Test::Constrained
-  RASN1::Types.define_type('UInt32', from: RASN1::Types::Integer, in_module: self) do |val|
-    (val >= 0) && (val < (2**32))
-  end
-  RASN1::Types.define_type('Int', from: RASN1::Types::Integer, in_module: self)
-  RASN1::Types.define_type('MySeq', from: RASN1::Types::Sequence, in_module: self)
+module RASN1Test
+  module Constrained
+    RASN1::Types.define_type('UInt32', from: RASN1::Types::Integer, in_module: self) do |val|
+      (val >= 0) && (val < (2**32))
+    end
+    RASN1::Types.define_type('Int', from: RASN1::Types::Integer, in_module: self)
+    RASN1::Types.define_type('MySeq', from: RASN1::Types::Sequence, in_module: self)
 
-  RASN1::Types.define_type('Int32', from: RASN1::Types::Integer, in_module: self) do |value|
-    (value >= -2**31) && (value < 2**31)
-  end
-  RASN1::Types.define_type('LocalSeq', from: RASN1::Types::Sequence, in_module: self)
+    RASN1::Types.define_type('Int32', from: RASN1::Types::Integer, in_module: self) do |value|
+      (value >= -2**31) && (value < 2**31)
+    end
+    RASN1::Types.define_type('LocalSeq', from: RASN1::Types::Sequence, in_module: self)
 
-  class MyDefinedModel < RASN1::Model
-    local_seq :myseq, content: [
-      int32(:id),
-      integer(:normal_integer)
-    ]
+    class MyDefinedModel < RASN1::Model
+      local_seq :myseq, content: [
+        int32(:id),
+        integer(:normal_integer)
+      ]
+    end
   end
 end
 
