@@ -21,6 +21,10 @@ module RASN1
         end
       end
 
+      def can_build?
+        value? || !optional?
+      end
+
       # Parse a DER string. This method updates object: {#value} will be a DER
       # string.
       # @param [String] der DER string

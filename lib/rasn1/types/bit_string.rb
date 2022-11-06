@@ -43,9 +43,7 @@ module RASN1
       end
 
       def can_build?
-        !(!@default.nil? && (!value? || (@value == @default) &&
-                              (@bit_length == @default_bit_length))) &&
-          !(optional? && !value?)
+        super || (!@default.nil? && (@bit_length != @default_bit_length))
       end
 
       private

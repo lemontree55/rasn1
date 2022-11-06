@@ -15,6 +15,10 @@ module RASN1
         str
       end
 
+      def can_build?
+        !optional?
+      end
+
       private
 
       def value_to_der
