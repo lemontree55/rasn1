@@ -15,6 +15,10 @@ module RASN1Test
     end
     RASN1::Types.define_type('LocalSeq', from: RASN1::Types::Sequence, in_module: self)
 
+    module AnotherModule; end
+
+    RASN1::Types.define_type('AnotherType', from: UInt32, in_module: AnotherModule)
+
     class MyDefinedModel < RASN1::Model
       local_seq :myseq, content: [
         int32(:id),
@@ -27,6 +31,10 @@ end
 # rubocop:disable Metrics/BlockLength
 module RASN1::Types
   describe Constrained do
+    it 'is defined in given module' do
+      expect(RASN1Test::Constrained::AnotherModule.constants).to include(:AnotherType)
+    end
+
     describe '.constrained?' do
       it 'returns true for contrained type' do
         expect(RASN1Test::Constrained::UInt32.constrained?).to be(true)
