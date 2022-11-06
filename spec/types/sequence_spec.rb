@@ -64,7 +64,7 @@ module RASN1
           expect(seq2.to_der).to eq(@no_bool_der)
         end
 
-        it 'does not generate a DER string for an optional SEQUENCE which subelement have no value' do
+        it 'does not generate a DER string for an optional SEQUENCE which subelements have no value' do
           seq = Sequence.new(optional: true, value: [@bool, @int, @bs])
           expect(seq.to_der).to eq('')
         end

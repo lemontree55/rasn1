@@ -10,6 +10,23 @@ module RASN1
       # Constructed value
       ASN1_PC = 0x20
 
+      # @return [Boolean]
+      # @since 0.12.0
+      # @see Base#can_build?
+      def can_build?
+        case @value
+        when Array
+          return super unless optional?
+          return false unless super
+
+          @value.any? { |el| el.can_build? && (el.primitive? || !el.value.empty?) }
+        else
+          super
+        end
+      end
+
+      # @param [::Integer] level (default: 0)
+      # @return [String]
       def inspect(level=0)
         case @value
         when Array

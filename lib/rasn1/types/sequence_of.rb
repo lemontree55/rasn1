@@ -123,15 +123,6 @@ module RASN1
         str
       end
 
-      # @return [Boolean]
-      # @since 0.12.0
-      # @see Base#can_build?
-      def can_build?
-        return super unless optional?
-
-        super && !@value.empty? && @value.all? { |el| el.default.nil? || (el.value != el.default) }
-      end
-
       private
 
       def of_type_class
