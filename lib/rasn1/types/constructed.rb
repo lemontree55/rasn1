@@ -18,7 +18,7 @@ module RASN1
           level = level.abs + 1
           @value.each do |item|
             case item
-            when Base, Model
+            when Base, Model, Wrapper
               str << "#{item.inspect(level)}\n"
             else
               str << '  ' * level
