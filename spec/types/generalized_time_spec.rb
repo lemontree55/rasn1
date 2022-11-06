@@ -34,6 +34,12 @@ module RASN1::Types
         gt.value = DateTime.new(2017, 12, 30, 16, 30, 23.55, 0)
         expect(gt.to_der).to eq("\x18\x1220171230163023.55Z".b)
       end
+
+      it 'generates a DER string with a Time object' do
+        gt = GeneralizedTime.new
+        gt.value = Time.new(2017, 12, 30, 16, 30, 23.55, 0)
+        expect(gt.to_der).to eq("\x18\x1220171230163023.55Z".b)
+      end
     end
 
     describe '#parse!' do

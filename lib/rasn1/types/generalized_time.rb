@@ -45,7 +45,8 @@ module RASN1
       private
 
       def value_to_der
-        utc_value = @value.new_offset('0')
+        value = @value.is_a?(DateTime) ? @value : @value.to_datetime
+        utc_value = value.new_offset('0')
         if utc_value.sec_fraction.positive?
           der = utc_value.strftime('%Y%m%d%H%M%S.%9NZ')
           der.sub(/0+Z/, 'Z')
