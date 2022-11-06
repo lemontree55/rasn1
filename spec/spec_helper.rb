@@ -27,6 +27,13 @@ module TestModel
                        integer(:house, explicit: 1, default: 0)]
   end
 
+  class ConstructedModelTest < RASN1::Model
+    sequence :record,
+             content: [integer(:id, constructed: true),
+                       integer(:room, implicit: 0, constructed: true, optional: true),
+                       integer(:house, explicit: 1, constructed: true, default: 0)]
+  end
+
   class ModelTest2 < RASN1::Model
     sequence :record2,
              content: [boolean(:rented),
