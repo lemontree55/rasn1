@@ -45,6 +45,10 @@ module RASN1
       def value_to_der
         @value.is_a?(String) ? @value : @value.to_der
       end
+
+      def inspect_value
+        ''
+      end
     end
 
     # @param [Class] klass a Types::Base or Model class
@@ -160,6 +164,12 @@ module RASN1
     # @return [Boolean]
     def primitive?
       !constructed?
+    end
+
+    def inspect(level=0)
+      return super(level) unless explicit?
+
+      @explicit_wrapper.inspect(level) << ' ' << super(level)
     end
 
     private

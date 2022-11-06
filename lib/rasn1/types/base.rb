@@ -280,8 +280,7 @@ module RASN1
       # @return [Boolean]
       # @since 0.12
       def can_build?
-        (@default.nil? || (value? && (@value != @default))) &&
-          (!optional? || value?)
+        value? && (@default.nil? || (@value != @default))
       end
 
       private
