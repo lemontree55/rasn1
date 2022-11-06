@@ -19,7 +19,11 @@ module RASN1
           return super unless optional?
           return false unless super
 
-          @value.any? { |el| el.can_build? && (el.primitive? || !el.value.empty?) }
+          @value.any? do |el|
+            el.can_build? && (
+              el.primitive? ||
+                (el.value.respond_to?(:empty?) ? !el.value.empty? : !el.value.nil?))
+          end
         else
           super
         end
