@@ -4,7 +4,7 @@ module RASN1
   module Types
     # ASN.1 GeneralizedTime
     #
-    # +{#value} of a {GeneralizedTime} should be a ruby Time.
+    # +{#value} of a {GeneralizedTime} should be a ruby DateTime.
     #
     # ===Notes
     # When encoding, resulting string is always a UTC time, appended with +Z+.
