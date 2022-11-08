@@ -20,8 +20,14 @@ module RASN1
 
   # CHOICE error: #chosen not set
   class ChoiceError < RASN1::Error
+    # @param [Types::Base] object
+    def initialize(object)
+      @object = object
+      super()
+    end
+
     def message
-      "CHOICE #{@name}: #chosen not set"
+      "CHOICE #{@object.name}: #chosen not set"
     end
   end
 

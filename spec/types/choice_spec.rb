@@ -22,7 +22,7 @@ module RASN1::Types
 
     context '(chosen value)' do
       before(:each) do
-        @choice = Choice.new
+        @choice = Choice.new name: :mock_choice_name
         @choice.value = [Integer.new, OctetString.new]
       end
 
@@ -70,7 +70,8 @@ module RASN1::Types
         end
 
         it 'raises if chosen is not set' do
-          expect { @choice.to_der }.to raise_error(RASN1::ChoiceError)
+          expect { @choice.to_der }
+            .to raise_error(an_instance_of(RASN1::ChoiceError).and having_attributes({"message" => "CHOICE mock_choice_name: #chosen not set"}))
         end
       end
     end

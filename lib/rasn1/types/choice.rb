@@ -100,7 +100,7 @@ module RASN1
       private
 
       def check_chosen
-        raise ChoiceError if !defined?(@chosen) || @chosen.nil?
+        raise ChoiceError.new(self) if !defined?(@chosen) || @chosen.nil?
       end
     end
   end
