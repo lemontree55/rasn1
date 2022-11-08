@@ -255,6 +255,18 @@ module RASN1 # rubocop:disable Metrics/moduleLength
                                            { id: 2, house: 1 }] })
       end
 
+      it 'generates a Hash image of a model with a choice model' do
+        model = ModelChoice.parse(CHOICE_INTEGER)
+        expect(model.to_h).to eq({ choice: 16 })
+
+        model = ModelChoice.parse(CHOICE_SEQUENCE)
+        expect(model.to_h).to eq({ choice: { id: 65537, room: 43, house: 4660 } })
+
+        model = ModelChoice.new
+        expect { model.to_h }
+          .to raise_error(an_instance_of(RASN1::ChoiceError).and having_attributes({"message" => "CHOICE choice: #chosen not set"}))
+      end
+
       it 'generates a Hash image of a model with an implicit wrapped submodel' do
         model = ModelWithImplicitWrapper.new
         model[:a_record][:id] = 2

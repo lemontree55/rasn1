@@ -561,6 +561,10 @@ module RASN1
                 sequence_of_to_h(my_element)
               when Types::Sequence
                 sequence_to_h(my_element)
+              when Types::Choice
+                raise ChoiceError.new(my_element) if my_element.chosen.nil?
+
+                private_to_h(my_element.value[my_element.chosen])
               when Wrapper
                 wrapper_to_h(my_element)
               else
