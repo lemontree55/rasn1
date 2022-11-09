@@ -58,6 +58,7 @@ module RASN1::Types
       it 'parses a DER IA5STRING' do
         ia5.parse!("\x16\x04!:;,".b)
         expect(ia5.value).to eq('!:;,')
+        expect(ia5.value.encoding).to eq(Encoding::ASCII_8BIT)
       end
     end
   end
