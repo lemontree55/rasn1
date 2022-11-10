@@ -34,7 +34,7 @@ module RASN1::Types
       end
 
       it 'generates a DER string according to default' do
-        utf8 = Utf8String.new(default: 'NOP', octet_length: 22)
+        utf8 = Utf8String.new(default: 'NOP')
         utf8.value = 'NOP'
         expect(utf8.to_der).to eq('')
         utf8.value = 'N'

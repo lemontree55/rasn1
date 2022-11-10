@@ -36,7 +36,7 @@ module RASN1::Types
       end
 
       it 'generates a DER string according to default' do
-        ia5 = IA5String.new(default: 'NOP', octet_length: 22)
+        ia5 = IA5String.new(default: 'NOP')
         ia5.value = 'NOP'
         expect(ia5.to_der).to eq('')
         ia5.value = 'N'
