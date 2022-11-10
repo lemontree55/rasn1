@@ -35,20 +35,16 @@ module RASN1
 
       def der_to_value(der, ber: false) # rubocop:disable Lint/UnusedMethodArgument
         format = case der.size
-                 when 11
-                   '%Y%m%d%H%MZ'
-                 when 13
-                   '%Y%m%d%H%M%SZ'
-                 when 15
+                 when 11, 15
                    '%Y%m%d%H%M%z'
-                 when 17
+                 when 13, 17
                    '%Y%m%d%H%M%S%z'
                  else
                    prefix = @name.nil? ? type : "tag #{@name}"
                    raise ASN1Error, "#{prefix}: unrecognized format: #{der}"
                  end
         century = (Time.now.year / 100).to_s
-        @value = DateTime.strptime(century + der, format).to_time
+        @value = Strptime.new(format).exec(century + der)
       end
     end
   end
