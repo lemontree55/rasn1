@@ -71,18 +71,13 @@ module RASN1
       end
 
       def value_when_fraction_empty(date_hour)
-        utc_offset_forced = false
-
         if (date_hour[-1] != 'Z') && (date_hour !~ /[+-]\d+$/)
           # If not UTC, have to add offset with UTC to force
-          # DateTime#strptime to generate a local time. But this difference
-          # may be errored because of DST.
+          # Strptime to generate a local time.
           date_hour << Time.now.strftime('%z')
-          utc_offset_forced = true
         end
 
         value_from(date_hour)
-        fix_dst if utc_offset_forced
       end
 
       def value_when_fraction_ends_with_z(date_hour, fraction)
@@ -100,15 +95,12 @@ module RASN1
           date_hour << match[2]
         else
           # fraction only contains fraction.
-          # Have to add offset with UTC to force DateTime#strptime to
-          # generate a local time. But this difference may be errored
-          # because of DST.
+          # Have to add offset with UTC to force Strptime to
+          # generate a local time.
           date_hour << Time.now.strftime('%z')
-          utc_offset_forced = true
         end
 
         frac_base = value_from(date_hour)
-        fix_dst if utc_offset_forced
         fix_value(fraction, frac_base)
       end
 
@@ -116,12 +108,6 @@ module RASN1
         format, frac_base = strformat(date_hour)
         @value = Strptime.new(format).exec(date_hour)
         frac_base
-      end
-
-      # Check DST. There may be a shift of one hour...
-      def fix_dst
-        #compare_time = Time.new(@value.year, @value.month, @value.mday, @value.hour, @value.minute, @value.sec)
-        #@value = compare_time if compare_time.utc_offset != @value.to_time.utc_offset
       end
 
       def fix_value(fraction, frac_base)
