@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
+require 'strptime'
+
 module RASN1
   module Types
     # ASN.1 GeneralizedTime
     #
-    # +{#value} of a {GeneralizedTime} should be a ruby DateTime.
+    # +{#value} of a {GeneralizedTime} should be a ruby Time.
     #
     # ===Notes
     # When encoding, resulting string is always a UTC time, appended with +Z+.
@@ -25,11 +27,11 @@ module RASN1
       ID = 24
 
       # @private
-      HOUR_TO_DAY = Rational(1, 24).freeze
+      HOUR_TO_SEC = 3600
       # @private
-      MINUTE_TO_DAY = Rational(1, 24 * 60).freeze
+      MINUTE_TO_SEC = 60
       # @private
-      SECOND_TO_DAY = Rational(1, 24 * 60 * 60).freeze
+      SECOND_TO_SEC = 1
 
       # Get ASN.1 type
       # @return [String]
@@ -37,16 +39,16 @@ module RASN1
         'GeneralizedTime'
       end
 
-      # @return [DateTime]
+      # @return [Time]
       def void_value
-        DateTime.now
+        Time.now
       end
 
       private
 
       def value_to_der
-        utc_value = @value.new_offset('0')
-        if utc_value.sec_fraction.positive?
+        utc_value = @value.getutc
+        if utc_value.nsec.positive?
           der = utc_value.strftime('%Y%m%d%H%M%S.%9NZ')
           der.sub(/0+Z/, 'Z')
         else
@@ -69,18 +71,13 @@ module RASN1
       end
 
       def value_when_fraction_empty(date_hour)
-        utc_offset_forced = false
-
         if (date_hour[-1] != 'Z') && (date_hour !~ /[+-]\d+$/)
           # If not UTC, have to add offset with UTC to force
-          # DateTime#strptime to generate a local time. But this difference
-          # may be errored because of DST.
+          # Strptime to generate a local time.
           date_hour << Time.now.strftime('%z')
-          utc_offset_forced = true
         end
 
         value_from(date_hour)
-        fix_dst if utc_offset_forced
       end
 
       def value_when_fraction_ends_with_z(date_hour, fraction)
@@ -98,56 +95,47 @@ module RASN1
           date_hour << match[2]
         else
           # fraction only contains fraction.
-          # Have to add offset with UTC to force DateTime#strptime to
-          # generate a local time. But this difference may be errored
-          # because of DST.
+          # Have to add offset with UTC to force Strptime to
+          # generate a local time.
           date_hour << Time.now.strftime('%z')
-          utc_offset_forced = true
         end
 
         frac_base = value_from(date_hour)
-        fix_dst if utc_offset_forced
         fix_value(fraction, frac_base)
       end
 
       def value_from(date_hour)
         format, frac_base = strformat(date_hour)
-        @value = DateTime.strptime(date_hour, format)
+        @value = Strptime.new(format).exec(date_hour)
         frac_base
-      end
-
-      # Check DST. There may be a shift of one hour...
-      def fix_dst
-        compare_time = Time.new(@value.year, @value.month, @value.mday, @value.hour, @value.minute, @value.sec)
-        @value = compare_time.to_datetime if compare_time.utc_offset != @value.to_time.utc_offset
       end
 
       def fix_value(fraction, frac_base)
         frac = ".#{fraction}".to_r * frac_base
-        @value = (@value + frac).to_datetime unless fraction.nil?
+        @value = (@value + frac) unless fraction.nil?
       end
 
       def strformat(date_hour) # rubocop:disable Metrics/CyclomaticComplexity, Metrics/MethodLength
         case date_hour.size
         when 11
-          frac_base = HOUR_TO_DAY
-          format = '%Y%m%d%HZ'
+          frac_base = HOUR_TO_SEC
+          format = '%Y%m%d%H%z'
         when 13
-          frac_base = MINUTE_TO_DAY
-          format = '%Y%m%d%H%MZ'
+          frac_base = MINUTE_TO_SEC
+          format = '%Y%m%d%H%M%z'
         when 15
           if date_hour[-1] == 'Z'
-            frac_base = SECOND_TO_DAY
-            format = '%Y%m%d%H%M%SZ'
+            frac_base = SECOND_TO_SEC
+            format = '%Y%m%d%H%M%S%z'
           else
-            frac_base = HOUR_TO_DAY
+            frac_base = HOUR_TO_SEC
             format = '%Y%m%d%H%z'
           end
         when 17
-          frac_base = MINUTE_TO_DAY
+          frac_base = MINUTE_TO_SEC
           format = '%Y%m%d%H%M%z'
         when 19
-          frac_base = SECOND_TO_DAY
+          frac_base = SECOND_TO_SEC
           format = '%Y%m%d%H%M%S%z'
         else
           prefix = @name.nil? ? type : "tag #{@name}"
