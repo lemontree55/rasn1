@@ -129,6 +129,10 @@ module RASN1
       # @return [void]
       def root_options(options)
         @options = options
+        return unless options.key?(:name)
+
+        @root = @root.dup
+        @root.name = options[:name]
       end
 
       # On inheritance, create +@root+ class variable

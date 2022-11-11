@@ -68,6 +68,10 @@ end
 module RASN1 # rubocop:disable Metrics/moduleLength
   include TestModel
 
+  class NamedModelTest < ModelTest
+    root_options name: 'NewName'
+  end
+
   SIMPLE_VALUE = "\x30\x0e\x02\x03\x01\x00\x01\x80\x01\x2b\x81\x04\x02\x02\x12\x34".b.freeze
   OPTIONAL_VALUE = "\x30\x0b\x02\x03\x01\x00\x01\x81\x04\x02\x02\x12\x34".b.freeze
   DEFAULT_VALUE = "\x30\x08\x02\x03\x01\x00\x01\x80\x01\x2b".b.freeze
@@ -93,6 +97,12 @@ module RASN1 # rubocop:disable Metrics/moduleLength
 
       it 'does not update other elements' do
         expect(model[:id].id).to eq(Types::Integer::ID)
+      end
+
+      it 'updates model name' do
+        named_model = NamedModelTest.new
+        expect(named_model.name).to eq('NewName')
+        expect(named_model.to_h.keys).to eq(['NewName'])
       end
     end
 
