@@ -56,6 +56,7 @@ module RASN1::Types
       it 'parses a DER UTF8 STRING' do
         utf8.parse!("\x0c\x04\x31\xe2\x82\xac".b)
         expect(utf8.value).to eq('1€')
+        expect(utf8.value.encoding).to eq(Encoding::UTF_8)
       end
     end
   end
