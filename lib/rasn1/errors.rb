@@ -48,6 +48,7 @@ module RASN1
   end
 
   # Exception raised when model validation fails
+  # @since 0.12.0
   class ModelValidationError < Error
   end
 end

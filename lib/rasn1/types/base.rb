@@ -271,14 +271,14 @@ module RASN1
 
       # Say if a value is set
       # @return [Boolean]
-      # @since 0.12
+      # @since 0.12.0
       def value?
         !@no_value
       end
 
       # Say if DER can be built (not default value, not optional without value, has a value)
       # @return [Boolean]
-      # @since 0.12
+      # @since 0.12.0
       def can_build?
         value? && (@default.nil? || (@value != @default))
       end

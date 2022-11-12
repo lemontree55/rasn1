@@ -57,11 +57,12 @@ module RASN1
   #
   # == Delegation
   # {Model} may delegate some methods to its root element. Thus, if root element
-  # is, for example, a {TypeInts::Choice}, model may delegate +#chosen+ and +#chosen_value+.
+  # is, for example, a {Types::Choice}, model may delegate +#chosen+ and +#chosen_value+.
   #
   # All methods defined by root may be delegated by model, unless model also defines
   # this method.
   # @author Sylvain Daubert
+  # @author adfoster-r7 ModelValidationError, track source location for dynamic class methods
   class Model # rubocop:disable Metrics/ClassLength
     # @private
     Elem = Struct.new(:name, :proc_or_class, :content) do
@@ -92,7 +93,6 @@ module RASN1
       end
     end
 
-    # @private
     module Accel
       # @return [Hash]
       attr_reader :options
@@ -127,6 +127,7 @@ module RASN1
       #  end
       # @param [Hash] options
       # @return [void]
+      # @since 0.12.0 may change name through +:name+
       def root_options(options)
         @options = options
         return unless options.key?(:name)
@@ -144,6 +145,8 @@ module RASN1
         klass.class_eval { @root = root }
       end
 
+      # @since 0.11.0
+      # @since 0.12.0 track source location on error (adfoster-r7)
       def define_type_accel_base(accel_name, klass)
         singleton_class.class_eval <<-EVAL, __FILE__, __LINE__ + 1
           def #{accel_name}(name, options={}) # def sequence(name, type, options)
@@ -156,6 +159,8 @@ module RASN1
         EVAL
       end
 
+      # @since 0.11.0
+      # @since 0.12.0 track source location on error (adfoster-r7)
       def define_type_accel_of(accel_name, klass)
         singleton_class.class_eval <<-EVAL, __FILE__, __LINE__ + 1
           def #{accel_name}_of(name, type, options={}) # def sequence_of(name, type, options)
@@ -171,6 +176,7 @@ module RASN1
       # Define an accelarator to access a type in a model definition
       # @param [String] accel_name
       # @param [Class] klass
+      # @since 0.11.0
       def define_type_accel(accel_name, klass)
         if klass < Types::SequenceOf
           define_type_accel_of(accel_name, klass)
@@ -223,17 +229,20 @@ module RASN1
 
     extend Accel
 
-    # @method sequence(name, options)
+    # @!method sequence(name, options)
+    #  @!scope class
     #  @param [Symbol,String] name name of object in model
     #  @param [Hash] options
     #  @return [Elem]
     #  @see Types::Sequence#initialize
-    # @method set(name, options)
+    # @!method set(name, options)
+    #  @!scope class
     #  @param [Symbol,String] name name of object in model
     #  @param [Hash] options
     #  @return [Elem]
     #  @see Types::Set#initialize
-    # @method choice(name, options)
+    # @!method choice(name, options)
+    #  @!scope class
     #  @param [Symbol,String] name name of object in model
     #  @param [Hash] options
     #  @return [Elem]
@@ -242,13 +251,15 @@ module RASN1
       self.define_type_accel_base(type, Types.const_get(type.capitalize))
     end
 
-    # @method sequence_of(name, type, options)
+    # @!method sequence_of(name, type, options)
+    #  @!scope class
     #  @param [Symbol,String] name name of object in model
     #  @param [Model, Types::Base] type type for SEQUENCE OF
     #  @param [Hash] options
     #  @return [Elem]
     #  @see Types::SequenceOf#initialize
-    # @method set_of(name, type, options)
+    # @!method set_of(name, type, options)
+    #  @!scope class
     #  @param [Symbol,String] name name of object in model
     #  @param [Model, Types::Base] type type for SET OF
     #  @param [Hash] options
@@ -258,57 +269,68 @@ module RASN1
       define_type_accel_of(type, Types.const_get("#{type.capitalize}Of"))
     end
 
-    # @method boolean(name, options)
+    # @!method boolean(name, options)
+    #  @!scope class
     #  @param [Symbol,String] name name of object in model
     #  @param [Hash] options
     #  @return [Elem]
     #  @see Types::Boolean#initialize
-    # @method integer(name, options)
+    # @!method integer(name, options)
+    #  @!scope class
     #  @param [Symbol,String] name name of object in model
     #  @param [Hash] options
     #  @return [Elem]
     #  @see Types::Integer#initialize
-    # @method bit_string(name, options)
+    # @!method bit_string(name, options)
+    #  @!scope class
     #  @param [Symbol,String] name name of object in model
     #  @param [Hash] options
     #  @return [Elem]
     #  @see Types::BitString#initialize
-    # @method octet_string(name, options)
+    # @!method octet_string(name, options)
+    #  @!scope class
     #  @param [Symbol,String] name name of object in model
     #  @param [Hash] options
     #  @return [Elem]
     #  @see Types::OctetString#initialize
-    # @method null(name, options)
+    # @!method null(name, options)
+    #  @!scope class
     #  @param [Symbol,String] name name of object in model
     #  @param [Hash] options
     #  @return [Elem]
     #  @see Types::Null#initialize
-    # @method enumerated(name, options)
+    # @!method enumerated(name, options)
+    #  @!scope class
     #  @param [Symbol,String] name name of object in model
     #  @param [Hash] options
     #  @return [Elem]
     #  @see Types::Enumerated#initialize
-    # @method utf8_string(name, options)
+    # @!method utf8_string(name, options)
+    #  @!scope class
     #  @param [Symbol,String] name name of object in model
     #  @param [Hash] options
     #  @return [Elem]
     #  @see Types::Utf8String#initialize
-    # @method numeric_string(name, options)
+    # @!method numeric_string(name, options)
+    #  @!scope class
     #  @param [Symbol,String] name name of object in model
     #  @param [Hash] options
     #  @return [Elem]
     #  @see Types::NumericString#initialize
-    # @method printable_string(name, options)
+    # @!method printable_string(name, options)
+    #  @!scope class
     #  @param [Symbol,String] name name of object in model
     #  @param [Hash] options
     #  @return [Elem]
     #  @see Types::PrintableString#initialize
-    # @method visible_string(name, options)
+    # @!method visible_string(name, options)
+    #  @!scope class
     #  @param [Symbol,String] name name of object in model
     #  @param [Hash] options
     #  @return [Elem]
     #  @see Types::VisibleString#initialize
-    # @method ia5_string(name, options)
+    # @!method ia5_string(name, options)
+    #  @!scope class
     #  @param [Symbol,String] name name of object in model
     #  @param [Hash] options
     #  @return [Elem]
@@ -335,7 +357,7 @@ module RASN1
       @elements[name]
     end
 
-    # Set value of element +name+. Element should be a {Base}.
+    # Set value of element +name+. Element should be a {Types::Base}.
     # @param [String,Symbol] name
     # @param [Object] value
     # @return [Object] value
@@ -565,6 +587,7 @@ module RASN1
                 sequence_of_to_h(my_element)
               when Types::Sequence
                 sequence_to_h(my_element)
+              # @author adfoster-r7
               when Types::Choice
                 raise ChoiceError.new(my_element) if my_element.chosen.nil?
 

@@ -3,7 +3,7 @@
 module RASN1
   module Types
     # Mixin to had constraints on a RASN1 type.
-    # Should not be used directly but through {Model.define_type}.
+    # Should not be used directly but through {Types.define_type}.
     # @version 0.11.0
     # @author Sylvain Daubert
     module Constrained

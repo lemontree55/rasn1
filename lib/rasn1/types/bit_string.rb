@@ -48,6 +48,8 @@ module RASN1
 
       private
 
+      # @author Sylvain Daubert
+      # @author adfoster-r7
       def value_to_der
         raise ASN1Error, "#{@name}: bit length is not set" if bit_length.nil?
 

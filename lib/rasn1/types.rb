@@ -87,6 +87,8 @@ module RASN1
     # @param [Types::Base] from class from which inherits
     # @param [Module] in_module module in which creates new type (default to {RASN1::Types})
     # @return [Class] newly created class
+    # @since 0.11.0
+    # @since 0.12.0 in_module parameter
     def self.define_type(name, from:, in_module: self, &block)
       constraint = block.nil? ? nil : block.to_proc
 

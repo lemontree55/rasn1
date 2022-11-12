@@ -3,6 +3,8 @@
 module RASN1
   module Types
     # ASN.1 BmpString
+    # @since 0.12.0
+    # @author adfoster-r7
     class BmpString < OctetString
       # BmpString id value
       ID = 30

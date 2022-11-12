@@ -51,7 +51,7 @@ module RASN1
       end
     end
 
-    # @param [Class] klass a Types::Base or Model class
+    # @param [Types::Base,Model] element element to wrap
     # @param [Hash] options
     def initialize(element, options={})
       opts = explicit_implicit(options)
