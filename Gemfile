@@ -25,4 +25,5 @@ end
 group :rubocop do
   gem 'rubocop', '~> 1.0'
   gem 'rubocop-performance', '~> 1.0'
+  gem 'rubocop-rake', '~> 0.6'
 end

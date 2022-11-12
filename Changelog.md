@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.12.0 - 2022-11-12
+
+### Added
+
+* In `Model` class, correctly track source location for dynamic class methods, by adfoster-r7.
+* In `Model` class, add a check on name uniqueness for embedded types. Raise a `ModelValidationError` on error, by adfoster-r7.
+* Add `Wrapper` class to modify options of existing types or models. Add `Model.wrapper` to easily use a wrapper when defining a model, by sdaubert and adfoster-r7.
+* Add support for BmpStrings (class `Types::BmpString`).
+
+### Changed
+
+* Rake tasks may be launched before needing presence of yard.
+* `Types::Base#value?` and `#can_build?` are now public methods.
+* `Types.define_type` may now create the new type in given module (`in_module` parameter).
+* A model name may be changed using `Model.root_options`.
+
+### Fixed
+
+* Fix a frozen string crash in `Types::BitString` class, by adfoster-r7.
+* Fix a crash in `Types::BitString#to_der` when a Bit String is defined as an explicit one, by adfoster-r7.
+* `Types::GeneralizedTime`: parsed value is now always a `Time` and no more sometimes a `DateTime`.
+* `Types::Sequence` and `Types::SequenceOf` DER is no more generated when optional and value is void.
+* Fix `Model#to_h` for choice subelement, by adfoster-r7.
+
 ## 0.11.0 - 2022-10-13
 
 ### Added
