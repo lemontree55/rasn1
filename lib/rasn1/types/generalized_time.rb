@@ -115,34 +115,24 @@ module RASN1
         @value = (@value + frac) unless fraction.nil?
       end
 
-      def strformat(date_hour) # rubocop:disable Metrics/CyclomaticComplexity, Metrics/MethodLength
+      def strformat(date_hour)
         case date_hour.size
         when 11
-          frac_base = HOUR_TO_SEC
-          format = '%Y%m%d%H%z'
-        when 13
-          frac_base = MINUTE_TO_SEC
-          format = '%Y%m%d%H%M%z'
+          ['%Y%m%d%H%z', HOUR_TO_SEC]
+        when 13, 17
+          ['%Y%m%d%H%M%z', MINUTE_TO_SEC]
         when 15
           if date_hour[-1] == 'Z'
-            frac_base = SECOND_TO_SEC
-            format = '%Y%m%d%H%M%S%z'
+            ['%Y%m%d%H%M%S%z', SECOND_TO_SEC]
           else
-            frac_base = HOUR_TO_SEC
-            format = '%Y%m%d%H%z'
+            ['%Y%m%d%H%z', HOUR_TO_SEC]
           end
-        when 17
-          frac_base = MINUTE_TO_SEC
-          format = '%Y%m%d%H%M%z'
         when 19
-          frac_base = SECOND_TO_SEC
-          format = '%Y%m%d%H%M%S%z'
+          ['%Y%m%d%H%M%S%z', SECOND_TO_SEC]
         else
           prefix = @name.nil? ? type : "tag #{@name}"
           raise ASN1Error, "#{prefix}: unrecognized format: #{date_hour}"
         end
-
-        [format, frac_base]
       end
     end
   end

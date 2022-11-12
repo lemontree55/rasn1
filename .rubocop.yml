@@ -46,7 +46,7 @@ Style/PerlBackrefs:
   Enabled: false
 Style/RaiseArgs:
   EnforcedStyle: exploded
-  AllowedCompactTypes: ['ConstraintError']
+  AllowedCompactTypes: ['ConstraintError', 'ChoiceError']
 Style/RedundantSelf:
   Enabled: false
 Style/StructInheritance:

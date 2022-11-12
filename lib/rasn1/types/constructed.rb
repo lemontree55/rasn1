@@ -13,19 +13,14 @@ module RASN1
       # @return [Boolean]
       # @since 0.12.0
       # @see Base#can_build?
-      def can_build?
-        case @value
-        when Array
-          return super unless optional?
-          return false unless super
+      def can_build? # rubocop:disable Metrics/CyclomaticComplexity
+        return super unless @value.is_a?(Array) && optional?
+        return false unless super
 
-          @value.any? do |el|
-            el.can_build? && (
-              el.primitive? ||
-                (el.value.respond_to?(:empty?) ? !el.value.empty? : !el.value.nil?))
-          end
-        else
-          super
+        @value.any? do |el|
+          el.can_build? && (
+            el.primitive? ||
+              (el.value.respond_to?(:empty?) ? !el.value.empty? : !el.value.nil?))
         end
       end
 

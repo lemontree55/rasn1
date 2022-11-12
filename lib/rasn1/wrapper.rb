@@ -54,18 +54,12 @@ module RASN1
     # @param [Class] klass a Types::Base or Model class
     # @param [Hash] options
     def initialize(element, options={})
-      opts = options.dup
-      @explicit = opts.delete(:explicit)
-      @implicit = opts.delete(:implicit)
+      opts = explicit_implicit(options)
+
       if explicit?
+        generate_explicit_wrapper(opts)
+        element.options = element.options.merge(generate_explicit_wrapper_options(opts))
         @options = opts
-        # ExplicitWrapper is a hand-made explicit tag, but we have to use its implicit option
-        # to force its tag value.
-        @explicit_wrapper = ExplicitWrapper.new(opts.merge(implicit: @explicit))
-        new_opts = {}
-        new_opts[:default] = opts[:default] if opts.key?(:default)
-        new_opts[:optional] = opts[:optional] if opts.key?(:optional)
-        element.options = element.options.merge(new_opts)
       else
         opts[:value] = element.value
         element.options = element.options.merge(opts)
@@ -74,6 +68,26 @@ module RASN1
       raise RASN1::Error, 'Cannot be implicit and explicit' if explicit? && implicit?
 
       super(element)
+    end
+
+    def explicit_implicit(options)
+      opts = options.dup
+      @explicit = opts.delete(:explicit)
+      @implicit = opts.delete(:implicit)
+      opts
+    end
+
+    def generate_explicit_wrapper(options)
+      # ExplicitWrapper is a hand-made explicit tag, but we have to use its implicit option
+      # to force its tag value.
+      @explicit_wrapper = ExplicitWrapper.new(options.merge(implicit: @explicit))
+    end
+
+    def generate_explicit_wrapper_options(options)
+      new_opts = {}
+      new_opts[:default] = options[:default] if options.key?(:default)
+      new_opts[:optional] = options[:optional] if options.key?(:optional)
+      new_opts
     end
 
     # Say if wrapper is an explicit one (i.e. add tag and length to its element)

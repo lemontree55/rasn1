@@ -557,7 +557,7 @@ module RASN1
       end
     end
 
-    def private_to_h(element=nil)
+    def private_to_h(element=nil) # rubocop:disable Metrics/CyclomaticComplexity
       my_element = element || root
       my_element = my_element.root if my_element.is_a?(Model)
       value = case my_element
