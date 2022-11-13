@@ -5,6 +5,7 @@ require_relative 'rasn1/errors'
 require_relative 'rasn1/types'
 require_relative 'rasn1/model'
 require_relative 'rasn1/wrapper'
+require_relative 'rasn1/tracer'
 
 # Rasn1 is a pure ruby library to parse, decode and encode ASN.1 data.
 # @author Sylvain Daubert

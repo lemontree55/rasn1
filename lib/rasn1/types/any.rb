@@ -31,19 +31,7 @@ module RASN1
       # @param [Boolean] ber if +true+, accept BER encoding
       # @return [Integer] total number of parsed bytes
       def parse!(der, ber: false)
-        if der.empty?
-          return 0 if optional?
-
-          raise ASN1Error, 'Expected ANY but get nothing'
-        end
-
-        id_size = Types.decode_identifier_octets(der).last
-        total_length, = get_data(der[id_size..-1], ber)
-        total_length += id_size
-
-        @no_value = false
-        @value = der[0, total_length]
-
+        total_length, _data = do_parse(der, ber)
         total_length
       end
 
@@ -68,6 +56,39 @@ module RASN1
         str << "[#{id}] EXPLICIT " if explicit?
         str << "[#{id}] IMPLICIT " if implicit?
         str << '(ANY) '
+      end
+
+      # @private Tracer private API
+      # @return [String]
+      def trace
+        return trace_any if value?
+
+        msg_type << ' NONE'
+      end
+
+      private
+
+      def do_parse(der, ber)
+        if der.empty?
+          return [0, ''] if optional?
+
+          raise ASN1Error, 'Expected ANY but get nothing'
+        end
+
+        id_size = Types.decode_identifier_octets(der).last
+        total_length, = get_data(der[id_size..-1], ber)
+        total_length += id_size
+
+        @no_value = false
+        @value = der[0, total_length]
+
+        [total_length, @value]
+      end
+
+      def trace_any
+        data = unpack(value)
+        data = data[0...30] << '...' if data.size > 30
+        msg_type << " data: 0x#{data}"
       end
     end
   end

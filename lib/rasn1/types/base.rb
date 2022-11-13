@@ -71,6 +71,12 @@ module RASN1
       attr_reader :default
       # @return [Hash[Symbol, Object]]
       attr_reader :options
+      # @return [String] raw parsed data
+      attr_reader :raw_data
+      # @return [String] raw parsed length
+      attr_reader :raw_length
+
+      private :raw_data, :raw_length
 
       # Get ASN.1 type
       # @return [String]
@@ -121,6 +127,8 @@ module RASN1
         set_value(options.delete(:value))
         self.options = options
         specific_initializer
+        @raw_data = ''.b
+        @raw_length = ''.b
       end
 
       # @abstract To help subclass initialize itself. Default implementation do nothing.
@@ -215,12 +223,9 @@ module RASN1
       # @return [Integer] total number of parsed bytes
       # @raise [ASN1Error] error on parsing
       def parse!(der, ber: false)
-        return 0 unless check_id(der)
+        total_length, data = do_parse(der, ber)
+        return 0 if total_length.zero?
 
-        id_size = Types.decode_identifier_octets(der).last
-        total_length, data = get_data(der[id_size..-1], ber)
-        total_length += id_size
-        @no_value = false
         if explicit?
           # Delegate to #explicit type to generate sub-value
           type = explicit_type
@@ -283,7 +288,50 @@ module RASN1
         value? && (@default.nil? || (@value != @default))
       end
 
+      # @private Tracer private API
+      # @return [String]
+      def trace
+        return trace_real if value?
+
+        msg = msg_type
+        if default.nil? # rubocop:disable Style/ConditionalAssignment
+          msg << ' NONE'
+        else
+          msg << " DEFAULT VALUE #{default}"
+        end
+      end
+
       private
+
+      def trace_real
+        encoded_id = unpack(encode_identifier_octets)
+        data_length = raw_data.length
+        encoded_length = unpack(raw_length)
+        object_data = unpack(raw_data)
+        object_data = object_data[0...30] << '...' if object_data.size > 30
+        msg = msg_type
+        msg << " id: #{id} (0x#{encoded_id}),"
+        msg << " len: #{data_length} (0x#{encoded_length}),"
+        msg << " data: 0x#{object_data}"
+      end
+
+      def unpack(binstr)
+        binstr.unpack1('H*')
+      end
+
+      def msg_type
+        msg = if explicit?
+                +'EXPLICIT '
+              elsif implicit?
+                +'IMPLICIT '
+              else
+                +''
+              end
+        msg << 'OPTIONAL ' if optional?
+        msg << type
+        msg = +"#{name} #{msg}" unless name.nil?
+        msg
+      end
 
       def pc_bit
         if @constructed.nil?
@@ -311,6 +359,17 @@ module RASN1
         else
           '(NO VALUE)'
         end
+      end
+
+      def do_parse(der, ber)
+        return [0, ''] unless check_id(der)
+
+        id_size = Types.decode_identifier_octets(der).last
+        total_length, data = get_data(der[id_size..-1], ber)
+        total_length += id_size
+        @no_value = false
+
+        [total_length, data]
       end
 
       def value_to_der
@@ -454,6 +513,21 @@ module RASN1
       end
 
       def get_data(der, ber)
+        return [0, ''] if der.nil? || der.empty?
+
+        length, length_length = get_length(der, ber)
+
+        data = der[1 + length_length, length]
+        @raw_length = der[0, length_length + 1]
+        @raw_data = data
+
+        total_length = 1 + length
+        total_length += length_length if length_length.positive?
+
+        [total_length, data]
+      end
+
+      def get_length(der, ber)
         length = der.unpack1('C').to_i
         length_length = 0
 
@@ -464,12 +538,8 @@ module RASN1
           length = der[1, length_length].unpack('C*')
                                         .reduce(0) { |len, b| (len << 8) | b }
         end
-        data = der[1 + length_length, length]
 
-        total_length = 1 + length
-        total_length += length_length if length_length.positive?
-
-        [total_length, data]
+        [length, length_length]
       end
 
       def raise_on_indefinite_length(ber)
