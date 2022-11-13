@@ -3,7 +3,7 @@
 
 require_relative '../spec_helper'
 
-describe RASN1::Types::BmpString do
+describe RASN1::Types::BmpString do # rubocop:disable Metrics/BlockLength
   describe '.type' do
     it 'gets ASN.1 type' do
       expect(described_class.type).to eq('BmpString')
@@ -20,7 +20,7 @@ describe RASN1::Types::BmpString do
     end
   end
 
-  describe '#to_der' do
+  describe '#to_der' do # rubocop:disable Metrics/BlockLength
     it 'generates a DER string from UTF-8 input' do
       subject = described_class.new
       subject.value = (+'Α').force_encoding('UTF-8')
@@ -61,7 +61,7 @@ describe RASN1::Types::BmpString do
 
     it 'parses a DER BMPString' do
       subject.parse!("\x1e\x02\x03\x91".b)
-      expect(subject.value).to eq("\x03\x91".dup.force_encoding('UTF-16BE'))
+      expect(subject.value).to eq((+"\x03\x91").force_encoding('UTF-16BE'))
       expect(subject.value.encoding).to eq(Encoding::UTF_16BE)
     end
   end

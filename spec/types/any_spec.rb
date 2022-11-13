@@ -14,7 +14,7 @@ class AnyModelOptional < RASN1::Model
 end
 
 module RASN1::Types
-  describe Any do
+  describe Any do # rubocop:disable Metrics/BlockLength
     let(:os_der) { "\x30\x0a\x04\x03abc\x06\x03\x2a\x03\x04".b }
     let(:int_der) { "\x30\x09\x02\x02\x00\x80\x06\x03\x2a\x03\x05".b }
     let(:null_der) { "\x30\x07\x05\x00\x06\x03\x2a\x03\x06".b }
