@@ -13,12 +13,12 @@ module RASN1
 
   def self.trace(io=$stdout)
     @tracer = Tracer.new(io)
-    [Types::Any, Types::Base].each(&:start_tracing)
+    [Types::Any, Types::Choice, Types::Base].each(&:start_tracing)
 
     begin
       yield @tracer
     ensure
-      [Types::Base, Types::Any].each(&:stop_tracing)
+      [Types::Base, Types::Choice, Types::Any].each(&:stop_tracing)
       @tracer = nil
     end
   end
@@ -46,6 +46,26 @@ module RASN1
           tracer.trace(self.trace)
         end
         ret
+      end
+    end
+
+    class Choice
+      class << self
+        def start_tracing
+          alias_method :parse_without_tracing, :parse!
+          alias_method :parse!, :parse_with_tracing
+        end
+
+        def stop_tracing
+          alias_method :parse!, :parse_without_tracing # rubocop:disable Lint/DuplicateMethods
+        end
+      end
+
+      def parse_with_tracing(der, ber: false)
+        RASN1.trace_message do |tracer|
+          tracer.trace(self.trace)
+        end
+        parse_without_tracing(der, ber: ber)
       end
     end
   end

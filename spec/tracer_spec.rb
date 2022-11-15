@@ -114,14 +114,29 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
         seq.parse!("\x30\x05\x04\x03def".b)
         seq.parse!("\x30\x08\x02\x01\x01\x04\x03abc".b)
       end
-      expect(io.string).to eq(<<~EOD
+      expect(io.string).to eq(<<~ENDOFTRACE
         seq SEQUENCE id: 16 (0x30), len: 5 (0x05), data: 0x0403646566
         INTEGER DEFAULT VALUE 42
         OCTET STRING id: 4 (0x04), len: 3 (0x03), data: 0x646566
         seq SEQUENCE id: 16 (0x30), len: 8 (0x08), data: 0x0201010403616263
         INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x01
         OCTET STRING id: 4 (0x04), len: 3 (0x03), data: 0x616263
-        EOD
+      ENDOFTRACE
+      )
+    end
+
+    it 'traces a CHOICE parsing' do
+      choice = Types::Choice.new(value: [Types::Integer.new, Types::OctetString.new])
+      RASN1.trace(io) do
+        choice.parse!("\x02\x01\x01".b)
+        choice.parse!("\x04\x03abc".b)
+      end
+      expect(io.string).to eq(<<~ENDOFTRACE
+        CHOICE
+        INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x01
+        CHOICE
+        OCTET STRING id: 4 (0x04), len: 3 (0x03), data: 0x616263
+      ENDOFTRACE
       )
     end
   end

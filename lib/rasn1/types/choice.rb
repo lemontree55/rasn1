@@ -97,6 +97,12 @@ module RASN1
                end
       end
 
+      # @private Tracer private API
+      # @return [String]
+      def trace
+        msg_type
+      end
+
       private
 
       def check_chosen
