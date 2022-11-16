@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-# rubocop:disable Metrics/BlockLength
+# rubocop:disable Metrics/BlockLength,Layout/ClosingParenthesisIndentation
 module RASN1 # rubocop:disable Metrics/ModuleLength
   describe Tracer do
     let(:io) { StringIO.new }
@@ -139,6 +139,42 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
       ENDOFTRACE
       )
     end
+
+    it 'traces MODEL parsing' do
+      model = TestModel::OfModel.new
+      RASN1.trace(io) do
+        model.parse!("\x30\x12\x30\x06\x02\x01\x0f\x80\x01\x02\x30\x08\x02\x01\x10\x81\x03\x02\x01\x03".b)
+      end
+      expect(io.string).to eq(<<~ENDOFDATA
+        seqof SEQUENCE OF id: 16 (0x30), len: 18 (0x12), data: 0x300602010f80010230080201108103...
+        record SEQUENCE id: 16 (0x30), len: 6 (0x06), data: 0x02010f800102
+        id INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x0f
+        room IMPLICIT OPTIONAL INTEGER id: 0 (0x80), len: 1 (0x01), data: 0x02
+        house EXPLICIT INTEGER DEFAULT VALUE 0
+        record SEQUENCE id: 16 (0x30), len: 8 (0x08), data: 0x0201108103020103
+        id INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x10
+        room IMPLICIT OPTIONAL INTEGER NONE
+        house EXPLICIT INTEGER id: 1 (0x81), len: 3 (0x03), data: 0x020103
+        house INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x03
+      ENDOFDATA
+      )
+    end
+
+    it 'traces wrapped MODEL parsing' do
+      model = ModelWithImplicitWrapper.new
+      RASN1.trace(io) do
+        model.parse!("\x30\x0d\xa5\x0b\x02\x01\x10\x80\x01\x07\x81\x03\x02\x01\x03")
+      end
+      expect(io.string).to eq(<<~ENDOFDATA
+        seq SEQUENCE id: 16 (0x30), len: 13 (0x0d), data: 0xa50b0201108001078103020103
+        record IMPLICIT SEQUENCE id: 5 (0xa5), len: 11 (0x0b), data: 0x0201108001078103020103
+        id INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x10
+        room IMPLICIT OPTIONAL INTEGER id: 0 (0x80), len: 1 (0x01), data: 0x07
+        house EXPLICIT INTEGER id: 1 (0x81), len: 3 (0x03), data: 0x020103
+        house INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x03
+      ENDOFDATA
+      )
+    end
   end
 end
-# rubocop:enable Metrics/BlockLength
+# rubocop:enable Metrics/BlockLength,Layout/ClosingParenthesisIndentation

@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
 module RASN1
+  # @private
   class Tracer
+    attr_reader :io
+
     def initialize(io)
       @io = io
     end
@@ -19,10 +22,12 @@ module RASN1
       yield @tracer
     ensure
       [Types::Base, Types::Choice, Types::Any].each(&:stop_tracing)
+      @tracer.io.flush
       @tracer = nil
     end
   end
 
+  # @private
   def self.trace_message
     yield @tracer
   end
