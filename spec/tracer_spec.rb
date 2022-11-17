@@ -4,6 +4,23 @@ require 'spec_helper'
 
 # rubocop:disable Metrics/BlockLength,Layout/ClosingParenthesisIndentation
 module RASN1 # rubocop:disable Metrics/ModuleLength
+  module TestTrace
+    DER_SEQUENCE = "\x30\x08\x02\x01\x01\x04\x03abc".b.freeze
+    TRACE_SEQUENCE = <<~ENDOFTRACE
+      SEQUENCE id: 16 (0x30), len: 8 (0x08), data: 0x0201010403616263
+      INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x01
+      OCTET STRING id: 4 (0x04), len: 3 (0x03), data: 0x616263
+    ENDOFTRACE
+
+    DER_EXPLICIT_SEQUENCE = "\xa4\x0a\x30\x08\x02\x01\x01\x04\x03abc".b.freeze
+    TRACE_EXPLICIT_SEQUENCE = <<~ENDOFTRACE
+      EXPLICIT SEQUENCE id: 4 (0xa4), len: 10 (0x0a), data: 0x30080201010403616263
+      SEQUENCE id: 16 (0x30), len: 8 (0x08), data: 0x0201010403616263
+      INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x01
+      OCTET STRING id: 4 (0x04), len: 3 (0x03), data: 0x616263
+    ENDOFTRACE
+  end
+
   describe Tracer do
     let(:io) { StringIO.new }
     subject(:tracer) { described_class.new(io) }
@@ -67,28 +84,17 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
     it 'traces a CONSTRUCTED parsing' do
       seq = Types::Sequence.new(value: [Types::Integer.new, Types::OctetString.new])
       RASN1.trace(io) do
-        seq.parse!("\x30\x08\x02\x01\x01\x04\x03abc".b)
+        seq.parse!(TestTrace::DER_SEQUENCE)
       end
-      expect(io.string).to eq(<<~ENDOFTRACE
-        SEQUENCE id: 16 (0x30), len: 8 (0x08), data: 0x0201010403616263
-        INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x01
-        OCTET STRING id: 4 (0x04), len: 3 (0x03), data: 0x616263
-      ENDOFTRACE
-      )
+      expect(io.string).to eq(TestTrace::TRACE_SEQUENCE)
     end
 
     it 'traces an EXPLICIT CONSTRUCTED parsing' do
       seq = Types::Sequence.new(explicit: 4, value: [Types::Integer.new, Types::OctetString.new])
       RASN1.trace(io) do
-        seq.parse!("\xa4\x0a\x30\x08\x02\x01\x01\x04\x03abc".b)
+        seq.parse!(TestTrace::DER_EXPLICIT_SEQUENCE)
       end
-      expect(io.string).to eq(<<~ENDOFTRACE
-        EXPLICIT SEQUENCE id: 4 (0xa4), len: 10 (0x0a), data: 0x30080201010403616263
-        SEQUENCE id: 16 (0x30), len: 8 (0x08), data: 0x0201010403616263
-        INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x01
-        OCTET STRING id: 4 (0x04), len: 3 (0x03), data: 0x616263
-      ENDOFTRACE
-      )
+      expect(io.string).to eq(TestTrace::TRACE_EXPLICIT_SEQUENCE)
     end
 
     it 'traces a CONSTRUCTED parsing containing an OPTIONAL element' do
@@ -174,6 +180,39 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
         house INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x03
       ENDOFDATA
       )
+    end
+
+    it 'traces RASN1.parse' do
+      RASN1.trace(io) do
+        RASN1.parse(TestTrace::DER_SEQUENCE)
+      end
+      expect(io.string).to eq(TestTrace::TRACE_SEQUENCE)
+    end
+
+    it 'traces RASN1.parse (explicit element)' do
+      RASN1.trace(io) do
+        RASN1.parse(TestTrace::DER_EXPLICIT_SEQUENCE)
+      end
+      expect(io.string).to eq(<<~ENDOFDATA
+        BASE id: 4 (0xa4), len: 10 (0x0a), data: 0x30080201010403616263
+      ENDOFDATA
+      )
+    end
+
+    it 'traces long length' do
+      os = Types::OctetString.new(value: 'a' * 256)
+      RASN1.trace(io) do
+        RASN1.parse(os.to_der)
+      end
+      expect(io.string).to eq("OCTET STRING id: 4 (0x04), len: 256 (0x820100), data: 0x616161616161616161616161616161...\n")
+    end
+
+    it 'traces long id' do
+      os = Types::OctetString.new(implicit: 128, value: 'a')
+      RASN1.trace(io) do
+        RASN1.parse(os.to_der)
+      end
+      expect(io.string).to eq("BASE id: 128 (0x9f8100), len: 1 (0x01), data: 0x61\n")
     end
   end
 end
