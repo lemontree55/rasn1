@@ -21,23 +21,18 @@ module RASN1
   # @param [Boolean] ber if +true+, decode a BER string, else a DER one
   # @return [Types::Base]
   def self.parse(der, ber: false)
-    root = nil
-    until der.empty?
-      type = Types.id2type(der)
-      type.parse!(der, ber: ber)
-      root ||= type
+    type = Types.id2type(der)
+    type.parse!(der, ber: ber)
 
-      if [Types::Sequence, Types::Set].include? type.class
-        subder = type.value
-        ary = []
-        until subder.empty?
-          ary << self.parse(subder)
-          subder = subder[ary.last.to_der.size..-1]
-        end
-        type.value = ary
+    if [Types::Sequence, Types::Set].include? type.class
+      subder = type.value
+      ary = []
+      until subder.empty?
+        ary << self.parse(subder)
+        subder = subder[ary.last.to_der.size..-1]
       end
-      der = der[type.to_der.size..-1]
+      type.value = ary
     end
-    root
+    type
   end
 end
