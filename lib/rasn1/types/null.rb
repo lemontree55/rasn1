@@ -15,6 +15,8 @@ module RASN1
         str
       end
 
+      # @return [Boolean]
+      # Build only if not optional
       def can_build?
         !optional?
       end

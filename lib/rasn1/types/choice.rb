@@ -88,6 +88,8 @@ module RASN1
         raise ASN1Error, "CHOICE #{@name}: no type matching #{der.inspect}" unless parsed
       end
 
+      # @param [::Integer] level
+      # @return [String]
       def inspect(level=0)
         str = common_inspect(level)
         str << if defined? @chosen

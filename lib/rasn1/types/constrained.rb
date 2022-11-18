@@ -2,11 +2,12 @@
 
 module RASN1
   module Types
-    # Mixin to had constraints on a RASN1 type.
+    # Mixin to add constraints on a RASN1 type.
     # Should not be used directly but through {Types.define_type}.
     # @version 0.11.0
     # @author Sylvain Daubert
     module Constrained
+      # Define class/module methods for {Constrained} module
       module ClassMethods
         # Setter for constraint
         # @param [Proc,nil] constraint
@@ -31,8 +32,10 @@ module RASN1
       end
 
       class << self
+        # @return [Proc] proc to check constraints
         attr_reader :constraint
 
+        # Extend +base+ with {ClassMethods}
         def included(base)
           base.extend ClassMethods
         end
@@ -45,6 +48,8 @@ module RASN1
         self.class.check_constraint(val)
         super
       end
+
+      private
 
       def der_to_value(der, ber: false)
         super

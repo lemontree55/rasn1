@@ -66,6 +66,9 @@ module RASN1
   class Model # rubocop:disable Metrics/ClassLength
     # @private
     Elem = Struct.new(:name, :proc_or_class, :content) do
+      # @param [String,Symbol] name
+      # @param [Proc,Class] proc_or_class
+      # @param [Hash,nil] content
       def initialize(name, proc_or_class, content)
         if content.is_a?(Array)
           duplicate_names = find_all_duplicate_names(content.map(&:name) + [name])
@@ -88,11 +91,13 @@ module RASN1
 
     # @private
     WrapElem = Struct.new(:element, :options) do
+      # @return [String]
       def name
         "#{element.name}_wrapper"
       end
     end
 
+    # Define helper methods to define models
     module Accel
       # @return [Hash]
       attr_reader :options
@@ -145,6 +150,9 @@ module RASN1
         klass.class_eval { @root = root }
       end
 
+      # @private
+      # @param [String,Symbol] accel_name
+      # @param [Class] klass
       # @since 0.11.0
       # @since 0.12.0 track source location on error (adfoster-r7)
       def define_type_accel_base(accel_name, klass)
@@ -159,6 +167,9 @@ module RASN1
         EVAL
       end
 
+      # @private
+      # @param [String,Symbol] accel_name
+      # @param [Class] klass
       # @since 0.11.0
       # @since 0.12.0 track source location on error (adfoster-r7)
       def define_type_accel_of(accel_name, klass)
@@ -175,8 +186,9 @@ module RASN1
 
       # Define an accelarator to access a type in a model definition
       # @param [String] accel_name
-      # @param [Class] klass
+      # @param [Class] klass class to instanciate
       # @since 0.11.0
+      # @since 0.12.0 track source location on error (adfoster-r7)
       def define_type_accel(accel_name, klass)
         if klass < Types::SequenceOf
           define_type_accel_of(accel_name, klass)

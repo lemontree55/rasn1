@@ -134,8 +134,9 @@ module RASN1
       # @abstract To help subclass initialize itself. Default implementation do nothing.
       def specific_initializer; end
 
-      # Used by +#dup+ and +#clone+. Deep copy @value and @default.
-      def initialize_copy(_other)
+      # Deep copy @value and @default.
+      def initialize_copy(*)
+        super
         @value = @value.dup
         @no_value = @no_value.dup
         @default = @default.dup
@@ -161,6 +162,7 @@ module RASN1
         ''
       end
 
+      # Say if this type is optional
       # @return [::Boolean]
       def optional?
         @optional

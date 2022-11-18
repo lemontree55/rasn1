@@ -18,7 +18,7 @@ module RASN1
   # Enumerated error
   class EnumeratedError < Error; end
 
-  # CHOICE error: #chosen not set
+  # CHOICE error: {Types::Choice#chosen} not set
   class ChoiceError < RASN1::Error
     # @param [Types::Base] object
     def initialize(object)
@@ -26,6 +26,7 @@ module RASN1
       super()
     end
 
+    # @return [String]
     def message
       "CHOICE #{@object.name}: #chosen not set"
     end

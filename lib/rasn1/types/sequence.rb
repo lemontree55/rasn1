@@ -36,7 +36,8 @@ module RASN1
         @value ||= []
       end
 
-      def initialize_copy(other)
+      # Deep copy @value
+      def initialize_copy(*)
         super
         @value = case @value
                  when Array

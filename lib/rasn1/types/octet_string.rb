@@ -15,6 +15,8 @@ module RASN1
       # OctetString id value
       ID = 4
 
+      # @param [::Integer] level
+      # @return [String]
       def inspect(level=0)
         str = common_inspect(level)
         str << " #{value.inspect}"

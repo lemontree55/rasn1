@@ -20,7 +20,7 @@ module RASN1
         initialize_enum(@options[:enum])
       end
 
-      # @param [Integer,String,Symbol,nil] v
+      # @param [Integer,String,Symbol,nil] val
       # @return [void]
       def value=(val)
         @no_value = false

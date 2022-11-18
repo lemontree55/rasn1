@@ -67,7 +67,8 @@ module RASN1
         @no_value = false
       end
 
-      def initialize_copy(other)
+      # Clone @#of_type and values
+      def initialize_copy(*)
         super
         @of_type = @of_type.dup
         @value = @value.map(&:dup)
@@ -104,6 +105,7 @@ module RASN1
         @value.length
       end
 
+      # @param [::Integer] level
       # @return [String]
       def inspect(level=0)
         str = common_inspect(level)

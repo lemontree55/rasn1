@@ -35,6 +35,8 @@ module RASN1
         total_length
       end
 
+      # @param [::Integer] level
+      # @return [String]
       def inspect(level=0)
         str = common_inspect(level)
         str << if !value?
@@ -48,16 +50,6 @@ module RASN1
                end
       end
 
-      def common_inspect(level)
-        lvl = level >= 0 ? level : 0
-        str = '  ' * lvl
-        str << "#{@name} " unless @name.nil?
-        str << asn1_class.to_s.upcase << ' ' unless asn1_class == :universal
-        str << "[#{id}] EXPLICIT " if explicit?
-        str << "[#{id}] IMPLICIT " if implicit?
-        str << '(ANY) '
-      end
-
       # @private Tracer private API
       # @return [String]
       def trace
@@ -67,6 +59,16 @@ module RASN1
       end
 
       private
+
+      def common_inspect(level)
+        lvl = level >= 0 ? level : 0
+        str = '  ' * lvl
+        str << "#{@name} " unless @name.nil?
+        str << asn1_class.to_s.upcase << ' ' unless asn1_class == :universal
+        str << "[#{id}] EXPLICIT " if explicit?
+        str << "[#{id}] IMPLICIT " if implicit?
+        str << '(ANY) '
+      end
 
       def do_parse(der, ber)
         if der.empty?
