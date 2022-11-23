@@ -10,6 +10,7 @@ module RASN1
 
     TRACED_CLASSES = [Types::Any, Types::Choice, Types::Sequence, Types::SequenceOf, Types::Base].freeze
 
+    # @param [IO] io
     def initialize(io)
       @io = io
       @tracing_level = 0
@@ -22,6 +23,9 @@ module RASN1
       @io.puts(indent << msg)
     end
 
+    # Return identation for given +level+. If +nil+, use {#tracing_level}.
+    # @param [Integer,nil] level
+    # @return [String]
     def indent(level=nil)
       level ||= @tracing_level
       '  ' * level
