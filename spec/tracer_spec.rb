@@ -8,16 +8,16 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
     DER_SEQUENCE = "\x30\x08\x02\x01\x01\x04\x03abc".b.freeze
     TRACE_SEQUENCE = <<~ENDOFTRACE
       SEQUENCE id: 16 (0x30), len: 8 (0x08), data: 0x0201010403616263
-      INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x01
-      OCTET STRING id: 4 (0x04), len: 3 (0x03), data: 0x616263
+        INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x01
+        OCTET STRING id: 4 (0x04), len: 3 (0x03), data: 0x616263
     ENDOFTRACE
 
     DER_EXPLICIT_SEQUENCE = "\xa4\x0a\x30\x08\x02\x01\x01\x04\x03abc".b.freeze
     TRACE_EXPLICIT_SEQUENCE = <<~ENDOFTRACE
       EXPLICIT SEQUENCE id: 4 (0xa4), len: 10 (0x0a), data: 0x30080201010403616263
       SEQUENCE id: 16 (0x30), len: 8 (0x08), data: 0x0201010403616263
-      INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x01
-      OCTET STRING id: 4 (0x04), len: 3 (0x03), data: 0x616263
+        INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x01
+        OCTET STRING id: 4 (0x04), len: 3 (0x03), data: 0x616263
     ENDOFTRACE
   end
 
@@ -105,11 +105,11 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
       end
       expect(io.string).to eq(<<~ENDOFTRACE
         SEQUENCE id: 16 (0x30), len: 5 (0x05), data: 0x0403646566
-        OPTIONAL INTEGER NONE
-        OCTET STRING id: 4 (0x04), len: 3 (0x03), data: 0x646566
+          OPTIONAL INTEGER NONE
+          OCTET STRING id: 4 (0x04), len: 3 (0x03), data: 0x646566
         SEQUENCE id: 16 (0x30), len: 8 (0x08), data: 0x0201010403616263
-        OPTIONAL INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x01
-        OCTET STRING id: 4 (0x04), len: 3 (0x03), data: 0x616263
+          OPTIONAL INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x01
+          OCTET STRING id: 4 (0x04), len: 3 (0x03), data: 0x616263
       ENDOFTRACE
       )
     end
@@ -122,11 +122,11 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
       end
       expect(io.string).to eq(<<~ENDOFTRACE
         seq SEQUENCE id: 16 (0x30), len: 5 (0x05), data: 0x0403646566
-        INTEGER DEFAULT VALUE 42
-        OCTET STRING id: 4 (0x04), len: 3 (0x03), data: 0x646566
+          INTEGER DEFAULT VALUE 42
+          OCTET STRING id: 4 (0x04), len: 3 (0x03), data: 0x646566
         seq SEQUENCE id: 16 (0x30), len: 8 (0x08), data: 0x0201010403616263
-        INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x01
-        OCTET STRING id: 4 (0x04), len: 3 (0x03), data: 0x616263
+          INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x01
+          OCTET STRING id: 4 (0x04), len: 3 (0x03), data: 0x616263
       ENDOFTRACE
       )
     end
@@ -153,15 +153,15 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
       end
       expect(io.string).to eq(<<~ENDOFDATA
         seqof SEQUENCE OF id: 16 (0x30), len: 18 (0x12), data: 0x300602010f80010230080201108103...
-        record SEQUENCE id: 16 (0x30), len: 6 (0x06), data: 0x02010f800102
-        id INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x0f
-        room IMPLICIT OPTIONAL INTEGER id: 0 (0x80), len: 1 (0x01), data: 0x02
-        house EXPLICIT INTEGER DEFAULT VALUE 0
-        record SEQUENCE id: 16 (0x30), len: 8 (0x08), data: 0x0201108103020103
-        id INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x10
-        room IMPLICIT OPTIONAL INTEGER NONE
-        house EXPLICIT INTEGER id: 1 (0x81), len: 3 (0x03), data: 0x020103
-        house INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x03
+          record SEQUENCE id: 16 (0x30), len: 6 (0x06), data: 0x02010f800102
+            id INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x0f
+            room IMPLICIT OPTIONAL INTEGER id: 0 (0x80), len: 1 (0x01), data: 0x02
+            house EXPLICIT INTEGER DEFAULT VALUE 0
+          record SEQUENCE id: 16 (0x30), len: 8 (0x08), data: 0x0201108103020103
+            id INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x10
+            room IMPLICIT OPTIONAL INTEGER NONE
+            house EXPLICIT INTEGER id: 1 (0x81), len: 3 (0x03), data: 0x020103
+            house INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x03
       ENDOFDATA
       )
     end
@@ -173,11 +173,11 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
       end
       expect(io.string).to eq(<<~ENDOFDATA
         seq SEQUENCE id: 16 (0x30), len: 13 (0x0d), data: 0xa50b0201108001078103020103
-        record IMPLICIT SEQUENCE id: 5 (0xa5), len: 11 (0x0b), data: 0x0201108001078103020103
-        id INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x10
-        room IMPLICIT OPTIONAL INTEGER id: 0 (0x80), len: 1 (0x01), data: 0x07
-        house EXPLICIT INTEGER id: 1 (0x81), len: 3 (0x03), data: 0x020103
-        house INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x03
+          record IMPLICIT SEQUENCE id: 5 (0xa5), len: 11 (0x0b), data: 0x0201108001078103020103
+            id INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x10
+            room IMPLICIT OPTIONAL INTEGER id: 0 (0x80), len: 1 (0x01), data: 0x07
+            house EXPLICIT INTEGER id: 1 (0x81), len: 3 (0x03), data: 0x020103
+            house INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x03
       ENDOFDATA
       )
     end

@@ -5,16 +5,21 @@ module RASN1
   class Tracer
     # @return [IO]
     attr_reader :io
+    # @return [Integer]
+    attr_accessor :tracing_level
+
+    TRACED_CLASSES = [Types::Any, Types::Choice, Types::Sequence, Types::SequenceOf, Types::Base].freeze
 
     def initialize(io)
       @io = io
+      @tracing_level = 0
     end
 
     # Puts +msg+ onto {#io}.
     # @param [String] msg
     # @return [void]
     def trace(msg)
-      @io.puts(msg)
+      @io.puts(('  ' * tracing_level) << msg)
     end
   end
 
@@ -30,20 +35,20 @@ module RASN1
   # @return [void]
   def self.trace(io=$stdout)
     @tracer = Tracer.new(io)
-    [Types::Any, Types::Choice, Types::Base].each(&:start_tracing)
+    Tracer::TRACED_CLASSES.each(&:start_tracing)
 
     begin
       yield @tracer
     ensure
-      [Types::Base, Types::Choice, Types::Any].each(&:stop_tracing)
+      Tracer::TRACED_CLASSES.reverse.each(&:stop_tracing)
       @tracer.io.flush
       @tracer = nil
     end
   end
 
   # @private
-  def self.trace_message
-    yield @tracer
+  def self.tracer
+    @tracer
   end
 
   module Types
@@ -68,9 +73,7 @@ module RASN1
       # @see #parse!
       def do_parse_with_tracing(der, ber)
         ret = do_parse_without_tracing(der, ber)
-        RASN1.trace_message do |tracer|
-          tracer.trace(self.trace)
-        end
+        RASN1.tracer.trace(self.trace)
         ret
       end
     end
@@ -95,10 +98,58 @@ module RASN1
       # Parse +der+ with tracing abillity
       # @see #parse!
       def parse_with_tracing(der, ber: false)
-        RASN1.trace_message do |tracer|
-          tracer.trace(self.trace)
-        end
+        RASN1.tracer.trace(self.trace)
         parse_without_tracing(der, ber: ber)
+      end
+    end
+
+    class Sequence
+      class << self
+        # @private
+        # Patch {#der_to_value} to add tracing ability
+        def start_tracing
+          alias_method :der_to_value_without_tracing, :der_to_value
+          alias_method :der_to_value, :der_to_value_with_tracing
+        end
+
+        # @private
+        # Unpatch {#der_to_value!} to remove tracing ability
+        def stop_tracing
+          alias_method :der_to_value, :der_to_value_without_tracing # rubocop:disable Lint/DuplicateMethods
+        end
+      end
+
+      # @private
+      # der_to_value +der+ with tracing abillity
+      def der_to_value_with_tracing(der, ber: false)
+        RASN1.tracer.tracing_level += 1
+        der_to_value_without_tracing(der, ber: ber)
+        RASN1.tracer.tracing_level -= 1
+      end
+    end
+
+    class SequenceOf
+      class << self
+        # @private
+        # Patch {#der_to_value} to add tracing ability
+        def start_tracing
+          alias_method :der_to_value_without_tracing, :der_to_value
+          alias_method :der_to_value, :der_to_value_with_tracing
+        end
+
+        # @private
+        # Unpatch {#der_to_value!} to remove tracing ability
+        def stop_tracing
+          alias_method :der_to_value, :der_to_value_without_tracing # rubocop:disable Lint/DuplicateMethods
+        end
+      end
+
+      # @private
+      # der_to_value +der+ with tracing abillity
+      def der_to_value_with_tracing(der, ber: false)
+        RASN1.tracer.tracing_level += 1
+        der_to_value_without_tracing(der, ber: ber)
+        RASN1.tracer.tracing_level -= 1
       end
     end
   end
