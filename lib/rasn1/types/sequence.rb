@@ -89,6 +89,10 @@ module RASN1
         end
       end
 
+      def trace_data
+        ''
+      end
+
       def explicit_type
         self.class.new(value: @value)
       end

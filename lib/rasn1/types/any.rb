@@ -88,9 +88,7 @@ module RASN1
       end
 
       def trace_any
-        data = unpack(value)
-        data = data[0...30] << '...' if data.size > 30
-        msg_type << " data: 0x#{data}"
+        msg_type << trace_data(value)
       end
     end
   end

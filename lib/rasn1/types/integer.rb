@@ -128,18 +128,29 @@ module RASN1
         v
       end
 
+      def int_to_enum(int, check_enum: true)
+        raise EnumeratedError, "#{@name}: value #{int} not in enumeration" if check_enum && !@enum.value?(int)
+
+        @enum.key(int) || int
+      end
+
       def der_to_value(der, ber: false)
         @value = der_to_int_value(der, ber: ber)
         return if @enum.empty?
 
-        int_value = @value
-        raise EnumeratedError, "#{@name}: value #{int_value} not in enumeration" unless @enum.value?(@value)
-
-        @value = @enum.key(@value)
+        @value = int_to_enum(@value)
       end
 
       def explicit_type
         self.class.new(name: @name, enum: @enum)
+      end
+
+      def trace_data
+        return super if explicit?
+        return "    #{der_to_int_value(raw_data)} (0x#{raw_data.unpack1('H*')})" if @enum.empty?
+
+        v = int_to_enum(der_to_int_value(raw_data), check_enum: false)
+        "    #{v} (0x#{raw_data.unpack1('H*')})"
       end
     end
   end

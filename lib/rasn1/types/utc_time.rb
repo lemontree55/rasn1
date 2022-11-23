@@ -46,6 +46,10 @@ module RASN1
         century = (Time.now.year / 100).to_s
         @value = Strptime.new(format).exec(century + der)
       end
+
+      def trace_data
+        +'    ' << raw_data
+      end
     end
   end
 end

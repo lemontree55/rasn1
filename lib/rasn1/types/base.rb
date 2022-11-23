@@ -309,12 +309,34 @@ module RASN1
         encoded_id = unpack(encode_identifier_octets)
         data_length = raw_data.length
         encoded_length = unpack(raw_length)
-        object_data = unpack(raw_data)
-        object_data = object_data[0...30] << '...' if object_data.size > 30
         msg = msg_type
         msg << " id: #{id} (0x#{encoded_id}),"
-        msg << " len: #{data_length} (0x#{encoded_length}),"
-        msg << " data: 0x#{object_data}"
+        msg << " len: #{data_length} (0x#{encoded_length})"
+        msg << trace_data
+      end
+
+      def trace_data(data=nil)
+        byte_count = 0
+        data ||= raw_data
+
+        lines = []
+        str = ''
+        base_idx = 7 + RASN1.tracer.indent(RASN1.tracer.tracing_level + 1).length
+        data.each_byte do |byte|
+          if (byte_count % 16).zero?
+            str = trace_format_new_data_line(byte_count)
+            lines << str
+          end
+          str[base_idx + (byte_count % 16) * 3, 2] = '%02x' % byte
+          str[base_idx + 49 + byte_count % 16] = byte >= 32 && byte <= 126 ? byte.chr : '.'
+          byte_count += 1
+        end
+        lines.map(&:rstrip).join << "\n"
+      end
+
+      def trace_format_new_data_line(count)
+        head_line = RASN1.tracer.indent(RASN1.tracer.tracing_level + 1)
+        ("\n#{head_line}%04x " % count) << ' ' * 68
       end
 
       def unpack(binstr)

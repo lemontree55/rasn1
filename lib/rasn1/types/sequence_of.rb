@@ -190,6 +190,10 @@ module RASN1
           raise ASN1Error, "object to add should be a #{of_type_class} or a Hash"
         end
       end
+
+      def trace_data
+        ''
+      end
     end
   end
 end

@@ -19,7 +19,12 @@ module RASN1
     # @param [String] msg
     # @return [void]
     def trace(msg)
-      @io.puts(('  ' * tracing_level) << msg)
+      @io.puts(indent << msg)
+    end
+
+    def indent(level=nil)
+      level ||= @tracing_level
+      '  ' * level
     end
   end
 
