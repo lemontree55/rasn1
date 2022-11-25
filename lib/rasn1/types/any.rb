@@ -55,7 +55,7 @@ module RASN1
       def trace
         return trace_any if value?
 
-        msg_type << ' NONE'
+        msg_type(no_id: true) << ' NONE'
       end
 
       private
@@ -88,7 +88,7 @@ module RASN1
       end
 
       def trace_any
-        msg_type << trace_data(value)
+        msg_type(no_id: true) << trace_data(value)
       end
     end
   end

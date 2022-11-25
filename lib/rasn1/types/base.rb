@@ -307,7 +307,7 @@ module RASN1
         data_length = raw_data.length
         encoded_length = unpack(raw_length)
         msg = msg_type
-        msg << " id: #{id} (0x#{encoded_id}),"
+        msg << " (0x#{encoded_id}),"
         msg << " len: #{data_length} (0x#{encoded_length})"
         msg << trace_data
       end
@@ -344,17 +344,22 @@ module RASN1
         binstr.unpack1('H*')
       end
 
-      def msg_type
-        msg = if explicit?
-                +'EXPLICIT '
-              elsif implicit?
-                +'IMPLICIT '
-              else
-                +''
-              end
-        msg << 'OPTIONAL ' if optional?
+      def asn1_class_to_s
+        asn1_class == :universal ? '' : asn1_class.to_s.upcase << ' '
+      end
+
+      def msg_type(no_id: false)
+        msg = name.nil? ? +'' : +"#{name} "
+        msg << "[ #{asn1_class_to_s}#{id} ] " unless no_id
+        msg << if explicit?
+                 +'EXPLICIT '
+               elsif implicit?
+                 +'IMPLICIT '
+               else
+                 +''
+               end
         msg << type
-        msg = +"#{name} #{msg}" unless name.nil?
+        msg << ' OPTIONAL' if optional?
         msg
       end
 
@@ -372,7 +377,7 @@ module RASN1
         lvl = level >= 0 ? level : 0
         str = '  ' * lvl
         str << "#{@name} " unless @name.nil?
-        str << asn1_class.to_s.upcase << ' ' unless asn1_class == :universal
+        str << asn1_class_to_s
         str << "[#{id}] EXPLICIT " if explicit?
         str << "[#{id}] IMPLICIT " if implicit?
         str << "#{type}:"
@@ -593,10 +598,6 @@ module RASN1
         msg = name.nil? ? +'' : +"#{name}: "
         msg << "Expected #{self2name} but get #{der2name(der)}"
         raise ASN1Error, msg
-      end
-
-      def class_from_numeric_id(id)
-        CLASSES.key(id & CLASS_MASK)
       end
 
       def self2name

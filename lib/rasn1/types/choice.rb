@@ -102,7 +102,7 @@ module RASN1
       # @private Tracer private API
       # @return [String]
       def trace
-        msg_type
+        msg_type(no_id: true)
       end
 
       private

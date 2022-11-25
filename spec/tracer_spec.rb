@@ -7,18 +7,18 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
   module TestTrace
     DER_SEQUENCE = "\x30\x08\x02\x01\x01\x04\x03abc".b.freeze
     TRACE_SEQUENCE = <<~ENDOFTRACE
-      SEQUENCE id: 16 (0x30), len: 8 (0x08)
-        INTEGER id: 2 (0x02), len: 1 (0x01)    1 (0x01)
-        OCTET STRING id: 4 (0x04), len: 3 (0x03)
+      [ 16 ] SEQUENCE (0x30), len: 8 (0x08)
+        [ 2 ] INTEGER (0x02), len: 1 (0x01)    1 (0x01)
+        [ 4 ] OCTET STRING (0x04), len: 3 (0x03)
           0000  61 62 63                                         abc
     ENDOFTRACE
 
     DER_EXPLICIT_SEQUENCE = "\xa4\x0a\x30\x08\x02\x01\x01\x04\x03abc".b.freeze
     TRACE_EXPLICIT_SEQUENCE = <<~ENDOFTRACE
-      EXPLICIT SEQUENCE id: 4 (0xa4), len: 10 (0x0a)
-        SEQUENCE id: 16 (0x30), len: 8 (0x08)
-          INTEGER id: 2 (0x02), len: 1 (0x01)    1 (0x01)
-          OCTET STRING id: 4 (0x04), len: 3 (0x03)
+      [ CONTEXT 4 ] EXPLICIT SEQUENCE (0xa4), len: 10 (0x0a)
+        [ 16 ] SEQUENCE (0x30), len: 8 (0x08)
+          [ 2 ] INTEGER (0x02), len: 1 (0x01)    1 (0x01)
+          [ 4 ] OCTET STRING (0x04), len: 3 (0x03)
             0000  61 62 63                                         abc
     ENDOFTRACE
   end
@@ -40,7 +40,7 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
       RASN1.trace(io) do
         Types::Integer.new.parse!("\x02\x01\x01".b)
       end
-      expect(io.string).to eq("INTEGER id: 2 (0x02), len: 1 (0x01)    1 (0x01)\n")
+      expect(io.string).to eq("[ 2 ] INTEGER (0x02), len: 1 (0x01)    1 (0x01)\n")
     end
 
     it 'traces an EXPLICIT PRIMITIVE parsing' do
@@ -48,9 +48,9 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
         Types::Integer.new(explicit: 8).parse!("\x88\x03\x02\x01\x01".b)
       end
       expect(io.string).to eq(<<~ENDOFTRACE
-        EXPLICIT INTEGER id: 8 (0x88), len: 3 (0x03)
+        [ CONTEXT 8 ] EXPLICIT INTEGER (0x88), len: 3 (0x03)
           0000  02 01 01                                         ...
-          INTEGER id: 2 (0x02), len: 1 (0x01)    1 (0x01)
+          [ 2 ] INTEGER (0x02), len: 1 (0x01)    1 (0x01)
       ENDOFTRACE
       )
     end
@@ -60,7 +60,7 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
         Types::Integer.new(implicit: 7, class: :application).parse!("\x47\x01\x01".b)
       end
       expect(io.string).to eq(<<~ENDOFTRACE
-        IMPLICIT INTEGER id: 7 (0x47), len: 1 (0x01)    1 (0x01)
+        [ APPLICATION 7 ] IMPLICIT INTEGER (0x47), len: 1 (0x01)    1 (0x01)
       ENDOFTRACE
       )
     end
@@ -78,8 +78,8 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
         Types::Any.new(optional: true).parse!("\x02\x01\x01".b)
       end
       expect(io.string).to eq(<<~ENDOFTRACE
-        OPTIONAL ANY NONE
-        OPTIONAL ANY
+        ANY OPTIONAL NONE
+        ANY OPTIONAL
           0000  02 01 01                                         ...
       ENDOFTRACE
       )
@@ -108,13 +108,13 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
         seq.parse!("\x30\x08\x02\x01\x01\x04\x03abc".b)
       end
       expect(io.string).to eq(<<~ENDOFTRACE
-        SEQUENCE id: 16 (0x30), len: 5 (0x05)
-          OPTIONAL INTEGER NONE
-          OCTET STRING id: 4 (0x04), len: 3 (0x03)
+        [ 16 ] SEQUENCE (0x30), len: 5 (0x05)
+          [ 2 ] INTEGER OPTIONAL NONE
+          [ 4 ] OCTET STRING (0x04), len: 3 (0x03)
             0000  64 65 66                                         def
-        SEQUENCE id: 16 (0x30), len: 8 (0x08)
-          OPTIONAL INTEGER id: 2 (0x02), len: 1 (0x01)    1 (0x01)
-          OCTET STRING id: 4 (0x04), len: 3 (0x03)
+        [ 16 ] SEQUENCE (0x30), len: 8 (0x08)
+          [ 2 ] INTEGER OPTIONAL (0x02), len: 1 (0x01)    1 (0x01)
+          [ 4 ] OCTET STRING (0x04), len: 3 (0x03)
             0000  61 62 63                                         abc
       ENDOFTRACE
       )
@@ -127,13 +127,13 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
         seq.parse!("\x30\x08\x02\x01\x01\x04\x03abc".b)
       end
       expect(io.string).to eq(<<~ENDOFTRACE
-        seq SEQUENCE id: 16 (0x30), len: 5 (0x05)
-          INTEGER DEFAULT VALUE 42
-          OCTET STRING id: 4 (0x04), len: 3 (0x03)
+        seq [ 16 ] SEQUENCE (0x30), len: 5 (0x05)
+          [ 2 ] INTEGER DEFAULT VALUE 42
+          [ 4 ] OCTET STRING (0x04), len: 3 (0x03)
             0000  64 65 66                                         def
-        seq SEQUENCE id: 16 (0x30), len: 8 (0x08)
-          INTEGER id: 2 (0x02), len: 1 (0x01)    1 (0x01)
-          OCTET STRING id: 4 (0x04), len: 3 (0x03)
+        seq [ 16 ] SEQUENCE (0x30), len: 8 (0x08)
+          [ 2 ] INTEGER (0x02), len: 1 (0x01)    1 (0x01)
+          [ 4 ] OCTET STRING (0x04), len: 3 (0x03)
             0000  61 62 63                                         abc
       ENDOFTRACE
       )
@@ -147,9 +147,9 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
       end
       expect(io.string).to eq(<<~ENDOFTRACE
         CHOICE
-        INTEGER id: 2 (0x02), len: 1 (0x01)    -1 (0xff)
+        [ 2 ] INTEGER (0x02), len: 1 (0x01)    -1 (0xff)
         CHOICE
-        OCTET STRING id: 4 (0x04), len: 3 (0x03)
+        [ 4 ] OCTET STRING (0x04), len: 3 (0x03)
           0000  61 62 63                                         abc
       ENDOFTRACE
       )
@@ -161,17 +161,17 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
         model.parse!("\x30\x12\x30\x06\x02\x01\x0f\x80\x01\x02\x30\x08\x02\x01\x10\x81\x03\x02\x01\x03".b)
       end
       expect(io.string).to eq(<<~ENDOFDATA
-        seqof SEQUENCE OF id: 16 (0x30), len: 18 (0x12)
-          record SEQUENCE id: 16 (0x30), len: 6 (0x06)
-            id INTEGER id: 2 (0x02), len: 1 (0x01)    15 (0x0f)
-            room IMPLICIT OPTIONAL INTEGER id: 0 (0x80), len: 1 (0x01)    2 (0x02)
-            house EXPLICIT INTEGER DEFAULT VALUE 0
-          record SEQUENCE id: 16 (0x30), len: 8 (0x08)
-            id INTEGER id: 2 (0x02), len: 1 (0x01)    16 (0x10)
-            room IMPLICIT OPTIONAL INTEGER NONE
-            house EXPLICIT INTEGER id: 1 (0x81), len: 3 (0x03)
+        seqof [ 16 ] SEQUENCE OF (0x30), len: 18 (0x12)
+          record [ 16 ] SEQUENCE (0x30), len: 6 (0x06)
+            id [ 2 ] INTEGER (0x02), len: 1 (0x01)    15 (0x0f)
+            room [ CONTEXT 0 ] IMPLICIT INTEGER OPTIONAL (0x80), len: 1 (0x01)    2 (0x02)
+            house [ CONTEXT 1 ] EXPLICIT INTEGER DEFAULT VALUE 0
+          record [ 16 ] SEQUENCE (0x30), len: 8 (0x08)
+            id [ 2 ] INTEGER (0x02), len: 1 (0x01)    16 (0x10)
+            room [ CONTEXT 0 ] IMPLICIT INTEGER OPTIONAL NONE
+            house [ CONTEXT 1 ] EXPLICIT INTEGER (0x81), len: 3 (0x03)
               0000  02 01 03                                         ...
-              house INTEGER id: 2 (0x02), len: 1 (0x01)    3 (0x03)
+              house [ 2 ] INTEGER (0x02), len: 1 (0x01)    3 (0x03)
       ENDOFDATA
       )
     end
@@ -182,13 +182,13 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
         model.parse!("\x30\x0d\xa5\x0b\x02\x01\x10\x80\x01\x07\x81\x03\x02\x01\x03")
       end
       expect(io.string).to eq(<<~ENDOFDATA
-        seq SEQUENCE id: 16 (0x30), len: 13 (0x0d)
-          record IMPLICIT SEQUENCE id: 5 (0xa5), len: 11 (0x0b)
-            id INTEGER id: 2 (0x02), len: 1 (0x01)    16 (0x10)
-            room IMPLICIT OPTIONAL INTEGER id: 0 (0x80), len: 1 (0x01)    7 (0x07)
-            house EXPLICIT INTEGER id: 1 (0x81), len: 3 (0x03)
+        seq [ 16 ] SEQUENCE (0x30), len: 13 (0x0d)
+          record [ CONTEXT 5 ] IMPLICIT SEQUENCE (0xa5), len: 11 (0x0b)
+            id [ 2 ] INTEGER (0x02), len: 1 (0x01)    16 (0x10)
+            room [ CONTEXT 0 ] IMPLICIT INTEGER OPTIONAL (0x80), len: 1 (0x01)    7 (0x07)
+            house [ CONTEXT 1 ] EXPLICIT INTEGER (0x81), len: 3 (0x03)
               0000  02 01 03                                         ...
-              house INTEGER id: 2 (0x02), len: 1 (0x01)    3 (0x03)
+              house [ 2 ] INTEGER (0x02), len: 1 (0x01)    3 (0x03)
       ENDOFDATA
       )
     end
@@ -205,7 +205,7 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
         RASN1.parse(TestTrace::DER_EXPLICIT_SEQUENCE)
       end
       expect(io.string).to eq(<<~ENDOFDATA
-        BASE id: 4 (0xa4), len: 10 (0x0a)
+        [ CONTEXT 4 ] BASE (0xa4), len: 10 (0x0a)
           0000  30 08 02 01 01 04 03 61 62 63                    0......abc
       ENDOFDATA
       )
@@ -217,7 +217,7 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
         RASN1.parse(os.to_der)
       end
       expect(io.string).to eq(<<~ENDOFDATA
-        OCTET STRING id: 4 (0x04), len: 256 (0x820100)
+        [ 4 ] OCTET STRING (0x04), len: 256 (0x820100)
           0000  61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61  aaaaaaaaaaaaaaaa
           0010  61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61  aaaaaaaaaaaaaaaa
           0020  61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61  aaaaaaaaaaaaaaaa
@@ -244,7 +244,7 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
         RASN1.parse(os.to_der)
       end
       expect(io.string).to eq(<<~ENDOFDATA
-        BASE id: 128 (0x9f8100), len: 1 (0x01)
+        [ CONTEXT 128 ] BASE (0x9f8100), len: 1 (0x01)
           0000  61                                               a
       ENDOFDATA
       )
@@ -262,9 +262,9 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
           RASN1.parse("\x01\x01\x00")
         end
         expect(io.string).to eq(<<~ENDOFDATA
-          BOOLEAN id: 1 (0x01), len: 1 (0x01)    TRUE (0xff)
-          BOOLEAN id: 1 (0x01), len: 1 (0x01)    TRUE (0x01)
-          BOOLEAN id: 1 (0x01), len: 1 (0x01)    FALSE (0x00)
+          [ 1 ] BOOLEAN (0x01), len: 1 (0x01)    TRUE (0xff)
+          [ 1 ] BOOLEAN (0x01), len: 1 (0x01)    TRUE (0x01)
+          [ 1 ] BOOLEAN (0x01), len: 1 (0x01)    FALSE (0x00)
         ENDOFDATA
         )
       end
@@ -282,8 +282,8 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
             subject.parse!("#{id.chr}\x01\x02")
           end
           expect(io.string).to eq(<<~ENDOFDATA
-            #{klass.type} id: #{id} (0x#{'%02x' % id}), len: 1 (0x01)    ONE (0x01)
-            #{klass.type} id: #{id} (0x#{'%02x' % id}), len: 1 (0x01)    TWO (0x02)
+            [ #{id} ] #{klass.type} (0x#{'%02x' % id}), len: 1 (0x01)    ONE (0x01)
+            [ #{id} ] #{klass.type} (0x#{'%02x' % id}), len: 1 (0x01)    TWO (0x02)
           ENDOFDATA
           )
         end
@@ -294,7 +294,7 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
             expect { subject.parse!("#{id.chr}\x01\xfe") }.to raise_error(EnumeratedError)
           end
           expect(io.string).to eq(<<~ENDOFDATA
-            #{klass.type} id: #{id} (0x#{'%02x' % id}), len: 1 (0x01)    -2 (0xfe)
+            [ #{id} ] #{klass.type} (0x#{'%02x' % id}), len: 1 (0x01)    -2 (0xfe)
           ENDOFDATA
           )
         end
@@ -309,7 +309,7 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
         RASN1.trace(io) do
           RASN1.parse(gt.to_der)
         end
-        expect(io.string).to eq("GeneralizedTime id: 24 (0x18), len: 15 (0x0f)    20221123105433Z\n")
+        expect(io.string).to eq("[ 24 ] GeneralizedTime (0x18), len: 15 (0x0f)    20221123105433Z\n")
       end
 
       it 'traces an explicit tag' do
@@ -318,10 +318,10 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
           gt.parse!(gt.to_der)
         end
         expect(io.string).to eq(<<~ENDOFDATA
-          dueTime EXPLICIT GeneralizedTime id: 1 (0x81), len: 17 (0x11)
+          dueTime [ CONTEXT 1 ] EXPLICIT GeneralizedTime (0x81), len: 17 (0x11)
             0000  18 0f 32 30 32 32 31 31 32 33 31 30 35 34 33 33  ..20221123105433
             0010  5a                                               Z
-            dueTime GeneralizedTime id: 24 (0x18), len: 15 (0x0f)    20221123105433Z
+            dueTime [ 24 ] GeneralizedTime (0x18), len: 15 (0x0f)    20221123105433Z
         ENDOFDATA
         )
       end
@@ -335,7 +335,7 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
         RASN1.trace(io) do
           RASN1.parse(ut.to_der)
         end
-        expect(io.string).to eq("UTCTime id: 23 (0x17), len: 13 (0x0d)    221123105433Z\n")
+        expect(io.string).to eq("[ 23 ] UTCTime (0x17), len: 13 (0x0d)    221123105433Z\n")
       end
 
       it 'traces an explicit tag' do
@@ -344,9 +344,9 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
           ut.parse!(ut.to_der)
         end
         expect(io.string).to eq(<<~ENDOFDATA
-          dueTime EXPLICIT UTCTime id: 2 (0x82), len: 15 (0x0f)
+          dueTime [ CONTEXT 2 ] EXPLICIT UTCTime (0x82), len: 15 (0x0f)
             0000  17 0d 32 32 31 31 32 33 31 30 35 34 33 33 5a     ..221123105433Z
-            dueTime UTCTime id: 23 (0x17), len: 13 (0x0d)    221123105433Z
+            dueTime [ 23 ] UTCTime (0x17), len: 13 (0x0d)    221123105433Z
         ENDOFDATA
         )
       end
