@@ -582,7 +582,7 @@ module RASN1
       end
 
       def explicit_type
-        self.class.new
+        self.class.new(name: name)
       end
 
       def raise_id_error(der)

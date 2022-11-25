@@ -94,7 +94,7 @@ module RASN1
       end
 
       def explicit_type
-        self.class.new(value: @value)
+        self.class.new(name: name, value: @value)
       end
     end
   end

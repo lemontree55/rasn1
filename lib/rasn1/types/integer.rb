@@ -142,7 +142,7 @@ module RASN1
       end
 
       def explicit_type
-        self.class.new(name: @name, enum: @enum)
+        self.class.new(name: name, enum: enum)
       end
 
       def trace_data

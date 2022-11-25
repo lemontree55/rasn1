@@ -88,7 +88,7 @@ module RASN1
       end
 
       def explicit_type
-        self.class.new(value: @value, bit_length: @bit_length)
+        self.class.new(name: name, value: @value, bit_length: @bit_length)
       end
     end
   end

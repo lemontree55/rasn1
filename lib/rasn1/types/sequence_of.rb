@@ -155,7 +155,7 @@ module RASN1
       end
 
       def explicit_type
-        self.class.new(self.of_type)
+        self.class.new(self.of_type, name: name)
       end
 
       def push_primitive(obj)
