@@ -229,10 +229,7 @@ module RASN1
         return 0 if total_length.zero?
 
         if explicit?
-          # Delegate to #explicit type to generate sub-value
-          type = explicit_type
-          type.parse!(data)
-          @value = type.value
+          do_parse_explicit(data)
         else
           der_to_value(data, ber: ber)
         end
@@ -398,6 +395,13 @@ module RASN1
         @no_value = false
 
         [total_length, data]
+      end
+
+      def do_parse_explicit(data)
+        # Delegate to #explicit type to generate sub-value
+        type = explicit_type
+        type.parse!(data)
+        @value = type.value
       end
 
       def value_to_der

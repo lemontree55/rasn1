@@ -68,12 +68,15 @@ module RASN1
         def start_tracing
           alias_method :do_parse_without_tracing, :do_parse
           alias_method :do_parse, :do_parse_with_tracing
+          alias_method :do_parse_explicit_without_tracing, :do_parse_explicit
+          alias_method :do_parse_explicit, :do_parse_explicit_with_tracing
         end
 
         # @private
         # Unpatch {#do_parse} to remove tracing ability
         def stop_tracing
           alias_method :do_parse, :do_parse_without_tracing # rubocop:disable Lint/DuplicateMethods
+          alias_method :do_parse_explicit, :do_parse_explicit_without_tracing # rubocop:disable Lint/DuplicateMethods
         end
       end
 
@@ -84,6 +87,12 @@ module RASN1
         ret = do_parse_without_tracing(der, ber)
         RASN1.tracer.trace(self.trace)
         ret
+      end
+
+      def do_parse_explicit_with_tracing(data)
+        RASN1.tracer.tracing_level += 1
+        do_parse_explicit_without_tracing(data)
+        RASN1.tracer.tracing_level -= 1
       end
     end
 

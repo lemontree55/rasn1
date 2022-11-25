@@ -48,6 +48,8 @@ module RASN1
       end
 
       def trace_data
+        return super if explicit?
+
         +'    ' << raw_data
       end
     end

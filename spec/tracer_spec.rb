@@ -16,10 +16,10 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
     DER_EXPLICIT_SEQUENCE = "\xa4\x0a\x30\x08\x02\x01\x01\x04\x03abc".b.freeze
     TRACE_EXPLICIT_SEQUENCE = <<~ENDOFTRACE
       EXPLICIT SEQUENCE id: 4 (0xa4), len: 10 (0x0a)
-      SEQUENCE id: 16 (0x30), len: 8 (0x08)
-        INTEGER id: 2 (0x02), len: 1 (0x01)    1 (0x01)
-        OCTET STRING id: 4 (0x04), len: 3 (0x03)
-          0000  61 62 63                                         abc
+        SEQUENCE id: 16 (0x30), len: 8 (0x08)
+          INTEGER id: 2 (0x02), len: 1 (0x01)    1 (0x01)
+          OCTET STRING id: 4 (0x04), len: 3 (0x03)
+            0000  61 62 63                                         abc
     ENDOFTRACE
   end
 
@@ -50,7 +50,7 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
       expect(io.string).to eq(<<~ENDOFTRACE
         EXPLICIT INTEGER id: 8 (0x88), len: 3 (0x03)
           0000  02 01 01                                         ...
-        INTEGER id: 2 (0x02), len: 1 (0x01)    1 (0x01)
+          INTEGER id: 2 (0x02), len: 1 (0x01)    1 (0x01)
       ENDOFTRACE
       )
     end
@@ -171,7 +171,7 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
             room IMPLICIT OPTIONAL INTEGER NONE
             house EXPLICIT INTEGER id: 1 (0x81), len: 3 (0x03)
               0000  02 01 03                                         ...
-            house INTEGER id: 2 (0x02), len: 1 (0x01)    3 (0x03)
+              house INTEGER id: 2 (0x02), len: 1 (0x01)    3 (0x03)
       ENDOFDATA
       )
     end
@@ -188,7 +188,7 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
             room IMPLICIT OPTIONAL INTEGER id: 0 (0x80), len: 1 (0x01)    7 (0x07)
             house EXPLICIT INTEGER id: 1 (0x81), len: 3 (0x03)
               0000  02 01 03                                         ...
-            house INTEGER id: 2 (0x02), len: 1 (0x01)    3 (0x03)
+              house INTEGER id: 2 (0x02), len: 1 (0x01)    3 (0x03)
       ENDOFDATA
       )
     end
@@ -311,17 +311,44 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
         end
         expect(io.string).to eq("GeneralizedTime id: 24 (0x18), len: 15 (0x0f)    20221123105433Z\n")
       end
+
+      it 'traces an explicit tag' do
+        gt = GeneralizedTime.new(value: Time.utc(2022, 11, 23, 10, 54, 33), explicit: 1, name: 'dueTime')
+        RASN1.trace(io) do
+          gt.parse!(gt.to_der)
+        end
+        expect(io.string).to eq(<<~ENDOFDATA
+          dueTime EXPLICIT GeneralizedTime id: 1 (0x81), len: 17 (0x11)
+            0000  18 0f 32 30 32 32 31 31 32 33 31 30 35 34 33 33  ..20221123105433
+            0010  5a                                               Z
+            dueTime GeneralizedTime id: 24 (0x18), len: 15 (0x0f)    20221123105433Z
+        ENDOFDATA
+        )
+      end
     end
 
     describe UtcTime do
       let(:io) { StringIO.new }
 
       it 'traces with Time format' do
-        gt = UtcTime.new(value: Time.utc(2022, 11, 23, 10, 54, 33))
+        ut = UtcTime.new(value: Time.utc(2022, 11, 23, 10, 54, 33))
         RASN1.trace(io) do
-          RASN1.parse(gt.to_der)
+          RASN1.parse(ut.to_der)
         end
         expect(io.string).to eq("UTCTime id: 23 (0x17), len: 13 (0x0d)    221123105433Z\n")
+      end
+
+      it 'traces an explicit tag' do
+        ut = UtcTime.new(value: Time.utc(2022, 11, 23, 10, 54, 33), explicit: 2, name: 'dueTime')
+        RASN1.trace(io) do
+          ut.parse!(ut.to_der)
+        end
+        expect(io.string).to eq(<<~ENDOFDATA
+          dueTime EXPLICIT UTCTime id: 2 (0x82), len: 15 (0x0f)
+            0000  17 0d 32 32 31 31 32 33 31 30 35 34 33 33 5a     ..221123105433Z
+            dueTime UTCTime id: 23 (0x17), len: 13 (0x0d)    221123105433Z
+        ENDOFDATA
+        )
       end
     end
   end
