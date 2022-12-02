@@ -67,7 +67,8 @@ module RASN1
         @no_value = false
       end
 
-      def initialize_copy(other)
+      # Clone @#of_type and values
+      def initialize_copy(*)
         super
         @of_type = @of_type.dup
         @value = @value.map(&:dup)
@@ -104,6 +105,7 @@ module RASN1
         @value.length
       end
 
+      # @param [::Integer] level
       # @return [String]
       def inspect(level=0)
         str = common_inspect(level)
@@ -153,7 +155,7 @@ module RASN1
       end
 
       def explicit_type
-        self.class.new(self.of_type)
+        self.class.new(self.of_type, name: name)
       end
 
       def push_primitive(obj)
@@ -187,6 +189,10 @@ module RASN1
         else
           raise ASN1Error, "object to add should be a #{of_type_class} or a Hash"
         end
+      end
+
+      def trace_data
+        ''
       end
     end
   end

@@ -87,8 +87,16 @@ module RASN1
     # @param [Types::Base] from class from which inherits
     # @param [Module] in_module module in which creates new type (default to {RASN1::Types})
     # @return [Class] newly created class
+    # @yieldparam [Object] value value to set to type, or infered at parsing
+    # @yieldreturn [Boolean]
     # @since 0.11.0
     # @since 0.12.0 in_module parameter
+    # @example
+    #   # Define a new UInt32 type
+    #   # UInt32 ::= INTEGER (0 .. 4294967295)
+    #   RASN1::Types.define_type('UInt32', from: RASN1::Types::Integer) do |value|
+    #     (value >= 0) && (value < 2**32)
+    #   end
     def self.define_type(name, from:, in_module: self, &block)
       constraint = block.nil? ? nil : block.to_proc
 

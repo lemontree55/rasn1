@@ -36,7 +36,8 @@ module RASN1
         @value ||= []
       end
 
-      def initialize_copy(other)
+      # Deep copy @value
+      def initialize_copy(*)
         super
         @value = case @value
                  when Array
@@ -88,8 +89,12 @@ module RASN1
         end
       end
 
+      def trace_data
+        ''
+      end
+
       def explicit_type
-        self.class.new(value: @value)
+        self.class.new(name: name, value: @value)
       end
     end
   end

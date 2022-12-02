@@ -39,6 +39,12 @@ module RASN1
           @value = true
         end
       end
+
+      def trace_data
+        return super if explicit?
+
+        "    #{raw_data == "\x00".b ? 'FALSE' : 'TRUE'} (0x#{raw_data.unpack1('H*')})"
+      end
     end
   end
 end

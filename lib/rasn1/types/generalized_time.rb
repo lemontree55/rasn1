@@ -134,6 +134,12 @@ module RASN1
           raise ASN1Error, "#{prefix}: unrecognized format: #{date_hour}"
         end
       end
+
+      def trace_data
+        return super if explicit?
+
+        +'    ' << raw_data
+      end
     end
   end
 end

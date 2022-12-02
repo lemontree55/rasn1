@@ -8,7 +8,6 @@ module RASN1
       # BitString id value
       ID = 3
 
-      # @param [Integer] bit_length
       # @return [Integer]
       attr_writer :bit_length
 
@@ -42,6 +41,9 @@ module RASN1
         str << " #{value.inspect} (bit length: #{bit_length})"
       end
 
+      # Same as {Base#can_build?} but also check bit_length
+      # @see Base#can_build?
+      # @return [Boolean]
       def can_build?
         super || (!@default.nil? && (@bit_length != @default_bit_length))
       end
@@ -86,7 +88,7 @@ module RASN1
       end
 
       def explicit_type
-        self.class.new(value: @value, bit_length: @bit_length)
+        self.class.new(name: name, value: @value, bit_length: @bit_length)
       end
     end
   end

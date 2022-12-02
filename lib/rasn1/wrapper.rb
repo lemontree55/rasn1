@@ -14,8 +14,8 @@ module RASN1
   # @example
   #   # object to wrap
   #   int = RASN1::Types::Integer.new(implicit: 1)    # its tag is 0x81
-  #   # simple wraper, change an option
-  #   wrapper = RASN1::Wrapper.new(int, optional: true, default: 1)
+  #   # simple wrapper, change an option
+  #   wrapper = RASN1::Wrapper.new(int, default: 1)
   #   # implicit wrapper
   #   wrapper = RASN1::Wrapper.new(int, implicit: 3)  # wrapped int tag is now 0x83
   #   # explicit wrapper
@@ -70,26 +70,6 @@ module RASN1
       super(element)
     end
 
-    def explicit_implicit(options)
-      opts = options.dup
-      @explicit = opts.delete(:explicit)
-      @implicit = opts.delete(:implicit)
-      opts
-    end
-
-    def generate_explicit_wrapper(options)
-      # ExplicitWrapper is a hand-made explicit tag, but we have to use its implicit option
-      # to force its tag value.
-      @explicit_wrapper = ExplicitWrapper.new(options.merge(implicit: @explicit))
-    end
-
-    def generate_explicit_wrapper_options(options)
-      new_opts = {}
-      new_opts[:default] = options[:default] if options.key?(:default)
-      new_opts[:optional] = options[:optional] if options.key?(:optional)
-      new_opts
-    end
-
     # Say if wrapper is an explicit one (i.e. add tag and length to its element)
     # @return [Boolean]
     def explicit?
@@ -136,6 +116,8 @@ module RASN1
       end
     end
 
+    # @return [Boolean]
+    # @see Types::Base#value?
     def value?
       if explicit?
         @explicit_wrapper.value?
@@ -151,6 +133,7 @@ module RASN1
     end
 
     # @return [::Integer]
+    # @see Types::Base#id
     def id
       if implicit?
         @implicit
@@ -162,6 +145,7 @@ module RASN1
     end
 
     # @return [Symbol]
+    # @see Types::Base#asn1_class
     def asn1_class
       return element.asn1_class unless @options.key?(:class)
 
@@ -169,6 +153,7 @@ module RASN1
     end
 
     # @return [Boolean]
+    # @see Types::Base#constructed
     def constructed?
       return element.constructed? unless @options.key?(:constructed)
 
@@ -176,10 +161,13 @@ module RASN1
     end
 
     # @return [Boolean]
+    # @see Types::Base#primitive
     def primitive?
       !constructed?
     end
 
+    # @param [::Integer] level
+    # @return [String]
     def inspect(level=0)
       return super(level) unless explicit?
 
@@ -187,6 +175,26 @@ module RASN1
     end
 
     private
+
+    def explicit_implicit(options)
+      opts = options.dup
+      @explicit = opts.delete(:explicit)
+      @implicit = opts.delete(:implicit)
+      opts
+    end
+
+    def generate_explicit_wrapper(options)
+      # ExplicitWrapper is a hand-made explicit tag, but we have to use its implicit option
+      # to force its tag value.
+      @explicit_wrapper = ExplicitWrapper.new(options.merge(implicit: @explicit))
+    end
+
+    def generate_explicit_wrapper_options(options)
+      new_opts = {}
+      new_opts[:default] = options[:default] if options.key?(:default)
+      new_opts[:optional] = options[:optional] if options.key?(:optional)
+      new_opts
+    end
 
     def generate_implicit_element
       el = element.dup
