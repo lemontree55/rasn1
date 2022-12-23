@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.12.1 - 2022-12-23
+
+### Added
+
+* Add parse tracing capacity.
+
 ## 0.12.0 - 2022-11-12
 
 ### Added
