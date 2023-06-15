@@ -15,52 +15,6 @@ module Kerberos
     def self.model_name
       name.split('::').last.to_sym
     end
-
-    def self.kerberos_uint32(name, options = {})
-      custom_primitive_type_for(name, UInt32, options)
-    end
-
-    def self.kerberos_int32(name, options = {})
-      custom_primitive_type_for(name, Int32, options)
-    end
-
-    def self.kerberos_string(name, options = {})
-      custom_primitive_type_for(name, KerberosString, options)
-    end
-
-    def self.kerberos_realm(name, options = {})
-      custom_primitive_type_for(name, Realm, options)
-    end
-
-    def self.kerberos_microseconds(name, options = {})
-      custom_primitive_type_for(name, Microseconds, options)
-    end
-
-    def self.kerberos_time(name, options = {})
-      custom_primitive_type_for(name, KerberosTime, options)
-    end
-
-    def self.kerberos_ticket_flags(name, options = {})
-      custom_primitive_type_for(name, TicketFlags, options)
-    end
-
-    def self.kerberos_kdc_options(name, options = {})
-      custom_primitive_type_for(name, KdcOptions, options)
-    end
-
-    def self.kerberos_ap_options(name, options = {})
-      custom_primitive_type_for(name, ApOptions, options)
-    end
-
-    def self.custom_primitive_type_for(name, clazz, options = {})
-      options.merge!(name: name)
-      proc = proc do |opts|
-        clazz.new(options.merge(opts))
-      end
-      @root = Elem.new(name, proc, nil)
-    end
-
-    private_class_method :custom_primitive_type_for
   end
 
   #
@@ -72,15 +26,10 @@ module Kerberos
   # IA5String.
   #
   #       KerberosString  ::= GeneralString (IA5String)
-  class KerberosString < RASN1::Types::IA5String
-    # GeneralString id value
+  RASN1::Types.define_type('KerberosString', from: RASN1::Types::IA5String, in_module: self)
+  class KerberosString
+    # Override ID as the GeneralString id value
     ID = 27
-
-    # Get ASN.1 type
-    # @return [String]
-    def self.type
-      'KerberosString'
-    end
   end
 
   #
@@ -88,8 +37,7 @@ module Kerberos
   #
 
   # KerberosTime    ::= GeneralizedTime -- with no fractional seconds
-  class KerberosTime < RASN1::Types::GeneralizedTime
-  end
+  RASN1::Types.define_type('KerberosTime', from: RASN1::Types::GeneralizedTime, in_module: self)
 
   #
   # 5.2.4.  Constrained Integer Types
@@ -97,20 +45,20 @@ module Kerberos
 
   #   Int32           ::= INTEGER (-2147483648..2147483647)
   #                        -- signed values representable in 32 bits
-  class Int32 < RASN1::Types::Integer
-    # XXX: Add constrained types in accordance to the specification
+  RASN1::Types.define_type('KerberosInt32', from: RASN1::Types::Integer, in_module: self) do |value|
+    (value >= -2**31) && (value < 2**31)
   end
 
   #   UInt32          ::= INTEGER (0..4294967295)
   #                        -- unsigned 32 bit values
-  class UInt32 < RASN1::Types::Integer
-    # XXX: Add constrained types in accordance to the specification
+  RASN1::Types.define_type('KerberosUInt32', from: RASN1::Types::Integer, in_module: self) do |val|
+    (val >= 0) && (val < (2**32))
   end
 
   #   Microseconds    ::= INTEGER (0..999999)
   #                        -- microseconds
-  class Microseconds < RASN1::Types::Integer
-    # XXX: Add constrained types in accordance to the specification
+  RASN1::Types.define_type('KerberosMicroseconds', from: RASN1::Types::Integer, in_module: self) do |value|
+    (value >= 0) && (value < 999999)
   end
 
   #
@@ -118,8 +66,7 @@ module Kerberos
   #
 
   #   Realm           ::= KerberosString
-  class Realm < KerberosString
-  end
+  RASN1::Types.define_type('KerberosRealm', from: KerberosString, in_module: self)
 
   #   PrincipalName   ::= SEQUENCE {
   #            name-type       [0] Int32,
@@ -403,35 +350,7 @@ module Kerberos
 
   # TODO: See if there's a way to have name bit string flags in RASN1
   # ticket_flags_input = "\x03\x05\x00\x50\xE1\x00\x00".b
-  class TicketFlags < KerberosFlags
-    #  module Flag
-    #     RESERVED = 0
-    #     FORWARDABLE = 1
-    #     FORWARDED = 2
-    #     PROXIABLE = 3
-    #     PROXY = 4
-    #     ALLOW_POST_DATE = 5
-    #     POST_DATED = 6
-    #     INVALID = 7
-    #     RENEWABLE = 8
-    #     INITIAL = 9
-    #     PRE_AUTHENT = 10
-    #     HW_AUTHNET = 11
-    #     TRANSITED_POLICY_CHECKED = 12
-    #     OK_AS_DELEGATE = 13
-    #   end
-    #
-    #   # @param [Array<Flag>] flags an array of numerical values representing flags
-    #   # @return [TicketFlags]
-    #   def self.from_flags(flags)
-    #     value = 0
-    #     flags.each do |flag|
-    #       value |= 1 << (31 - flag)
-    #     end
-    #
-    #     new(value)
-    #   end
-  end
+  RASN1::Types.define_type('KerberosTicketFlags', from: KerberosFlags, in_module: self)
 
   #   -- encoded Transited field
   #    TransitedEncoding       ::= SEQUENCE {
@@ -509,8 +428,7 @@ module Kerberos
   #         -- enc-tkt-in-skey(28),
   #         -- renew(30),
   #         -- validate(31)
-  class KdcOptions < KerberosFlags
-  end
+  RASN1::Types.define_type('KerberosKdcOptions', from: KerberosFlags, in_module: self)
 
   # KDC-REQ-BODY    ::= SEQUENCE {
   #         kdc-options             [0] KDCOptions,
@@ -543,7 +461,7 @@ module Kerberos
                kerberos_time(:till, explicit: 5, constructed: true),
                kerberos_time(:rtime, explicit: 6, constructed: true, optional: true),
                kerberos_uint32(:nonce, explicit: 7, constructed: true),
-               sequence_of(:etype, Int32, explicit: 8),
+               sequence_of(:etype, KerberosInt32, explicit: 8),
                wrapper(model(:addresses, HostAddresses), explicit: 9, constructed: true, optional: true),
                wrapper(model(:enc_authorization_data, EncryptedData), explicit: 10, constructed: true, optional: true),
                # TODO: Add test for this - might have additional issues
@@ -708,8 +626,8 @@ module Kerberos
   #         -- reserved(0),
   #         -- use-session-key(1),
   #         -- mutual-required(2)
-  class ApOptions < KerberosFlags
-  end
+  RASN1::Types.define_type('KerberosApOptions', from: KerberosFlags, in_module: self)
+
 
   #  AP-REQ          ::= [APPLICATION 14] SEQUENCE {
   #         pvno            [0] INTEGER (5),
