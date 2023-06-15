@@ -94,9 +94,17 @@ module RASN1::Types
         expect(nb_bytes).to eq(4)
       end
 
-      it 'raises when parsin a DER string which does not contain any type from CHOICE' do
-        str = Boolean.new(value: false).to_der
-        expect { @choice.parse! str }.to raise_error(RASN1::ASN1Error, /no type matching/)
+      context 'when parsing a DER string which does not contain any type from CHOICE' do
+        it 'raises RASN1::ASN1Error' do
+          str = Boolean.new(value: false).to_der
+          expect { @choice.parse! str }.to raise_error(RASN1::ASN1Error, /no type matching/)
+        end
+
+        it 'does not raise RASN1::ASN1Error when optional' do
+          str = Boolean.new(value: false).to_der
+          @choice.options = @choice.options.merge optional: true
+          expect { @choice.parse! str }.not_to raise_error
+        end
       end
     end
 
