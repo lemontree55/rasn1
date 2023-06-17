@@ -79,9 +79,7 @@ module RASN1
           @chosen = i
           nb_bytes = element.parse!(der, ber: ber)
           return nb_bytes
-        rescue ASN1Error => e
-          #$stderr.puts e.inspect
-          #$stderr.puts e.backtrace
+        rescue ASN1Error
           @chosen = nil
           next
         end
