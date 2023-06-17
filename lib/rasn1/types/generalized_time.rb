@@ -71,19 +71,33 @@ module RASN1
       end
 
       def value_when_fraction_empty(date_hour)
-        if (date_hour[-1] != 'Z') && (date_hour !~ /[+-]\d+$/)
-          # If not UTC, have to add offset with UTC to force
-          # Strptime to generate a local time.
-          date_hour << Time.now.strftime('%z')
+        tz = if date_hour[-1] == 'Z'
+               date_hour.slice!(-1, 1)
+               '+00:00' # Ruby 3.0: to remove after end-of support of ruby 3.0
+             elsif date_hour.match?(/[+-]\d+$/)
+               # Ruby 3.0
+               # date_hour.slice!(-5, 5)
+               zone = date_hour.slice!(-5, 5)
+               zone[0, 3] << ':' << zone[3, 2]
+             end
+        year = date_hour.slice!(0, 4).to_i
+        others = date_hour.scan(/../).map(&:to_i)
+        # Ruby 3.0
+        # From 3.1: "Z" and "-0100" are supported
+        # Below 3.1: should be "-01:00" or "+00:00"
+        unless tz.nil?
+          others += [0] * (5 - others.size)
+          others << tz
         end
-
-        value_from(date_hour)
+        @value = Time.new(year, *others)
+        # From 3.1: replace all this code by: Time.new(year, *others, in: tz)
       end
 
       def value_when_fraction_ends_with_z(date_hour, fraction)
         fraction = fraction[0...-1]
         date_hour << 'Z'
-        frac_base = value_from(date_hour)
+        frac_base = compute_frac_base(date_hour)
+        value_when_fraction_empty(date_hour)
         fix_value(fraction, frac_base)
       end
 
@@ -93,21 +107,11 @@ module RASN1
           # fraction contains fraction and timezone info. Split them
           fraction = match[1]
           date_hour << match[2]
-        else
-          # fraction only contains fraction.
-          # Have to add offset with UTC to force Strptime to
-          # generate a local time.
-          date_hour << Time.now.strftime('%z')
         end
 
-        frac_base = value_from(date_hour)
+        frac_base = compute_frac_base(date_hour)
+        value_when_fraction_empty(date_hour)
         fix_value(fraction, frac_base)
-      end
-
-      def value_from(date_hour)
-        format, frac_base = strformat(date_hour)
-        @value = Strptime.new(format).exec(date_hour)
-        frac_base
       end
 
       def fix_value(fraction, frac_base)
@@ -115,20 +119,20 @@ module RASN1
         @value = (@value + frac) unless fraction.nil?
       end
 
-      def strformat(date_hour)
+      def compute_frac_base(date_hour)
         case date_hour.size
-        when 11
-          ['%Y%m%d%H%z', HOUR_TO_SEC]
-        when 13, 17
-          ['%Y%m%d%H%M%z', MINUTE_TO_SEC]
+        when 10, 11
+          HOUR_TO_SEC
+        when 12, 13, 17
+          MINUTE_TO_SEC
         when 15
           if date_hour[-1] == 'Z'
-            ['%Y%m%d%H%M%S%z', SECOND_TO_SEC]
+            SECOND_TO_SEC
           else
-            ['%Y%m%d%H%z', HOUR_TO_SEC]
+            HOUR_TO_SEC
           end
-        when 19
-          ['%Y%m%d%H%M%S%z', SECOND_TO_SEC]
+        when 14, 19
+          SECOND_TO_SEC
         else
           prefix = @name.nil? ? type : "tag #{@name}"
           raise ASN1Error, "#{prefix}: unrecognized format: #{date_hour}"
