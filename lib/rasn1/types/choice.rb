@@ -75,24 +75,27 @@ module RASN1
       # @return [Integer] total number of parsed bytes
       # @raise [ASN1Error] error on parsing
       def parse!(der, ber: false)
-        parsed = false
         @value.each_with_index do |element, i|
           @chosen = i
           nb_bytes = element.parse!(der, ber: ber)
-          parsed = true
           return nb_bytes
         rescue ASN1Error
           @chosen = nil
           next
         end
-        raise ASN1Error, "CHOICE #{@name}: no type matching #{der.inspect}" unless parsed
+
+        @no_value = true
+        @value = void_value
+        raise ASN1Error, "CHOICE #{@name}: no type matching #{der.inspect}" unless optional?
+
+        0
       end
 
       # @param [::Integer] level
       # @return [String]
       def inspect(level=0)
         str = common_inspect(level)
-        str << if defined? @chosen
+        str << if defined?(@chosen) && value?
                  "\n#{@value[@chosen].inspect(level + 1)}"
                else
                  ' not chosen!'
