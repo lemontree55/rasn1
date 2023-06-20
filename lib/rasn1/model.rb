@@ -299,6 +299,12 @@ module RASN1
     #  @param [Hash] options
     #  @return [Elem]
     #  @see Types::BitString#initialize
+    # @!method bmp_string(name, options)
+    #  @!scope class
+    #  @param [Symbol,String] name name of object in model
+    #  @param [Hash] options
+    #  @return [Elem]
+    #  @see Types::BmpString#initialize
     # @!method octet_string(name, options)
     #  @!scope class
     #  @param [Symbol,String] name name of object in model
@@ -317,6 +323,12 @@ module RASN1
     #  @param [Hash] options
     #  @return [Elem]
     #  @see Types::Enumerated#initialize
+    # @!method universal_string(name, options)
+    #  @!scope class
+    #  @param [Symbol,String] name name of object in model
+    #  @param [Hash] options
+    #  @return [Elem]
+    #  @see Types::UniversalString#initialize
     # @!method utf8_string(name, options)
     #  @!scope class
     #  @param [Symbol,String] name name of object in model
