@@ -34,6 +34,6 @@ Gem::Specification.new do |spec|
     '--inline-source',
     '--quiet'
   ]
-  spec.required_ruby_version = '>= 2.5.0'
+  spec.required_ruby_version = '>= 2.7.0'
   spec.add_dependency 'strptime', '~>0.2.5'
 end

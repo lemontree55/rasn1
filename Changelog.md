@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.13.0 - 2024-01-03
+
+### Added
+
+* Add `Types::UniversalString`, by zeroSteiner
+
+### Fixed
+
+* Allow `Types::Choice` to be optional, by zeroSteiner
+* Fix timezone computation in `Types::GeneralizedTime`.
+
+### Removed
+
+* Remove support for Ruby < 2.7
+
 ## 0.12.1 - 2022-12-23
 
 ### Added
