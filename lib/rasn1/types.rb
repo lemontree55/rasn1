@@ -98,7 +98,7 @@ module RASN1
     #     (value >= 0) && (value < 2**32)
     #   end
     def self.define_type(name, from:, in_module: self, &block)
-      constraint = block.nil? ? nil : block.to_proc
+      constraint = block&.to_proc
 
       new_klass = Class.new(from) do
         include Constrained

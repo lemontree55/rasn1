@@ -75,8 +75,8 @@ module RASN1
         # @private
         # Unpatch {#do_parse} to remove tracing ability
         def stop_tracing
-          alias_method :do_parse, :do_parse_without_tracing # rubocop:disable Lint/DuplicateMethods
-          alias_method :do_parse_explicit, :do_parse_explicit_without_tracing # rubocop:disable Lint/DuplicateMethods
+          alias_method :do_parse, :do_parse_without_tracing
+          alias_method :do_parse_explicit, :do_parse_explicit_without_tracing
         end
       end
 
@@ -108,7 +108,7 @@ module RASN1
         # @private
         # Unpatch {#parse!} to remove tracing ability
         def stop_tracing
-          alias_method :parse!, :parse_without_tracing # rubocop:disable Lint/DuplicateMethods
+          alias_method :parse!, :parse_without_tracing
         end
       end
 
@@ -133,7 +133,7 @@ module RASN1
         # @private
         # Unpatch {#der_to_value!} to remove tracing ability
         def stop_tracing
-          alias_method :der_to_value, :der_to_value_without_tracing # rubocop:disable Lint/DuplicateMethods
+          alias_method :der_to_value, :der_to_value_without_tracing
         end
       end
 
@@ -158,7 +158,7 @@ module RASN1
         # @private
         # Unpatch {#der_to_value!} to remove tracing ability
         def stop_tracing
-          alias_method :der_to_value, :der_to_value_without_tracing # rubocop:disable Lint/DuplicateMethods
+          alias_method :der_to_value, :der_to_value_without_tracing
         end
       end
 

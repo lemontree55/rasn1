@@ -374,7 +374,7 @@ module RASN1
       end
 
       def common_inspect(level)
-        lvl = level >= 0 ? level : 0
+        lvl = [level, 0].max
         str = '  ' * lvl
         str << "#{@name} " unless @name.nil?
         str << asn1_class_to_s
@@ -621,7 +621,7 @@ module RASN1
       def find_type(id)
         Types.constants.map { |c| Types.const_get(c) }
              .select { |klass| klass < Primitive || klass < Constructed }
-             .find { |klass| klass::ID == id }
+             .find { |klass| id == klass::ID }
       end
 
       def bin2hex(str)

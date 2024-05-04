@@ -278,7 +278,7 @@ module RASN1
     #  @return [Elem]
     #  @see Types::SetOf#initialize
     %w[sequence set].each do |type|
-      define_type_accel_of(type, Types.const_get("#{type.capitalize}Of"))
+      define_type_accel_of(type, Types.const_get(:"#{type.capitalize}Of"))
     end
 
     # @!method boolean(name, options)

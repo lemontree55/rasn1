@@ -61,7 +61,7 @@ module RASN1
       private
 
       def common_inspect(level)
-        lvl = level >= 0 ? level : 0
+        lvl = [0, level].max
         str = '  ' * lvl
         str << "#{@name} " unless @name.nil?
         str << asn1_class.to_s.upcase << ' ' unless asn1_class == :universal
