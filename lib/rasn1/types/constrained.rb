@@ -9,12 +9,8 @@ module RASN1
     module Constrained
       # Define class/module methods for {Constrained} module
       module ClassMethods
-        # Setter for constraint
-        # @param [Proc,nil] constraint
-        # @return [Proc,nil]
-        def constraint=(constraint)
-          @constraint = constraint
-        end
+        # @return [Proc] proc to check constraints
+        attr_accessor :constraint
 
         # Check if a constraint is really defined
         # @return [Boolean]
@@ -31,15 +27,7 @@ module RASN1
         end
       end
 
-      class << self
-        # @return [Proc] proc to check constraints
-        attr_reader :constraint
-
-        # Extend +base+ with {ClassMethods}
-        def included(base)
-          base.extend ClassMethods
-        end
-      end
+      extend ClassMethods
 
       # Redefined +#value=+ to check constraint before assigning +val+
       # @see Types::Base#value=

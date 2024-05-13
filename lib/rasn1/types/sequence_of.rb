@@ -144,11 +144,7 @@ module RASN1
         nb_bytes = 0
 
         while nb_bytes < der.length
-          type = if composed_of_type? && !@of_type.is_a?(Class)
-                   @of_type.dup
-                 else
-                   of_type_class.new
-                 end
+          type = of_type_class.new
           nb_bytes += type.parse!(der[nb_bytes, der.length])
           @value << type
         end

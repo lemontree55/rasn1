@@ -45,10 +45,12 @@ module RASN1
       # Integer value
       # @return [Integer]
       def to_i
-        if @enum.empty?
-          value? ? @value : @default || 0
+        val = value? ? @value : @default
+        case val
+        when String, Symbol
+          @enum[val]
         else
-          @enum[value? ? @value : @default] || 0
+          val || 0
         end
       end
 
@@ -135,10 +137,12 @@ module RASN1
       end
 
       def der_to_value(der, ber: false)
-        @value = der_to_int_value(der, ber: ber)
-        return if @enum.empty?
-
-        @value = int_to_enum(@value)
+        int_value = der_to_int_value(der, ber: ber)
+        @value = if @enum.empty?
+                   int_value
+                 else
+                   int_to_enum(int_value)
+                 end
       end
 
       def explicit_type

@@ -100,9 +100,9 @@ module RASN1
     def self.define_type(name, from:, in_module: self, &block)
       constraint = block&.to_proc
 
-      new_klass = Class.new(from) do
-        include Constrained
-      end
+      new_klass = Class.new(from)
+      new_klass.include(Constrained)
+      new_klass.extend(Constrained::ClassMethods)
       new_klass.constraint = constraint
 
       in_module.const_set(name, new_klass)

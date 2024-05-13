@@ -461,6 +461,7 @@ module RASN1
         root.value
       else
         elt = by_name(name)
+        return nil if elt.nil?
 
         unless args.empty?
           args.each do |arg|
@@ -504,7 +505,7 @@ module RASN1
 
     # Give a (nested) element from its name
     # @param [String, Symbol] name
-    # @return [Model, Types::Base]
+    # @return [Model, Types::Base, nil]
     def by_name(name)
       elt = self[name]
       return elt unless elt.nil?
@@ -656,12 +657,13 @@ module RASN1
     end
 
     def wrapper_to_h(wrap)
-      case wrap.element
+      el = wrap.element
+      case el
       when Model
-        hsh = wrap.element.to_h
+        hsh = el.to_h
         hsh[hsh.keys.first]
       else
-        private_to_h(wrap.element)
+        private_to_h(el)
       end
     end
   end
