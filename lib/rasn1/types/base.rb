@@ -427,7 +427,7 @@ module RASN1
         when nil
           @asn1_class = :universal
         when Symbol
-          raise ClassError unless CLASSES.key? asn1_class
+          raise ClassError unless CLASSES.key?(asn1_class)
 
           @asn1_class = asn1_class
         else

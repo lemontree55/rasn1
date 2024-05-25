@@ -82,9 +82,10 @@ module RASN1
         total_length += id_size
 
         @no_value = false
-        @value = der[0, total_length]
+        real_value = der[0, total_length].to_s
+        @value = real_value
 
-        [total_length, @value]
+        [total_length, real_value]
       end
 
       def trace_any
