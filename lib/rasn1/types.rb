@@ -32,18 +32,20 @@ module RASN1
     #                 ID and size of identifier octets
     def self.decode_identifier_octets(der)
       first_octet = der.unpack1('C').to_i
-      asn1_class = Types::Base::CLASSES.key(first_octet & Types::Base::CLASS_MASK)
+      asn1_class = Types::Base::CLASSES.key(first_octet & Types::Base::CLASS_MASK) || :universal
       pc = (first_octet & Types::Constructed::ASN1_PC).positive? ? :constructed : :primitive
       id = first_octet & Types::Base::MULTI_OCTETS_ID
 
       size = if id == Types::Base::MULTI_OCTETS_ID
                id = 0
-               der.bytes.each_with_index do |octet, i|
-                 next if i.zero?
+               count = 1
+               der[1..-1].to_s.bytes.each do |octet|
+                 count += 1
 
                  id = (id << 7) | (octet & 0x7f)
-                 break i + 1 if (octet & 0x80).zero?
+                 break if (octet & 0x80).zero?
                end
+               count
              else
                1
              end
