@@ -68,7 +68,7 @@ module RASN1
     Elem = Struct.new(:name, :proc_or_class, :content) do
       # @param [String,Symbol] name
       # @param [Proc,Class] proc_or_class
-      # @param [Hash,nil] content
+      # @param [Array,nil] content
       def initialize(name, proc_or_class, content)
         if content.is_a?(Array)
           duplicate_names = find_all_duplicate_names(content.map(&:name) + [name])
@@ -511,8 +511,9 @@ module RASN1
       return elt unless elt.nil?
 
       @elements.each_key do |subelt_name|
-        if self[subelt_name].is_a?(Model)
-          elt = self[subelt_name][name]
+        subelt = self[subelt_name]
+        if subelt.is_a?(Model)
+          elt = subelt[name]
           return elt unless elt.nil?
         end
       end
@@ -542,7 +543,12 @@ module RASN1
       class_element = self.class.class_eval { @root }
       @root_name = class_element.name
       @elements = {}
-      @elements[@root_name] = get_type(class_element.proc_or_class, self.class.options || {})
+      @elements[@root_name] = case class_element
+                              when WrapElem
+                                generate_wrapper(class_element)
+                              else
+                                get_type(class_element.proc_or_class, self.class.options || {})
+                              end
       class_element
     end
 
@@ -578,17 +584,18 @@ module RASN1
 
     def initialize_elements(obj, args)
       args.each do |name, value|
-        next unless obj[name]
+        subobj = obj[name]
+        next unless subobj
 
         case value
         when Hash
-          raise ArgumentError, "element #{name}: may only pass a Hash for Model elements" unless obj[name].is_a?(Model)
+          raise ArgumentError, "element #{name}: may only pass a Hash for Model elements" unless subobj.is_a?(Model)
 
-          initialize_elements obj[name], value
+          initialize_elements(subobj, value)
         when Array
-          initialize_element_from_array(obj[name], value)
+          initialize_element_from_array(subobj, value)
         else
-          obj[name].value = value
+          subobj.value = value
         end
       end
     end
