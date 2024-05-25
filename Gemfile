@@ -8,17 +8,19 @@ gemspec
 gem 'bundler', '>=1.17', '<3'
 
 group :development do
-  gem 'ruby-lsp'
-  gem 'simplecov', '~> 0.16'
-  gem 'yard', '~>0.9'
+  # gem 'ruby-lsp'
+  gem 'solargraph', require: false
+  gem 'steep', require: false
+  gem 'yard', '~>0.9', require: false
 end
 
 group :test do
-  gem 'rspec', '~> 3.0'
+  gem 'rspec', '~> 3.0', require: false
+  gem 'simplecov', '~> 0.22', require: false
 end
 
 group :development, :test do
-  gem 'rake', '~> 12.3'
+  gem 'rake', '~> 12.3', require: false
 end
 
 group :rubocop do
