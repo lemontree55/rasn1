@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'rasn1'
+require 'spec_helper'
 require 'openssl'
 require 'time'
 require 'base64'
