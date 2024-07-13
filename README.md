@@ -1,5 +1,5 @@
 [![Gem Version](https://badge.fury.io/rb/rasn1.svg)](https://badge.fury.io/rb/rasn1)
-[![Action status](https://github.com/sdaubert/rasn1/workflows/ci/badge.svg?branch=master)](https://github.com/sdaubert/rasn1/actions?query=workflow%3Aci)
+[![Action status](https://github.com/lemontree55/rasn1/workflows/ci/badge.svg?branch=master)](https://github.com/lemontree55/rasn1/actions?query=workflow%3Aci)
 
 # Rasn1
 

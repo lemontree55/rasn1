@@ -7,8 +7,8 @@ Gem::Specification.new do |spec|
   spec.name          = 'rasn1'
   spec.version       = RASN1::VERSION
   spec.license       = 'MIT'
-  spec.authors       = ['Sylvain Daubert']
-  spec.email         = ['sylvain.daubert@laposte.net']
+  spec.authors       = ['LemonTree55']
+  spec.email         = ['lenontree@proton.me']
 
   spec.summary       = 'Ruby ASN.1 library'
   spec.description   = <<~DESC
@@ -16,12 +16,12 @@ Gem::Specification.new do |spec|
     encodings.
   DESC
 
-  spec.homepage = 'https://github.com/sdaubert/rasn1'
+  spec.homepage = 'https://github.com/lemontree55/rasn1'
 
   spec.metadata = {
-    'homepage_uri' => 'https://github.com/sdaubert/rasn1',
-    'source_code_uri' => 'https://github.com/sdaubert/rasn1',
-    'bug_tracker_uri' => 'https://github.com/sdaubert/rasn1/issues',
+    'homepage_uri' => 'https://github.com/lemontree55/rasn1',
+    'source_code_uri' => 'https://github.com/lemontree55/rasn1',
+    'bug_tracker_uri' => 'https://github.com/lemontree55/rasn1/issues',
     'documentation_uri' => 'https://www.rubydoc.info/gems/rasn1',
   }
 
