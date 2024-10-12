@@ -8,9 +8,9 @@ gemspec
 gem 'bundler', '>=1.17', '<3'
 
 group :development do
-  # gem 'ruby-lsp'
-  gem 'solargraph', require: false
-  gem 'steep', require: false
+  gem 'debug'
+  gem 'ruby-lsp', require: false
+  gem 'ruby-lsp-rspec', require: false
   gem 'yard', '~>0.9', require: false
 end
 
