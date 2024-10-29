@@ -10,7 +10,7 @@ gem 'bundler', '>=1.17', '<3'
 group :development do
   gem 'debug'
   gem 'ruby-lsp', require: false
-  gem 'ruby-lsp-rspec', require: false
+  gem 'ruby-lsp-rspec', require: false if Gem.ruby_version >= Gem::Version.new('3.0.0')
   gem 'yard', '~>0.9', require: false
 end
 
