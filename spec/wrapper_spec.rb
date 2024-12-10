@@ -152,6 +152,20 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
         wrapper = Wrapper.new(ModelTest.new(id: 1, house: 2), explicit: 7, optional: true)
         expect(wrapper.to_der).to eq(TestWrapper::DER_OPTIONAL_EXPLICITLY_WRAPPED_MODEL)
       end
+
+      it 'implicit behaves the same when using the equivalent non-wrapped' do
+        wrapper = Wrapper.new(Types::Integer.new(value: 4), implicit: 0)
+        unwrapped = Types::Integer.new(value: 4, implicit: 0)
+        wrapper.parse!(unwrapped.to_der)
+        expect(wrapper.to_der).to eq(unwrapped.to_der)
+      end
+
+      it 'explicit behaves the same when using the equivalent non-wrapped' do
+        wrapper = Wrapper.new(Types::Integer.new(value: 4), explicit: 0)
+        unwrapped = Types::Integer.new(value: 4, explicit: 0)
+        wrapper.parse!(unwrapped.to_der)
+        expect(wrapper.to_der).to eq(unwrapped.to_der)
+      end
     end
   end
 end
