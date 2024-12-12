@@ -200,7 +200,7 @@ module RASN1
       el = element.dup
       if el.explicit?
         el.options = el.options.merge(explicit: @implicit)
-      elsif el.implicit?
+      else
         el.options = el.options.merge(implicit: @implicit)
       end
       el
