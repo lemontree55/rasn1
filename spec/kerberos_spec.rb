@@ -3,7 +3,6 @@
 require 'spec_helper'
 require 'openssl'
 require 'time'
-require 'base64'
 
 # Implements the model defined by Kerberos5
 # - https://datatracker.ietf.org/doc/html/rfc4120

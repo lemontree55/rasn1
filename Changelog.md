@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.14.0 - 2024-12-28
+
+### Removed
+
+* Drop support for Ruby 2.7.
+
+### Fixed
+
+* `Wrapper`: correctly wrap implicit types when the enclosed element itself wasn't implicit or explicit, by smashery.
+
+## 0.13.1 - 2024-07-13
+
+### Changed
+
+* Change ownership of this gem to lemontree55
+
+### Fixed
+
+* Fix some rubocop offenses.
+* KISS code
+* Fix an issue in `Model#initialize`: handle case when root element is a `Wrapper`.
+
 ## 0.13.0 - 2024-01-03
 
 ### Added
