@@ -1,5 +1,5 @@
 [![Gem Version](https://badge.fury.io/rb/rasn1.svg)](https://badge.fury.io/rb/rasn1)
-[![Action status](https://github.com/lemontree55/rasn1/workflows/ci/badge.svg?branch=master)](https://github.com/lemontree55/rasn1/actions?query=workflow%3Aci)
+[![Action status](https://github.com/lemontree55/rasn1/actions/workflows/ci.yml/badge.svg)](https://github.com/lemontree55/rasn1/actions/workflows/ci.yml)
 
 # Rasn1
 
@@ -15,11 +15,15 @@ gem 'rasn1'
 
 And then execute:
 
-    $ bundle install
+```bash
+bundle install
+```
 
 Or install it yourself as:
 
-    $ gem install rasn1
+```bash
+gem install rasn1
+```
 
 ## Simple usage
 
@@ -31,9 +35,10 @@ decoded_ber = RASN1.parse(ber_string, ber: true)
 ```
 
 ## Advanced usage
+
 All examples below will be based on:
 
-```
+```text
 Record ::= SEQUENCE {
   id        INTEGER,
   room  [0] INTEGER OPTIONAL,
@@ -70,6 +75,7 @@ end
 ```
 
 ### Parse a DER-encoded string
+
 ```ruby
 record = Record.parse(der_string)
 record[:id]             # => RASN1::Types::Integer
@@ -92,6 +98,7 @@ cplx_record[:a_record]        # => Record
 ```
 
 ### Generate a DER-encoded string
+
 ```ruby
 record = Record.new(id: 12)
 record[:id].to_i      # => 12
@@ -110,8 +117,8 @@ record.to_der         # => String
 
 ### More information
 
-see https://github.com/sdaubert/rasn1/wiki
+see <https://github.com/sdaubert/rasn1/wiki>
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/sdaubert/rasn1.
+Bug reports and pull requests are welcome on GitHub at <https://github.com/sdaubert/rasn1>.
