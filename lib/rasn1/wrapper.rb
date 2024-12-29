@@ -21,6 +21,8 @@ module RASN1
   #   # explicit wrapper
   #   wrapper = RASN1::Wrapper.new(int, explicit: 4)  # int tag is always 0x81, but it is wrapped in a 0x84 tag
   # @since 0.12.0
+  # @author Sylvain Daubert
+  # @author LemonTree55
   class Wrapper < SimpleDelegator
     # @private Private class used to build/parse explicit wrappers
     class ExplicitWrapper < Types::Base
@@ -203,11 +205,11 @@ module RASN1
 
     def generate_implicit_element
       el = element.dup
-      if el.explicit?
-        el.options = el.options.merge(explicit: @implicit)
-      else
-        el.options = el.options.merge(implicit: @implicit)
-      end
+      el.options = if el.explicit?
+                     el.options.merge(explicit: @implicit)
+                   else
+                     el.options.merge(implicit: @implicit)
+                   end
       el
     end
 

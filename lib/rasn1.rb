@@ -33,7 +33,7 @@ module RASN1
       RASN1.tracer.tracing_level += 1 unless RASN1.tracer.nil?
       until subder.empty?
         ary << self.parse(subder)
-        subder = subder[ary.last.to_der.size..-1]
+        subder = subder[ary.last.to_der.size..]
       end
       RASN1.tracer.tracing_level -= 1 unless RASN1.tracer.nil?
       type.value = ary

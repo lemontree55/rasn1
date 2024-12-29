@@ -82,7 +82,7 @@ module RASN1
 
       def der_to_value(der, ber: false) # rubocop:disable Lint/UnusedMethodArgument
         unused = der.unpack1('C').to_i
-        value = der[1..-1].to_s
+        value = der[1..].to_s
         @bit_length = value.length * 8 - unused
         @value = value
       end

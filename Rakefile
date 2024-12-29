@@ -7,7 +7,6 @@ RSpec::Core::RakeTask.new
 
 task default: :spec
 
-# rubocop:disable Lint/SuppressedException
 begin
   require 'yard'
 
@@ -15,6 +14,14 @@ begin
     t.files = ['lib/**/*.rb', '-', 'README.md', 'LICENSE']
     t.options = %w[--no-private]
   end
-rescue LoadError
+rescue LoadError # rubocop:disable Lint/SuppressedException
 end
-# rubocop:enable Lint/SuppressedException
+
+begin
+  require 'rubocop/rake_task'
+
+  RuboCop::RakeTask.new do |task|
+    task.patterns = ['lib/**/*.rb']
+  end
+rescue LoadError # rubocop:disable Lint/SuppressedException
+end

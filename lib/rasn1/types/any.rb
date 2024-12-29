@@ -78,7 +78,7 @@ module RASN1
         end
 
         id_size = Types.decode_identifier_octets(der).last
-        total_length, = get_data(der[id_size..-1], ber)
+        total_length, = get_data(der[id_size..], ber)
         total_length += id_size
 
         @no_value = false

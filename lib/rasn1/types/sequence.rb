@@ -81,7 +81,7 @@ module RASN1
         if @value.is_a?(Array) && !@value.empty?
           nb_bytes = 0
           @value.each do |element|
-            nb_bytes += element.parse!(der[nb_bytes..-1])
+            nb_bytes += element.parse!(der[nb_bytes..])
           end
         else
           @value = der

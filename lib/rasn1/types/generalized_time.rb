@@ -71,18 +71,7 @@ module RASN1
       end
 
       def value_when_fraction_empty(date_hour)
-        # Ruby 3.0: special handle for timezone
-        #   From 3.1: "Z" and "-0100" are supported
-        #   Below 3.1: should be "-01:00" or "+00:00"
-        tz = if date_hour[-1] == 'Z'
-               date_hour.slice!(-1, 1)
-               '+00:00' # Ruby 3.0: to remove after end-of support of ruby 3.0
-             elsif date_hour.match?(/[+-]\d+$/)
-               # Ruby 3.0
-               # date_hour.slice!(-5, 5)
-               zone = date_hour.slice!(-5, 5).to_s
-               "#{zone[0, 3]}:#{zone[3, 2]}"
-             end
+        tz = compute_tz(date_hour)
         year = date_hour.slice!(0, 4).to_i
         month = date_hour.slice!(0, 2).to_i
         day = date_hour.slice!(0, 2).to_i
@@ -90,6 +79,21 @@ module RASN1
         minute = date_hour.slice!(0, 2).to_i
         second = date_hour.slice!(0, 2).to_i
         @value = Time.new(year, month, day, hour, minute, second, tz)
+      end
+
+      # Ruby 3.0: special handle for timezone
+      #   From 3.1: "Z" and "-0100" are supported
+      #   Below 3.1: should be "-01:00" or "+00:00"
+      def compute_tz(date_hour)
+        if date_hour.end_with?('Z')
+          date_hour.slice!(-1, 1)
+          '+00:00' # Ruby 3.0: to remove after end-of support of ruby 3.0
+        elsif date_hour.match?(/[+-]\d+$/)
+          # Ruby 3.0
+          # date_hour.slice!(-5, 5)
+          zone = date_hour.slice!(-5, 5).to_s
+          "#{zone[0, 3]}:#{zone[3, 2]}"
+        end
       end
 
       def value_when_fraction_ends_with_z(date_hour, fraction)

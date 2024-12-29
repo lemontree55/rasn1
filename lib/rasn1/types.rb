@@ -33,17 +33,17 @@ module RASN1
     def self.decode_identifier_octets(der)
       first_octet = der.unpack1('C').to_i
       asn1_class = Types::Base::CLASSES.key(first_octet & Types::Base::CLASS_MASK) || :universal
-      pc = (first_octet & Types::Constructed::ASN1_PC).positive? ? :constructed : :primitive
+      pc = first_octet.anybits?(Types::Constructed::ASN1_PC) ? :constructed : :primitive
       id = first_octet & Types::Base::MULTI_OCTETS_ID
 
       size = if id == Types::Base::MULTI_OCTETS_ID
                id = 0
                count = 1
-               der[1..-1].to_s.bytes.each do |octet|
+               der[1..].to_s.bytes.each do |octet|
                  count += 1
 
                  id = (id << 7) | (octet & 0x7f)
-                 break if (octet & 0x80).zero?
+                 break if octet.nobits?(0x80)
                end
                count
              else
@@ -85,7 +85,7 @@ module RASN1
 
     # Define a new ASN.1 type from a base one.
     # This new type may have a constraint defines on it.
-    # @param [Symbol,String] name New type name. Must start with a capital letter.
+    # @param [Symbol,String] name new type name. Must start with a capital letter.
     # @param [Types::Base] from class from which inherits
     # @param [Module] in_module module in which creates new type (default to {RASN1::Types})
     # @return [Class] newly created class

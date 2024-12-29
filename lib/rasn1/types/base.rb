@@ -178,14 +178,14 @@ module RASN1
       # @return [::Boolean,nil] return +nil+ if not tagged, return +true+
       #   if explicit, else +false+
       def explicit?
-        defined?(@tag) ? @tag == :explicit : nil
+        defined?(@tag) ? @tag == :explicit : nil # rubocop:disable Style/ReturnNilInPredicateMethodDefinition
       end
 
       # Say if a tagged type is implicit
       # @return [::Boolean,nil] return +nil+ if not tagged, return +true+
       #   if implicit, else +false+
       def implicit?
-        defined?(@tag) ? @tag == :implicit : nil
+        defined?(@tag) ? @tag == :implicit : nil # rubocop:disable Style/ReturnNilInPredicateMethodDefinition
       end
 
       # @abstract This method SHOULD be partly implemented by subclasses, which
@@ -349,7 +349,7 @@ module RASN1
       end
 
       def msg_type(no_id: false)
-        msg = name.nil? ? +'' : +"#{name} "
+        msg = name.nil? ? +'' : "#{name} "
         msg << "[ #{asn1_class_to_s}#{id} ] " unless no_id
         msg << if explicit?
                  +'EXPLICIT '
@@ -395,7 +395,7 @@ module RASN1
         return [0, ''] unless check_id(der)
 
         id_size = Types.decode_identifier_octets(der).last
-        total_length, data = get_data(der[id_size..-1], ber)
+        total_length, data = get_data(der[id_size..], ber)
         total_length += id_size
         @no_value = false
 
@@ -595,13 +595,13 @@ module RASN1
       end
 
       def raise_id_error(der)
-        msg = name.nil? ? +'' : +"#{name}: "
+        msg = name.nil? ? +'' : "#{name}: "
         msg << "Expected #{self2name} but get #{der2name(der)}"
         raise ASN1Error, msg
       end
 
       def self2name
-        name = +"#{asn1_class.to_s.upcase} #{constructed? ? 'CONSTRUCTED' : 'PRIMITIVE'}"
+        name = "#{asn1_class.to_s.upcase} #{constructed? ? 'CONSTRUCTED' : 'PRIMITIVE'}"
         if implicit? || explicit?
           name << ' 0x%X (0x%s)' % [id, bin2hex(encode_identifier_octets)]
         else
@@ -613,7 +613,7 @@ module RASN1
         return 'no ID' if der.nil? || der.empty?
 
         asn1_class, pc, id, id_size = Types.decode_identifier_octets(der)
-        name = +"#{asn1_class.to_s.upcase} #{pc.to_s.upcase}"
+        name = "#{asn1_class.to_s.upcase} #{pc.to_s.upcase}"
         type =  find_type(id)
         name << " #{type.nil? ? '0x%X (0x%s)' % [id, bin2hex(der[0...id_size])] : type.encoded_type}"
       end
