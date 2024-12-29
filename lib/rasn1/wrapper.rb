@@ -54,15 +54,16 @@ module RASN1
     # @param [Types::Base,Model] element element to wrap
     # @param [Hash] options
     def initialize(element, options={})
+      @lazy = true
       opts = explicit_implicit(options)
 
       if explicit?
         generate_explicit_wrapper(opts)
-        element.options = element.options.merge(generate_explicit_wrapper_options(opts))
+        @element_options_to_merge = generate_explicit_wrapper_options(opts)
         @options = opts
       else
-        opts[:value] = element.value
-        element.options = element.options.merge(opts)
+        opts[:value] = element.value if element.respond_to?(:value)
+        @element_options_to_merge = opts
         @options = {}
       end
       raise RASN1::Error, 'Cannot be implicit and explicit' if explicit? && implicit?
@@ -85,6 +86,7 @@ module RASN1
     # Convert wrapper and its element to a DER string
     # @return [String]
     def to_der
+      lazy_generation
       if implicit?
         el = generate_implicit_element
         el.to_der
@@ -102,6 +104,7 @@ module RASN1
     # @return [Integer] total number of parsed bytes
     # @raise [ASN1Error] error on parsing
     def parse!(der, ber: false)
+      lazy_generation
       if implicit?
         el = generate_implicit_element
         parsed = el.parse!(der, ber: ber)
@@ -121,6 +124,8 @@ module RASN1
     def value?
       if explicit?
         @explicit_wrapper.value?
+      elsif element.is_a?(Class)
+        false
       else
         __getobj__.value?
       end
@@ -140,14 +145,14 @@ module RASN1
       elsif explicit?
         @explicit
       else
-        element.id
+        lazy_generation(register: false).id
       end
     end
 
     # @return [Symbol]
     # @see Types::Base#asn1_class
     def asn1_class
-      return element.asn1_class unless @options.key?(:class)
+      return lazy_generation(register: false).asn1_class unless @options.key?(:class)
 
       @options[:class]
     end
@@ -155,7 +160,7 @@ module RASN1
     # @return [Boolean]
     # @see Types::Base#constructed
     def constructed?
-      return element.constructed? unless @options.key?(:constructed)
+      return lazy_generation(register: false).constructed? unless @options.key?(:constructed)
 
       @options[:constructed]
     end
@@ -169,9 +174,9 @@ module RASN1
     # @param [::Integer] level
     # @return [String]
     def inspect(level=0)
-      return super(level) unless explicit?
+      return super unless explicit?
 
-      @explicit_wrapper.inspect(level) << ' ' << super(level)
+      @explicit_wrapper.inspect(level) << ' ' << super
     end
 
     private
@@ -204,6 +209,24 @@ module RASN1
         el.options = el.options.merge(implicit: @implicit)
       end
       el
+    end
+
+    def lazy_generation(register: true)
+      return element unless @lazy
+
+      case element
+      when Types::Base, Model
+        element.options = element.options.merge(@element_options_to_merge)
+        @lazy = false
+        element
+      else
+        el = element.new(@element_options_to_merge)
+        if register
+          @lazy = false
+          __setobj__(el)
+        end
+        el
+      end
     end
   end
 end

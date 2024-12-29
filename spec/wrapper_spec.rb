@@ -63,6 +63,11 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
       it 'raises if wrapper is explicit and implicit' do
         expect { Wrapper.new(Types::Null.new, explicit: 1, implicit: 2) }.to raise_error(RASN1::Error)
       end
+
+      it 'creates a lazy wrapper' do
+        wrapper = Wrapper.new(Types::Integer)
+        expect(wrapper.element).to eq(Types::Integer)
+      end
     end
 
     describe '#to_der' do
@@ -101,6 +106,12 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
         expect(wrapper.to_der).to eq('')
         wrapper = Wrapper.new(ModelTest.new(id: 1, house: 2), explicit: 7, optional: true)
         expect(wrapper.to_der).to eq(TestWrapper::DER_OPTIONAL_EXPLICITLY_WRAPPED_MODEL)
+      end
+
+      it 'lazily generates a DER string for implicitly wrapped base type' do
+        wrapper = Wrapper.new(Types::Integer, implicit: 2, class: :private,  constructed: true, value: -1)
+        expect(wrapper.value?).to eq(false)
+        expect(wrapper.to_der).to eq(TestWrapper::DER_SIMPLE_WRAPPED_INTEGER)
       end
     end
 
@@ -165,6 +176,13 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
         unwrapped = Types::Integer.new(value: 4, explicit: 0)
         wrapper.parse!(unwrapped.to_der)
         expect(wrapper.to_der).to eq(unwrapped.to_der)
+      end
+
+      it 'lazily parses a DER string for an implicitly wrapped base type' do
+        wrapper = Wrapper.new(Types::Integer, constructed: true, class: :private, implicit: 2)
+        expect(wrapper.value?).to eq(false)
+        expect { wrapper.parse!(TestWrapper::DER_SIMPLE_WRAPPED_INTEGER) }.not_to raise_error
+        expect(wrapper.value).to eq(-1)
       end
     end
   end
