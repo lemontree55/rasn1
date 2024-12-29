@@ -557,7 +557,7 @@ module RASN1
         generate_wrapper(element)
         return
       end
-      return unless element.content.is_a? Array
+      return unless element.content.is_a?(Array)
 
       @elements[name].value = element.content.map do |another_element|
         add_subelement(another_element)
