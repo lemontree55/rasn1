@@ -177,9 +177,9 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
     end
 
     it 'traces wrapped MODEL parsing' do
-      model = ModelWithImplicitWrapper.new
+      model = TestModel::ModelWithImplicitWrapper.new
       RASN1.trace(io) do
-        model.parse!("\x30\x0d\xa5\x0b\x02\x01\x10\x80\x01\x07\x81\x03\x02\x01\x03")
+        model.parse!("\x30\x0d\xa5\x0b\x02\x01\x10\x80\x01\x07\x81\x03\x02\x01\x03".b)
       end
       expect(io.string).to eq(<<~ENDOFDATA
         seq [ 16 ] SEQUENCE (0x30), len: 13 (0x0d)
