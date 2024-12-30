@@ -108,6 +108,10 @@ module RASN1
         msg_type(no_id: true)
       end
 
+      def void_value
+        []
+      end
+
       private
 
       def check_chosen
