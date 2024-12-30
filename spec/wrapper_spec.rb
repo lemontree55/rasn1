@@ -66,7 +66,7 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
 
       it 'creates a lazy wrapper' do
         wrapper = Wrapper.new(Types::Integer)
-        expect(wrapper.element).to eq(Types::Integer)
+        expect(wrapper.__getobj__).to eq(Types::Integer)
       end
     end
 
@@ -102,6 +102,8 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
       end
 
       it 'generates a DER string for an optional explicitly wrapped model' do
+        wrapper = Wrapper.new(ModelTest, explicit: 7, optional: true)
+        expect(wrapper.to_der).to eq('')
         wrapper = Wrapper.new(ModelTest.new, explicit: 7, optional: true)
         expect(wrapper.to_der).to eq('')
         wrapper = Wrapper.new(ModelTest.new(id: 1, house: 2), explicit: 7, optional: true)
