@@ -14,15 +14,19 @@ module RASN1
         'IA5String'
       end
 
+      # Make string value from +der+ string. Force encoding to +US-ASCII+.
+      # @param [String] der
+      # @param [::Boolean] ber
+      # @return [void]
+      def der_to_value(der, ber: false)
+        super
+        @value.to_s.dup.force_encoding('US-ASCII')
+      end
+
       private
 
       def value_to_der
         @value.to_s.dup.force_encoding('US-ASCII').b
-      end
-
-      def der_to_value(der, ber: false)
-        super
-        @value.to_s.dup.force_encoding('US-ASCII')
       end
     end
   end

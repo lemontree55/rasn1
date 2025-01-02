@@ -125,6 +125,21 @@ module RASN1
         str
       end
 
+      # Make sequence of value from +der+ string
+      # @param [String] der
+      # @param [::Boolean] ber
+      # @return [void]
+      def der_to_value(der, ber: false) # rubocop:disable Lint/UnusedMethodArgument
+        @value = []
+        nb_bytes = 0
+
+        while nb_bytes < der.length
+          type = of_type_class.new
+          nb_bytes += type.parse!(der[nb_bytes, der.length])
+          @value << type
+        end
+      end
+
       private
 
       def of_type_class
@@ -137,17 +152,6 @@ module RASN1
 
       def value_to_der
         @value.map(&:to_der).join
-      end
-
-      def der_to_value(der, ber: false) # rubocop:disable Lint/UnusedMethodArgument
-        @value = []
-        nb_bytes = 0
-
-        while nb_bytes < der.length
-          type = of_type_class.new
-          nb_bytes += type.parse!(der[nb_bytes, der.length])
-          @value << type
-        end
       end
 
       def explicit_type

@@ -31,7 +31,7 @@ module RASN1
       # @param [Boolean] ber if +true+, accept BER encoding
       # @return [Integer] total number of parsed bytes
       def parse!(der, ber: false)
-        total_length, _data = do_parse(der, ber)
+        total_length, _data = do_parse(der, ber: ber)
         total_length
       end
 
@@ -70,7 +70,9 @@ module RASN1
         str << '(ANY) '
       end
 
-      def do_parse(der, ber)
+      # @private
+      # @see Types::Base#do_parse
+      def do_parse(der, ber: false)
         if der.empty?
           return [0, ''] if optional?
 

@@ -8,9 +8,9 @@ module RASN1
       # Boolean id value
       ID = 0x01
 
-      # @private
+      # DER true value
       DER_TRUE = 0xff
-      # @private
+      # DER false value
       DER_FALSE = 0
 
       # @return [false]
@@ -18,12 +18,13 @@ module RASN1
         false
       end
 
-      private
-
-      def value_to_der
-        [@value ? DER_TRUE : DER_FALSE].pack('C')
-      end
-
+      # Make boolean value from DER/BER string.
+      # @param [String] der
+      # @param [::Boolean] ber
+      # @return [void]
+      # @see Types::Base#der_to_value
+      # @raise [ASN1Error] +der+ is not 1-byte long
+      # @raise [ASN1Error] +der+ is not {DER_TRUE} nor {DER_FALSE} and +ber+ is +false+
       def der_to_value(der, ber: false)
         raise ASN1Error, "tag #{@name}: BOOLEAN should have a length of 1" unless der.size == 1
 
@@ -38,6 +39,12 @@ module RASN1
 
           @value = true
         end
+      end
+
+      private
+
+      def value_to_der
+        [@value ? DER_TRUE : DER_FALSE].pack('C')
       end
 
       def trace_data

@@ -9,6 +9,30 @@ module RASN1
       # ObjectId id value
       ID = 6
 
+      # Make object id value from +der+ string
+      # @param [String] der
+      # @param [::Boolean] ber
+      # @return [void]
+      def der_to_value(der, ber: false) # rubocop:disable Lint/UnusedMethodArgument
+        bytes = der.unpack('C*')
+
+        ids = []
+        current_id = 0
+        bytes.each do |byte|
+          current_id = (current_id << 7) | (byte & 0x7f)
+          if byte.nobits?(0x80)
+            ids << current_id
+            current_id = 0
+          end
+        end
+
+        first_id = [2, ids.first / 40].min
+        second_id = ids.first - first_id * 40
+        ids[0..0] = [first_id, second_id]
+
+        @value = ids.join('.')
+      end
+
       private
 
       # @raise [ASN1Error]
@@ -34,26 +58,6 @@ module RASN1
       def check_first_ids(ids)
         raise ASN1Error, "OBJECT ID #{@name}: first subidentifier should be less than 3" if ids[0] > 2
         raise ASN1Error, "OBJECT ID #{@name}: second subidentifier should be less than 40" if (ids[0] < 2) && (ids[1] > 39)
-      end
-
-      def der_to_value(der, ber: false) # rubocop:disable Lint/UnusedMethodArgument
-        bytes = der.unpack('C*')
-
-        ids = []
-        current_id = 0
-        bytes.each do |byte|
-          current_id = (current_id << 7) | (byte & 0x7f)
-          if byte.nobits?(0x80)
-            ids << current_id
-            current_id = 0
-          end
-        end
-
-        first_id = [2, ids.first / 40].min
-        second_id = ids.first - first_id * 40
-        ids[0..0] = [first_id, second_id]
-
-        @value = ids.join('.')
       end
     end
   end

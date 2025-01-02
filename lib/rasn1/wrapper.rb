@@ -121,6 +121,18 @@ module RASN1
       end
     end
 
+    # @private
+    # @see Types::Base#do_parse
+    def do_parse(der, ber: false)
+      if implicit?
+        generate_implicit_element(Types::Base.new(constructed: element.constructed?)).do_parse(der, ber: ber)
+      elsif explicit?
+        @explicit_wrapper.do_parse(der, ber: ber)
+      else
+        element.do_parse(der, ber: ber)
+      end
+    end
+
     # @return [Boolean]
     # @see Types::Base#value?
     def value?
@@ -203,9 +215,9 @@ module RASN1
       new_opts
     end
 
-    def generate_implicit_element
-      el = element.dup
-      el.options = if el.explicit?
+    def generate_implicit_element(from=nil)
+      el = (from || element).dup
+      el.options = if element.explicit?
                      el.options.merge(explicit: @implicit)
                    else
                      el.options.merge(implicit: @implicit)

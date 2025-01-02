@@ -27,12 +27,11 @@ module RASN1
         'UTCTime'
       end
 
-      private
-
-      def value_to_der
-        @value.getutc.strftime('%y%m%d%H%M%SZ')
-      end
-
+      # Make time value from +der+ string
+      # @param [String] der
+      # @param [::Boolean] ber
+      # @return [void]
+      # @raise [ASN1Error] unrecognized  time format
       def der_to_value(der, ber: false) # rubocop:disable Lint/UnusedMethodArgument
         format = case der.size
                  when 11, 15
@@ -44,7 +43,18 @@ module RASN1
                    raise ASN1Error, "#{prefix}: unrecognized format: #{der}"
                  end
         century = (Time.now.year / 100).to_s
-        @value = Strptime.new(format).exec(century + der)
+        begin
+          @value = Strptime.new(format).exec(century + der)
+        rescue ArgumentError
+          prefix = @name.nil? ? type : "tag #{@name}"
+          raise ASN1Error, "#{prefix}: unrecognized format: #{der}"
+        end
+      end
+
+      private
+
+      def value_to_der
+        @value.getutc.strftime('%y%m%d%H%M%SZ')
       end
 
       def trace_data

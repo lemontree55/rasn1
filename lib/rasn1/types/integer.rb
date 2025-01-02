@@ -54,6 +54,19 @@ module RASN1
         end
       end
 
+      # Make integer value from +der+ string.
+      # @param [String] der
+      # @param [::Boolean] ber
+      # @return [void]
+      def der_to_value(der, ber: false)
+        int_value = der_to_int_value(der, ber: ber)
+        @value = if @enum.empty?
+                   int_value
+                 else
+                   int_to_enum(int_value)
+                 end
+      end
+
       private
 
       def initialize_enum(enum)
@@ -134,15 +147,6 @@ module RASN1
         raise EnumeratedError, "#{@name}: value #{int} not in enumeration" if check_enum && !@enum.value?(int)
 
         @enum.key(int) || int
-      end
-
-      def der_to_value(der, ber: false)
-        int_value = der_to_int_value(der, ber: ber)
-        @value = if @enum.empty?
-                   int_value
-                 else
-                   int_to_enum(int_value)
-                 end
       end
 
       def explicit_type

@@ -446,6 +446,12 @@ module RASN1
       root.parse!(der, ber: ber)
     end
 
+    # @private
+    # @see Types::Base#do_parse
+    def do_parse(der, ber: false)
+      root.do_parse(der, ber: ber)
+    end
+
     # @overload value
     #  Get value of root element
     #  @return [Object,nil]
@@ -489,9 +495,9 @@ module RASN1
     # @return [Hash]
     # Delegate some methods to root element
     # @param [Symbol] meth
-    def method_missing(meth, *args)
+    def method_missing(meth, *args, **kwargs)
       if root.respond_to?(meth)
-        root.send(meth, *args)
+        root.send(meth, *args, **kwargs)
       else
         super
       end
