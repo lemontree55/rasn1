@@ -87,4 +87,12 @@ module TestModel
     sequence :seq,
              content: [wrapper(model(:a_record, ModelTest3), explicit: 6)]
   end
+
+  class RecursiveModel < RASN1::Model
+    choice :recursive,
+           content: [
+             octet_string(:present, implicit: 1),
+             wrapper(model(:model, RecursiveModel), implicit: 2)
+           ]
+  end
 end
