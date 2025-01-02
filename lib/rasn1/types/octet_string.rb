@@ -21,6 +21,32 @@ module RASN1
         str = common_inspect(level)
         str << " #{value.inspect}"
       end
+
+      # Make string value from +der+ string. Force encoding to UTF-8
+      # @param [String] der
+      # @param [::Boolean] ber
+      # @return [void]
+      # @since 0.15.0 Handle ENCODING constant, if defined by subclass
+      def der_to_value(der, ber: false)
+        klass = self.class
+        if klass.const_defined?(:ENCODING)
+          @value = der.to_s.dup.force_encoding(klass.const_get(:ENCODING))
+        else
+          super
+        end
+      end
+
+      private
+
+      # @since 0.15.0 Handle ENCODING constant, if defined by subclass
+      def value_to_der
+        klass = self.class
+        if klass.const_defined?(:ENCODING)
+          @value.to_s.encode(klass.const_get(:ENCODING)).b
+        else
+          super
+        end
+      end
     end
   end
 end

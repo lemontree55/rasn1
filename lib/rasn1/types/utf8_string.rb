@@ -7,26 +7,14 @@ module RASN1
     class Utf8String < OctetString
       # Utf8String id value
       ID = 12
+      # Utf8String encoding
+      # @since 0.15.0
+      ENCODING = Encoding::UTF_8
 
       # Get ASN.1 type
       # @return [String]
       def self.type
         'UTF8String'
-      end
-
-      # Make string value from +der+ string. Force encoding to UTF-8
-      # @param [String] der
-      # @param [::Boolean] ber
-      # @return [void]
-      def der_to_value(der, ber: false)
-        super
-        @value = der.dup.force_encoding('UTF-8')
-      end
-
-      private
-
-      def value_to_der
-        @value.to_s.dup.force_encoding('UTF-8').b
       end
     end
   end
