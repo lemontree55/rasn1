@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'types/constrained'
-
 module RASN1
   # @abstract
   # {Model} class is a base class to define ASN.1 models.

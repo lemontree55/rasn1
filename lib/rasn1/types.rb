@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'types/constrained'
+
 module RASN1
   # This modules is a namesapce for all ASN.1 type classes.
   # @author Sylvain Daubert
@@ -135,7 +137,6 @@ require_relative 'types/utf8_string'
 require_relative 'types/numeric_string'
 require_relative 'types/printable_string'
 require_relative 'types/ia5string'
-require_relative 'types/visible_string'
 require_relative 'types/constructed'
 require_relative 'types/sequence'
 require_relative 'types/sequence_of'
