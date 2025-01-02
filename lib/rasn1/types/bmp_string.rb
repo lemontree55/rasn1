@@ -15,15 +15,20 @@ module RASN1
         'BmpString'
       end
 
+      # Make string value from DER/BER string. Force encoding to UTF-16BE.
+      # @param [String] der
+      # @param [::Boolean] ber
+      # @return [void]
+      # @see Types::Base#der_to_value
+      def der_to_value(der, ber: false)
+        super
+        @value = der.to_s.dup.force_encoding('UTF-16BE')
+      end
+
       private
 
       def value_to_der
         @value.to_s.dup.encode('UTF-16BE').b
-      end
-
-      def der_to_value(der, ber: false)
-        super
-        @value = der.to_s.dup.force_encoding('UTF-16BE')
       end
     end
   end

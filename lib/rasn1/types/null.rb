@@ -21,17 +21,22 @@ module RASN1
         !optional?
       end
 
-      private
-
-      def value_to_der
-        ''
-      end
-
+      # Check +der+ string
+      # @param [String] der
+      # @param [::Boolean] ber
+      # @return [void]
+      # @raise [ASN1Error] +der+ is not empty
       def der_to_value(der, ber: false) # rubocop:disable Lint/UnusedMethodArgument
         raise ASN1Error, 'NULL should not have content!' if der.length.positive?
 
         @no_value = true
         @value = void_value
+      end
+
+      private
+
+      def value_to_der
+        ''
       end
     end
   end

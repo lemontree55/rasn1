@@ -65,37 +65,43 @@ module RASN1
   # @author adfoster-r7 ModelValidationError, track source location for dynamic class methods
   class Model # rubocop:disable Metrics/ClassLength
     # @private
-    Elem = Struct.new(:name, :proc_or_class, :content) do
+    BaseElem = Struct.new(:name, :proc, :content) do
       # @param [String,Symbol] name
-      # @param [Proc,Class] proc_or_class
+      # @param [Proc] proc
       # @param [Array,nil] content
-      def initialize(name, proc_or_class, content)
-        if content.is_a?(Array)
-          duplicate_names = find_all_duplicate_names(content.map(&:name) + [name])
-          raise ModelValidationError, "Duplicate name #{duplicate_names.first} found" if duplicate_names.any?
-        end
-
+      def initialize(name, proc, content)
+        check_duplicates(content.map(&:name) + [name]) unless content.nil?
         super
       end
 
       private
 
-      # @param [Array<String>] names
       # @return [Array<String>] The duplicate names found in the array
       def find_all_duplicate_names(names)
         names.group_by { |name| name }
              .select { |_name, values| values.length > 1 }
              .keys
       end
+
+      def check_duplicates(names)
+        duplicates = find_all_duplicate_names(names)
+        raise ModelValidationError, "Duplicate name #{duplicates.first} found" if duplicates.any?
+      end
     end
 
     # @private
+    ModelElem = Struct.new(:name, :klass)
+
+    # @private
     WrapElem = Struct.new(:element, :options) do
-      # @return [String]
+      # @return [Symbol]
       def name
-        "#{element.name}_wrapper"
+        :"#{element.name}_wrapper"
       end
     end
+
+    # @private Sequence types
+    SEQUENCE_TYPES = [Types::Sequence, Types::SequenceOf, Types::Set, Types::SetOf].freeze
 
     # Define helper methods to define models
     module Accel
@@ -107,7 +113,7 @@ module RASN1
       # @param [Class] model_klass
       # @return [Elem]
       def model(name, model_klass)
-        @root = Elem.new(name, model_klass, nil)
+        @root = ModelElem.new(name, model_klass)
       end
 
       # Use a {Wrapper} around a {Types::Base} or a {Model} object
@@ -162,7 +168,7 @@ module RASN1
             proc = proc do |opts|
               #{klass}.new(options.merge(opts)) # Sequence.new(options.merge(opts))
             end
-            @root = Elem.new(name, proc, options[:content])
+            @root = BaseElem.new(name, proc, options[:content])
           end
         EVAL
       end
@@ -179,7 +185,7 @@ module RASN1
             proc = proc do |opts|
               #{klass}.new(type, options.merge(opts)) # SequenceOf.new(type, options.merge(opts))
             end
-            @root = Elem.new(name, proc, nil)
+            @root = BaseElem.new(name, proc, nil)
           end
         EVAL
       end
@@ -206,7 +212,7 @@ module RASN1
       def objectid(name, options={})
         options[:name] = name
         proc = proc { |opts| Types::ObjectId.new(options.merge(opts)) }
-        @root = Elem.new(name, proc, nil)
+        @root = BaseElem.new(name, proc, nil)
       end
 
       # @param [Symbol,String] name name of object in model
@@ -216,7 +222,7 @@ module RASN1
       def any(name, options={})
         options[:name] = name
         proc = proc { |opts| Types::Any.new(options.merge(opts)) }
-        @root = Elem.new(name, proc, nil)
+        @root = BaseElem.new(name, proc, nil)
       end
 
       # Give type name (aka class name)
@@ -366,19 +372,26 @@ module RASN1
       self.define_type_accel_base(method_name, prim)
     end
 
+    # @return [Model, Wrapper, Types::Base]
+    attr_reader :root
+
     # Create a new instance of a {Model}
     # @param [Hash] args
     def initialize(args={})
-      root = generate_root
-      generate_elements(root)
-      initialize_elements(self, args)
+      @elements = {}
+      generate_root(args)
+      lazy_initialize(args) unless args.empty?
     end
 
-    # Give access to element +name+ in model
-    # @param [String,Symbol] name
-    # @return [Types::Base]
+    # Access an element of the model by its name
+    # @param [Symbol] name
+    # @return [Model, Types::Base, Wrapper]
     def [](name)
-      @elements[name]
+      elt = @elements[name]
+      return elt unless elt.is_a?(Proc)
+
+      # Lazy element -> generate it
+      @elements[name] = elt.call
     end
 
     # Set value of element +name+. Element should be a {Types::Base}.
@@ -386,13 +399,17 @@ module RASN1
     # @param [Object] value
     # @return [Object] value
     def []=(name, value)
-      raise Error, 'cannot set value for a Model' if @elements[name].is_a? Model
+      # Here, use #[] to force generation for lazy elements
+      raise Error, 'cannot set value for a Model' if self[name].is_a?(Model)
 
-      @elements[name].value = value
+      self[name].value = value
     end
 
-    # Get name from root type
-    # @return [String,Symbol]
+    def initialize_copy(_other)
+      @elements = @elements.clone
+      @root = @elements[@root_name]
+    end
+
     def name
       @root_name
     end
@@ -409,12 +426,6 @@ module RASN1
       private_to_h
     end
 
-    # Get root element from model
-    # @return [Types::Base,Model]
-    def root
-      @elements[@root_name]
-    end
-
     # @return [String]
     def to_der
       root.to_der
@@ -427,12 +438,18 @@ module RASN1
     end
 
     # Parse a DER/BER encoded string, and modify object in-place.
-    # @param [String] str
+    # @param [String] der
     # @param [Boolean] ber accept BER encoding or not
     # @return [Integer] number of parsed bytes
     # @raise [ASN1Error] error on parsing
-    def parse!(str, ber: false)
-      root.parse!(str.dup.force_encoding('BINARY'), ber: ber)
+    def parse!(der, ber: false)
+      root.parse!(der, ber: ber)
+    end
+
+    # @private
+    # @see Types::Base#do_parse
+    def do_parse(der, ber: false)
+      root.do_parse(der, ber: ber)
     end
 
     # @overload value
@@ -474,11 +491,13 @@ module RASN1
       end
     end
 
+    # Return a hash image of model
+    # @return [Hash]
     # Delegate some methods to root element
     # @param [Symbol] meth
-    def method_missing(meth, *args)
-      if root.respond_to? meth
-        root.send meth, *args
+    def method_missing(meth, *args, **kwargs)
+      if root.respond_to?(meth)
+        root.send(meth, *args, **kwargs)
       else
         super
       end
@@ -491,7 +510,7 @@ module RASN1
 
     # @return [String]
     def inspect(level=0)
-      '  ' * level + "(#{type}) #{root.inspect(-level)}"
+      "#{'  ' * level}(#{type}) #{root.inspect(-level)}"
     end
 
     # Objects are equal if they have same class AND same DER
@@ -503,6 +522,36 @@ module RASN1
 
     protected
 
+    def lazy_initialize(args)
+      case args
+      when Hash
+        lazy_initialize_hash(args)
+      when Array
+        lazy_initialize_array(args)
+      end
+    end
+
+    def lazy_initialize_hash(args)
+      args.each do |name, value|
+        element = self[name]
+        case element
+        when Model
+          element.lazy_initialize(value)
+        when nil
+        else
+          element.value = value
+        end
+      end
+    end
+
+    def lazy_initialize_array(ary)
+      raise Error, 'Only sequence types may be initialized with an array' unless SEQUENCE_TYPES.any? { |klass| root.is_a?(klass) }
+
+      ary.each do |initializer|
+        root << initializer
+      end
+    end
+
     # Give a (nested) element from its name
     # @param [String, Symbol] name
     # @return [Model, Types::Base, nil]
@@ -510,12 +559,11 @@ module RASN1
       elt = self[name]
       return elt unless elt.nil?
 
-      @elements.each_key do |subelt_name|
-        subelt = self[subelt_name]
-        if subelt.is_a?(Model)
-          elt = subelt[name]
-          return elt unless elt.nil?
-        end
+      @elements.each_value do |subelt|
+        next unless subelt.is_a?(Model)
+
+        value = subelt.by_name(name)
+        return value unless value.nil?
       end
 
       nil
@@ -523,92 +571,39 @@ module RASN1
 
     private
 
-    def composed?(elt)
-      [Types::Sequence, Types::Set].include? elt.class
+    def generate_root(args)
+      opts = args.slice(:explicit, :implicit, :optional, :class, :default, :constructed, :tag_value)
+      root = self.class.class_eval { @root }
+      root_options = self.class.options || {}
+      root_options.merge!(opts)
+      @root = generate_element(root, root_options)
+      @root_name = root.name
+      @elements[root.name] = @root
     end
 
-    # proc_or_class:
-    # * proc: a Types::Base subclass
-    # * class: a model
-    def get_type(proc_or_class, options={})
-      case proc_or_class
-      when Proc
-        proc_or_class.call(options)
-      when Class
-        proc_or_class.new(options)
-      end
-    end
-
-    def generate_root
-      class_element = self.class.class_eval { @root }
-      @root_name = class_element.name
-      @elements = {}
-      @elements[@root_name] = case class_element
-                              when WrapElem
-                                generate_wrapper(class_element)
-                              else
-                                get_type(class_element.proc_or_class, self.class.options || {})
-                              end
-      class_element
-    end
-
-    def generate_elements(element)
-      if element.is_a?(WrapElem)
-        generate_wrapper(element)
-        return
-      end
-      return unless element.content.is_a?(Array)
-
-      @elements[name].value = element.content.map do |another_element|
-        add_subelement(another_element)
-      end
-    end
-
-    def generate_wrapper(wrap_elem)
-      inner_elem = wrap_elem.element
-      subel = add_subelement(inner_elem)
-      Wrapper.new(subel, wrap_elem.options)
-    end
-
-    def add_subelement(subelement)
-      case subelement
-      when Elem
-        subel = get_type(subelement.proc_or_class)
-        @elements[subelement.name] = subel
-        generate_elements(subelement) if composed?(subel) && subelement.content.is_a?(Array)
-        subel
+    def generate_element(elt, opts={})
+      case elt
+      when BaseElem
+        generate_base_element(elt, opts)
+      when ModelElem
+        elt.klass.new(opts)
       when WrapElem
-        generate_wrapper(subelement)
+        wrapped = elt.element.is_a?(ModelElem) ? elt.element.klass : generate_element(elt.element)
+        wrapper = Wrapper.new(wrapped, elt.options.merge(opts))
+        @elements[elt.element.name] = proc { wrapper.element }
+        wrapper
       end
     end
 
-    def initialize_elements(obj, args)
-      args.each do |name, value|
-        subobj = obj[name]
-        next unless subobj
+    def generate_base_element(elt, opts)
+      element = elt.proc.call(opts)
+      return element if elt.content.nil?
 
-        case value
-        when Hash
-          raise ArgumentError, "element #{name}: may only pass a Hash for Model elements" unless subobj.is_a?(Model)
-
-          initialize_elements(subobj, value)
-        when Array
-          initialize_element_from_array(subobj, value)
-        else
-          subobj.value = value
-        end
+      element.value = elt.content.map do |subel|
+        generated = generate_element(subel)
+        @elements[subel.name] = generated
       end
-    end
-
-    def initialize_element_from_array(obj, value)
-      composed = obj.is_a?(Model) ? obj.root : obj
-      if composed.of_type.is_a?(Model)
-        value.each do |el|
-          composed << initialize_elements(composed.of_type.class.new, el)
-        end
-      else
-        value.each { |el| composed << el }
-      end
+      element
     end
 
     def private_to_h(element=nil) # rubocop:disable Metrics/CyclomaticComplexity
@@ -638,29 +633,31 @@ module RASN1
 
     def sequence_of_to_h(elt)
       if elt.of_type < Model
-        elt.value.map { |el| el.to_h.values.first }
+        elt.value&.map { |el| el.to_h.values.first }
       else
-        elt.value.map { |el| private_to_h(el) }
+        elt.value&.map { |el| private_to_h(el) }
       end
     end
 
     def sequence_to_h(seq)
-      ary = seq.value.map do |el|
+      ary = seq.value&.map do |el|
         next if el.optional? && el.value.nil?
 
         case el
         when Model
           hsh = el.to_h
-          hsh = hsh[hsh.keys.first]
-          [@elements.key(el), hsh]
+          [@elements.key(el), hsh[hsh.keys.first]]
         when Wrapper
-          [@elements.key(el.element), wrapper_to_h(el)]
+          [unwrap_keyname(@elements.key(el)), wrapper_to_h(el)]
         else
           [el.name, private_to_h(el)]
         end
       end
-      ary.compact!
-      ary.to_h
+      ary.compact.to_h
+    end
+
+    def unwrap_keyname(key)
+      key.to_s.delete_suffix('_wrapper').to_sym
     end
 
     def wrapper_to_h(wrap)

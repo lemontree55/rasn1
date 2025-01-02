@@ -83,8 +83,8 @@ module RASN1
       # @private
       # Parse +der+ with tracing abillity
       # @see #parse!
-      def do_parse_with_tracing(der, ber)
-        ret = do_parse_without_tracing(der, ber)
+      def do_parse_with_tracing(der, ber:)
+        ret = do_parse_without_tracing(der, ber: ber)
         RASN1.tracer.trace(self.trace)
         ret
       end

@@ -48,6 +48,18 @@ module RASN1
         super || (!@default.nil? && (@bit_length != @default_bit_length))
       end
 
+      # Make value from DER/BER string. Also set {#bit_length}.
+      # @param [String] der
+      # @param [::Boolean] ber
+      # @return [void]
+      # @see Types::Base#der_to_value
+      def der_to_value(der, ber: false) # rubocop:disable Lint/UnusedMethodArgument
+        unused = der.unpack1('C').to_i
+        value = der[1..].to_s
+        @bit_length = value.length * 8 - unused
+        @value = value
+      end
+
       private
 
       # @author Sylvain Daubert
@@ -78,13 +90,6 @@ module RASN1
 
         max_len = @bit_length.to_i / 8 + ((@bit_length.to_i % 8).positive? ? 1 : 0)
         value[0, max_len].to_s
-      end
-
-      def der_to_value(der, ber: false) # rubocop:disable Lint/UnusedMethodArgument
-        unused = der.unpack1('C').to_i
-        value = der[1..].to_s
-        @bit_length = value.length * 8 - unused
-        @value = value
       end
 
       def explicit_type

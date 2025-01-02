@@ -37,8 +37,11 @@ module RASN1
         super
       end
 
-      private
-
+      # Make value from +der+ string and check constraints
+      # @param [String] der
+      # @param [::Boolean] ber
+      # @return [void]
+      # @raise [ConstraintError] constraint is not verified
       def der_to_value(der, ber: false)
         super
         self.class.check_constraint(@value)

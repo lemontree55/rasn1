@@ -15,15 +15,19 @@ module RASN1
         'UniversalString'
       end
 
+      # Make string value from +der+ string. Force encoding to UTF-32BE
+      # @param [String] der
+      # @param [::Boolean] ber
+      # @return [void]
+      def der_to_value(der, ber: false)
+        super
+        @value = der.to_s.dup.force_encoding('UTF-32BE')
+      end
+
       private
 
       def value_to_der
         @value.to_s.dup.encode('UTF-32BE').b
-      end
-
-      def der_to_value(der, ber: false)
-        super
-        @value = der.to_s.dup.force_encoding('UTF-32BE')
       end
     end
   end

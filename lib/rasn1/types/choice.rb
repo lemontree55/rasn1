@@ -57,6 +57,8 @@ module RASN1
           @value[@chosen].value
         when Model
           @value[@chosen]
+        when Wrapper
+          @value[@chosen].element
         end
       end
 
@@ -75,10 +77,24 @@ module RASN1
       # @return [Integer] total number of parsed bytes
       # @raise [ASN1Error] error on parsing
       def parse!(der, ber: false)
+        len, data = do_parse(der, ber: ber)
+        return 0 if len.zero?
+
+        element = @value[@chosen]
+        if element.explicit?
+          element.do_parse_explicit(data)
+        else
+          element.der_to_value(data, ber: ber)
+        end
+        len
+      end
+
+      # @private
+      # @see Types::Base#do_parse
+      def do_parse(der, ber: false)
         @value.each_with_index do |element, i|
           @chosen = i
-          nb_bytes = element.parse!(der, ber: ber)
-          return nb_bytes
+          return element.do_parse(der, ber: ber)
         rescue ASN1Error
           @chosen = nil
           next
@@ -88,7 +104,22 @@ module RASN1
         @value = void_value
         raise ASN1Error, "CHOICE #{@name}: no type matching #{der.inspect}" unless optional?
 
-        0
+        [0, ''.b]
+      end
+
+      # Make choice value from DER/BER string.
+      # @param [String] der
+      # @param [::Boolean] ber
+      # @return [void]
+      def der_to_value(der, ber: false)
+        @value.each_with_index do |element, i|
+          @chosen = i
+          element.parse!(der, ber: ber)
+          break
+        rescue ASN1Error
+          @chosen = nil
+          next
+        end
       end
 
       # @param [::Integer] level
@@ -106,6 +137,10 @@ module RASN1
       # @return [String]
       def trace
         msg_type(no_id: true)
+      end
+
+      def void_value
+        []
       end
 
       private

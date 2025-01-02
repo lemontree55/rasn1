@@ -121,12 +121,24 @@ module RASN1
       end
     end
 
+    # @private
+    # @see Types::Base#do_parse
+    def do_parse(der, ber: false)
+      if implicit?
+        generate_implicit_element(Types::Base.new(constructed: element.constructed?)).do_parse(der, ber: ber)
+      elsif explicit?
+        @explicit_wrapper.do_parse(der, ber: ber)
+      else
+        element.do_parse(der, ber: ber)
+      end
+    end
+
     # @return [Boolean]
     # @see Types::Base#value?
     def value?
       if explicit?
         @explicit_wrapper.value?
-      elsif element.is_a?(Class)
+      elsif __getobj__.is_a?(Class)
         false
       else
         __getobj__.value?
@@ -136,7 +148,7 @@ module RASN1
     # Return Wrapped element
     # @return [Types::Base,Model]
     def element
-      __getobj__
+      lazy_generation
     end
 
     # @return [::Integer]
@@ -176,9 +188,9 @@ module RASN1
     # @param [::Integer] level
     # @return [String]
     def inspect(level=0)
-      return super unless explicit?
+      return super() unless explicit?
 
-      @explicit_wrapper.inspect(level) << ' ' << super
+      @explicit_wrapper.inspect(level) << ' ' << super()
     end
 
     private
@@ -203,9 +215,9 @@ module RASN1
       new_opts
     end
 
-    def generate_implicit_element
-      el = element.dup
-      el.options = if el.explicit?
+    def generate_implicit_element(from=nil)
+      el = (from || element).dup
+      el.options = if element.explicit?
                      el.options.merge(explicit: @implicit)
                    else
                      el.options.merge(implicit: @implicit)
@@ -214,15 +226,16 @@ module RASN1
     end
 
     def lazy_generation(register: true)
-      return element unless @lazy
+      return __getobj__ unless @lazy
 
-      case element
+      real_element = __getobj__
+      case real_element
       when Types::Base, Model
-        element.options = element.options.merge(@element_options_to_merge)
+        real_element.options = real_element.options.merge(@element_options_to_merge)
         @lazy = false
-        element
+        real_element
       else
-        el = element.new(@element_options_to_merge)
+        el = real_element.new(@element_options_to_merge)
         if register
           @lazy = false
           __setobj__(el)

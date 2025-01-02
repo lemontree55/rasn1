@@ -432,5 +432,23 @@ module RASN1 # rubocop:disable Metrics/moduleLength
       end
     end
   end
+
+  context '(recursivity)' do
+    it 'may de defined recursively' do
+      expect { TestModel::RecursiveModel.new }.to_not raise_error
+    end
+
+    it 'parses a recursive model' do
+      recursive = TestModel::RecursiveModel.parse("\x82\x07\x82\x05\x81\x03abc".b)
+      p recursive[:recursive].instance_eval { @value[@chosen].class }
+      expect(recursive[:recursive].chosen).to eq(1)
+      expect(recursive[:recursive].chosen_value).to be_a(TestModel::RecursiveModel)
+      expect(recursive[:recursive].chosen_value.chosen_value).to be_a(TestModel::RecursiveModel)
+      last_choice = recursive[:recursive].chosen_value.chosen_value.chosen_value
+      expect(last_choice.value[last_choice.chosen]).to be_a(Types::OctetString)
+      expect(last_choice.value[last_choice.chosen].value).to eq('abc'.b)
+      expect(last_choice.chosen_value).to eq('abc'.b)
+    end
+  end
 end
 # rubocop:enable Metrics/BlockLength

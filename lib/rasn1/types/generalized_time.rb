@@ -44,18 +44,10 @@ module RASN1
         Time.now
       end
 
-      private
-
-      def value_to_der
-        utc_value = @value.getutc
-        if utc_value.nsec.positive?
-          der = utc_value.strftime('%Y%m%d%H%M%S.%9NZ')
-          der.sub(/0+Z/, 'Z')
-        else
-          utc_value.strftime('%Y%m%d%H%M%SZ')
-        end
-      end
-
+      # Make time value from +der+ string
+      # @param [String] der
+      # @param [::Boolean] ber
+      # @return [void]
       def der_to_value(der, ber: false) # rubocop:disable Lint/UnusedMethodArgument
         date_hour, fraction = der.split('.')
         date_hour = date_hour.to_s
@@ -67,6 +59,18 @@ module RASN1
           value_when_fraction_ends_with_z(date_hour, fraction)
         else
           value_on_others_cases(date_hour, fraction)
+        end
+      end
+
+      private
+
+      def value_to_der
+        utc_value = @value.getutc
+        if utc_value.nsec.positive?
+          der = utc_value.strftime('%Y%m%d%H%M%S.%9NZ')
+          der.sub(/0+Z/, 'Z')
+        else
+          utc_value.strftime('%Y%m%d%H%M%SZ')
         end
       end
 

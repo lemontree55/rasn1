@@ -6,8 +6,8 @@ module RASN1
     #
     #   Subclasses SHOULD define:
     #   * an ID constant defining ASN.1 BER/DER identification number,
+    #   * a method {#der_to_value} converting DER into {#value}.
     #   * a private method {#value_to_der} converting its {#value} to DER,
-    #   * a private method {#der_to_value} converting DER into {#value}.
     #
     # ==Define an optional value
     # An optional value may be defined using +:optional+ key from {#initialize}:
@@ -225,7 +225,7 @@ module RASN1
       # @return [Integer] total number of parsed bytes
       # @raise [ASN1Error] error on parsing
       def parse!(der, ber: false)
-        total_length, data = do_parse(der, ber)
+        total_length, data = do_parse(der, ber: ber)
         return 0 if total_length.zero?
 
         if explicit?
@@ -298,6 +298,38 @@ module RASN1
         else
           msg << " DEFAULT VALUE #{default}"
         end
+      end
+
+      # @private Parse tage and length from binary string. Return data length and binary data.
+      # @param [String] der
+      # @param [Boolean] ber
+      # @return [Array(::Integer, String)]
+      def do_parse(der, ber: false)
+        return [0, ''] unless check_id(der)
+
+        id_size = Types.decode_identifier_octets(der).last
+        total_length, data = get_data(der[id_size..], ber)
+        total_length += id_size
+        @no_value = false
+
+        [total_length, data]
+      end
+
+      # @private Delegate to #explicit type to generate sub-value
+      # @param [String] data
+      # @return [void]
+      def do_parse_explicit(data)
+        type = explicit_type
+        type.parse!(data)
+        @value = type.value
+      end
+
+      # Make value from DER/BER string
+      # @param [String] der
+      # @param [::Boolean] ber
+      # @return [void]
+      def der_to_value(der, ber: false) # rubocop:disable Lint/UnusedMethodArgument
+        @value = der
       end
 
       private
@@ -391,24 +423,6 @@ module RASN1
         end
       end
 
-      def do_parse(der, ber)
-        return [0, ''] unless check_id(der)
-
-        id_size = Types.decode_identifier_octets(der).last
-        total_length, data = get_data(der[id_size..], ber)
-        total_length += id_size
-        @no_value = false
-
-        [total_length, data]
-      end
-
-      def do_parse_explicit(data)
-        # Delegate to #explicit type to generate sub-value
-        type = explicit_type
-        type.parse!(data)
-        @value = type.value
-      end
-
       def value_to_der
         case @value
         when Base
@@ -416,10 +430,6 @@ module RASN1
         else
           @value.to_s
         end
-      end
-
-      def der_to_value(der, ber: false) # rubocop:disable Lint/UnusedMethodArgument
-        @value = der
       end
 
       def set_class(asn1_class) # rubocop:disable Naming/AccessorMethodName

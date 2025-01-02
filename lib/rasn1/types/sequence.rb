@@ -66,17 +66,10 @@ module RASN1
         end
       end
 
-      private
-
-      def value_to_der
-        case @value
-        when Array
-          @value.map(&:to_der).join
-        else
-          @value.to_s
-        end
-      end
-
+      # Make sequence value from +der+ string
+      # @param [String] der
+      # @param [::Boolean] ber
+      # @return [void]
       def der_to_value(der, ber: false) # rubocop:disable Lint/UnusedMethodArgument
         if @value.is_a?(Array) && !@value.empty?
           nb_bytes = 0
@@ -86,6 +79,17 @@ module RASN1
         else
           @value = der
           der.length
+        end
+      end
+
+      private
+
+      def value_to_der
+        case @value
+        when Array
+          @value.map(&:to_der).join
+        else
+          @value.to_s
         end
       end
 
