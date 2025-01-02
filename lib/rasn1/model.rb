@@ -63,7 +63,7 @@ module RASN1
   # this method.
   # @author Sylvain Daubert
   # @author adfoster-r7 ModelValidationError, track source location for dynamic class methods
-  class Model
+  class Model # rubocop:disable Metrics/ClassLength
     # @private
     BaseElem = Struct.new(:name, :proc, :content) do
       # @param [String,Symbol] name
@@ -646,17 +646,18 @@ module RASN1
         case el
         when Model
           hsh = el.to_h
-          hsh = hsh[hsh.keys.first]
-          [@elements.key(el), hsh]
+          [@elements.key(el), hsh[hsh.keys.first]]
         when Wrapper
-          name = @elements.key(el).to_s.delete_suffix('_wrapper').to_sym
-          [name, wrapper_to_h(el)]
+          [unwrap_keyname(@elements.key(el)), wrapper_to_h(el)]
         else
           [el.name, private_to_h(el)]
         end
       end
-      ary.compact!
-      ary.to_h
+      ary.compact.to_h
+    end
+
+    def unwrap_keyname(key)
+      key.to_s.delete_suffix('_wrapper').to_sym
     end
 
     def wrapper_to_h(wrap)
