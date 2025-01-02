@@ -304,6 +304,7 @@ module RASN1
       # @param [String] der
       # @param [Boolean] ber
       # @return [Array(::Integer, String)]
+      # @since 0.15.0 was private before
       def do_parse(der, ber: false)
         return [0, ''] unless check_id(der)
 
@@ -318,6 +319,7 @@ module RASN1
       # @private Delegate to #explicit type to generate sub-value
       # @param [String] data
       # @return [void]
+      # @since 0.15.0 was private before
       def do_parse_explicit(data)
         type = explicit_type
         type.parse!(data)
@@ -328,6 +330,7 @@ module RASN1
       # @param [String] der
       # @param [::Boolean] ber
       # @return [void]
+      # @since 0.15.0 was private before
       def der_to_value(der, ber: false) # rubocop:disable Lint/UnusedMethodArgument
         @value = der
       end

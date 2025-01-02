@@ -131,7 +131,7 @@ module RASN1
         end
 
         # @private
-        # Unpatch {#der_to_value!} to remove tracing ability
+        # Unpatch {#der_to_value} to remove tracing ability
         def stop_tracing
           alias_method :der_to_value, :der_to_value_without_tracing
         end
@@ -156,7 +156,7 @@ module RASN1
         end
 
         # @private
-        # Unpatch {#der_to_value!} to remove tracing ability
+        # Unpatch {#der_to_value} to remove tracing ability
         def stop_tracing
           alias_method :der_to_value, :der_to_value_without_tracing
         end

@@ -6,12 +6,13 @@ module RASN1
   # This class is used to wrap a {Types::Base} or {Model} instance to force its options.
   #
   # == Usage
-  # This class may be used to wrap another RASN1 object by 3 ways:
+  # This class may be used to wrap another RASN1 object by 4 ways:
   # * wrap an object to modify its options,
   # * implicitly wrap an object (i.e. change its tag),
-  # * explicitly wrap an object (i.e wrap the object in another explicit ASN.1 tag)
+  # * explicitly wrap an object (i.e wrap the object in another explicit ASN.1 tag),
+  # * wrap a choice model to reuse it in its own definition.
   #
-  # @example
+  # @example Wrapping object
   #   # object to wrap
   #   int = RASN1::Types::Integer.new(implicit: 1)    # its tag is 0x81
   #   # simple wrapper, change an option
@@ -20,7 +21,16 @@ module RASN1
   #   wrapper = RASN1::Wrapper.new(int, implicit: 3)  # wrapped int tag is now 0x83
   #   # explicit wrapper
   #   wrapper = RASN1::Wrapper.new(int, explicit: 4)  # int tag is always 0x81, but it is wrapped in a 0x84 tag
+  # @example Wrapping a choice to make it recursive
+  #  class RecursiveChoice < RASN1::Model
+  #    choice :choice,
+  #           content: [
+  #             integer(:value, implicit: 1),
+  #             wrapper(model(:recursive, RecursiveChoice), implicit:2)
+  #           ]
+  #  end
   # @since 0.12.0
+  # @since 0.15.0 Wrappers are lazy. They allocate their inner element only when needed (i.e. when calling {#to_der}, {#parse!} or {#element})
   # @author Sylvain Daubert
   # @author LemonTree55
   class Wrapper < SimpleDelegator
@@ -87,6 +97,8 @@ module RASN1
 
     # Convert wrapper and its element to a DER string
     # @return [String]
+    # @since 0.12.0
+    # @since 0.15.0 Allocate element (lazy wrapper)
     def to_der
       lazy_generation
       if implicit?
@@ -105,6 +117,8 @@ module RASN1
     # @param [Boolean] ber if +true+, accept BER encoding
     # @return [Integer] total number of parsed bytes
     # @raise [ASN1Error] error on parsing
+    # @since 0.12.0
+    # @since 0.15.0 Allocate element (lazy wrapper)
     def parse!(der, ber: false)
       lazy_generation
       if implicit?
@@ -147,6 +161,8 @@ module RASN1
 
     # Return Wrapped element
     # @return [Types::Base,Model]
+    # @since 0.12.0
+    # @since 0.15.0 Allocate element (lazy wrapper)
     def element
       lazy_generation
     end

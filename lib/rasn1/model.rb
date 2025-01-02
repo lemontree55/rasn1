@@ -62,7 +62,7 @@ module RASN1
   # @author Sylvain Daubert
   # @author adfoster-r7 ModelValidationError, track source location for dynamic class methods
   class Model # rubocop:disable Metrics/ClassLength
-    # @private
+    # @private Base Element
     BaseElem = Struct.new(:name, :proc, :content) do
       # @param [String,Symbol] name
       # @param [Proc] proc
@@ -87,10 +87,10 @@ module RASN1
       end
     end
 
-    # @private
+    # @private Model Element
     ModelElem = Struct.new(:name, :klass)
 
-    # @private
+    # @private Wrapper Element
     WrapElem = Struct.new(:element, :options) do
       # @return [Symbol]
       def name
@@ -403,11 +403,14 @@ module RASN1
       self[name].value = value
     end
 
+    # clone @elements and initialize @root from this new @element.
     def initialize_copy(_other)
       @elements = @elements.clone
       @root = @elements[@root_name]
     end
 
+    # Give model name (a.k.a root name)
+    # @return [String]
     def name
       @root_name
     end
@@ -520,6 +523,9 @@ module RASN1
 
     protected
 
+    # Initialize model elements from +args+
+    # @param [Hash,Array] args
+    # @return [void]
     def lazy_initialize(args)
       case args
       when Hash
@@ -529,6 +535,9 @@ module RASN1
       end
     end
 
+    # Initialize an element from a hash
+    # @param [Hash] args
+    # @return [void]
     def lazy_initialize_hash(args)
       args.each do |name, value|
         element = self[name]
@@ -542,6 +551,9 @@ module RASN1
       end
     end
 
+    # Initialize an sequence element from an array
+    # @param [Array] args
+    # @return [void]
     def lazy_initialize_array(ary)
       raise Error, 'Only sequence types may be initialized with an array' unless SEQUENCE_TYPES.any? { |klass| root.is_a?(klass) }
 

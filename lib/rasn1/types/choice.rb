@@ -91,6 +91,7 @@ module RASN1
 
       # @private
       # @see Types::Base#do_parse
+      # @since 0.15.0 Specific +#do_parse+ to handle recursivity
       def do_parse(der, ber: false)
         @value.each_with_index do |element, i|
           @chosen = i
@@ -111,6 +112,7 @@ module RASN1
       # @param [String] der
       # @param [::Boolean] ber
       # @return [void]
+      # @since 0.15.0 Specific +#der_to_value+ to handle recursivity
       def der_to_value(der, ber: false)
         @value.each_with_index do |element, i|
           @chosen = i
@@ -139,6 +141,9 @@ module RASN1
         msg_type(no_id: true)
       end
 
+      # Return empty array
+      # @return [Array()]
+      # @since 0.15.0
       def void_value
         []
       end
