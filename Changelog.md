@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.15.0 - 2025-01-03
+
+### Changed
+
+* `Types::Choice` may now be recursive via models and wrappers. It may define a choice using itself as an alternative.
+* `Types::Base`: make `#do_parse`, `#do_parse_explicit` and `#der_to_value` public. The first two are marked as private API.
+* `Types::VisibleString` is now constrained. It will raises a `ConstraintError` when using a String with a character outside of ASCII range 32 to 126.
+* `Wrapper` is now lazy: it only allocates its inner element when needed.
+* `Model`: simplify internal mechanics to create a model, and to populate it on initialization.
+
 ## 0.14.0 - 2024-12-28
 
 ### Removed
