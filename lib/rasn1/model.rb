@@ -393,7 +393,7 @@ module RASN1
       case name_or_idx
       when Symbol
         elt = @elements[name_or_idx]
-      return elt unless elt.is_a?(Proc)
+        return elt unless elt.is_a?(Proc)
 
         @elements[name_or_idx] = elt.call
       when Integer
@@ -628,6 +628,9 @@ module RASN1
       element
     end
 
+    # @author sdaubert
+    # @author lemontree55
+    # @author adfoster-r7
     def private_to_h(element=nil) # rubocop:disable Metrics/CyclomaticComplexity
       my_element = element || root
       my_element = my_element.root if my_element.is_a?(Model)
@@ -636,11 +639,11 @@ module RASN1
                 sequence_of_to_h(my_element)
               when Types::Sequence
                 sequence_to_h(my_element)
-              # @author adfoster-r7
               when Types::Choice
                 raise ChoiceError.new(my_element) if my_element.chosen.nil?
 
-                private_to_h(my_element.value[my_element.chosen])
+                chosen = my_element.value[my_element.chosen]
+                { chosen.name => private_to_h(chosen) }
               when Wrapper
                 wrapper_to_h(my_element)
               else

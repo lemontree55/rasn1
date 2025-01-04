@@ -79,6 +79,7 @@ module RASN1 # rubocop:disable Metrics/moduleLength
   ERRORED_VALUE = "\x01\x01\x00".b.freeze
   CHOICE_INTEGER = "\x02\x01\x10".b.freeze
   CHOICE_SEQUENCE = SIMPLE_VALUE
+  NESTED_CHOICE = "\x30\x0b\x04\x03abc\x63\x03\x40\x01\x01".b.freeze
   IMPLICIT_WRAPPED_SUBMODEL = "\x30\x0a\xa5\x08\x02\x01\x0a\x81\x03\x02\x01\x33".b.freeze
   EXPLICIT_WRAPPED_SUBMODEL = "\x30\x0c\x86\x0a\xa4\x08\x02\x01\x0a\x81\x03\x02\x01\x33".b.freeze
   OPTIONAL_VOID_WRAPPED_SUBMODEL = "\x30\x03\x02\x01\x01".b.freeze
@@ -267,10 +268,10 @@ module RASN1 # rubocop:disable Metrics/moduleLength
 
       it 'generates a Hash image of a model with a choice model' do
         model = ModelChoice.parse(CHOICE_INTEGER)
-        expect(model.to_h).to eq({ choice: 16 })
+        expect(model.to_h).to eq({ choice: { id: 16 }})
 
         model = ModelChoice.parse(CHOICE_SEQUENCE)
-        expect(model.to_h).to eq({ choice: { id: 65537, room: 43, house: 4660 } })
+        expect(model.to_h).to eq({ choice: { a_record: { id: 65537, room: 43, house: 4660 } } })
 
         model = ModelChoice.new
         expect { model.to_h }
@@ -289,6 +290,11 @@ module RASN1 # rubocop:disable Metrics/moduleLength
         model[:a_record][:id] = 4
         model[:a_record][:house] = 5
         expect(model.to_h).to eq({ seq: { a_record: { id: 4, house: 5 } } })
+      end
+
+      it 'generates a Hash image of a model with a nested Choice' do
+        model = NestedModelChoice.parse(NESTED_CHOICE)
+        expect(model.to_h).to eq({seq: { os: 'abc', first_choice: { more: { nested_choice:{ id: 1 }}}}})
       end
     end
 
