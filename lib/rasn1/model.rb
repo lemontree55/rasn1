@@ -608,13 +608,18 @@ module RASN1
         opts[:name] ||= elt.name
         elt.klass.new(opts)
       when WrapElem
-        wrapped = elt.element.is_a?(ModelElem) ? elt.element.klass : generate_element(elt.element)
-        options = elt.options.merge(opts)
-        options[:name] = elt.element.name if elt.element.is_a?(ModelElem)
-        wrapper = Wrapper.new(wrapped, options)
-        @elements[elt.element.name] = proc { wrapper.element }
-        wrapper
+        generate_wrapper_element(elt, opts)
       end
+    end
+
+    def generate_wrapper_element(elt, opts)
+      wrapped = elt.element.is_a?(ModelElem) ? elt.element.klass : generate_element(elt.element)
+      options = elt.options.merge(opts)
+      options[:name] = elt.element.name if elt.element.is_a?(ModelElem)
+      wrapper = Wrapper.new(wrapped, options)
+      # Use a proc as wrapper may be lazy
+      @elements[elt.element.name] = proc { wrapper.element }
+      wrapper
     end
 
     def generate_base_element(elt, opts)
@@ -640,10 +645,7 @@ module RASN1
               when Types::Sequence
                 sequence_to_h(my_element)
               when Types::Choice
-                raise ChoiceError.new(my_element) if my_element.chosen.nil?
-
-                chosen = my_element.value[my_element.chosen]
-                { chosen.name => private_to_h(chosen) }
+                choice_to_h(my_element)
               when Wrapper
                 wrapper_to_h(my_element)
               else
@@ -679,6 +681,13 @@ module RASN1
         end
       end
       ary.compact.to_h
+    end
+
+    def choice_to_h(elt)
+      raise ChoiceError.new(elt) if elt.chosen.nil?
+
+      chosen = elt.value[elt.chosen]
+      { chosen.name => private_to_h(chosen) }
     end
 
     def unwrap_keyname(key)
