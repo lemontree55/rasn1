@@ -161,15 +161,15 @@ module RASN1 # rubocop:disable Metrics/moduleLength
 
       it 'initializes a model from a parameter hash' do
         model = SuperOfModel.new(of: [{ id: 1234 }, { id: 4567, room: 43, house: 21 }])
-        expect(model[:of][:seqof].length).to eq(2)
-        expect(model[:of][:seqof][0]).to be_a(ModelTest)
-        expect(model[:of][:seqof][0][:id].to_i).to eq(1234)
-        expect(model[:of][:seqof][0][:room].value).to be_nil
-        expect(model[:of][:seqof][0][:house].to_i).to eq(0)
-        expect(model[:of][:seqof][1]).to be_a(ModelTest)
-        expect(model[:of][:seqof][1][:id].to_i).to eq(4567)
-        expect(model[:of][:seqof][1][:room].value).to eq(43)
-        expect(model[:of][:seqof][1][:house].to_i).to eq(21)
+        expect(model[:of].length).to eq(2)
+        expect(model[:of][0]).to be_a(ModelTest)
+        expect(model[:of][0][:id].to_i).to eq(1234)
+        expect(model[:of][0][:room].value).to be_nil
+        expect(model[:of][0][:house].to_i).to eq(0)
+        expect(model[:of][1]).to be_a(ModelTest)
+        expect(model[:of][1][:id].to_i).to eq(4567)
+        expect(model[:of][1][:room].value).to eq(43)
+        expect(model[:of][1][:house].to_i).to eq(21)
       end
 
       it 'initializes a model with an implicit wrapper from a parameter hash' do
@@ -412,7 +412,7 @@ module RASN1 # rubocop:disable Metrics/moduleLength
         expect(cert[:signatureValue].value).to eq(der[0x1b6, 128])
 
         issuer = cert[:tbsCertificate][:issuer].to_h
-        expect(issuer[:rdnSequence][0][0][:value]).to eq("\x13\x03org".b)
+        expect(issuer[:issuer][0][0][:value]).to eq("\x13\x03org".b)
       end
 
       it 'may generate a X.509 certificate' do

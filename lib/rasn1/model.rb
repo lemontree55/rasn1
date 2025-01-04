@@ -381,15 +381,24 @@ module RASN1
       lazy_initialize(args) unless args.empty?
     end
 
-    # Access an element of the model by its name
-    # @param [Symbol] name
-    # @return [Model, Types::Base, Wrapper]
-    def [](name)
-      elt = @elements[name]
+    # @overload [](name)
+    #  Access an element of the model by its name
+    #  @param [Symbol] name
+    #  @return [Model, Types::Base, Wrapper]
+    # @overload [](idx)
+    #  Access an element of root element by its index. Root element must be a {Sequence} or {SequenceOf}.
+    #  @param [Integer] idx
+    #  @return [Model, Types::Base, Wrapper]
+    def [](name_or_idx)
+      case name_or_idx
+      when Symbol
+        elt = @elements[name_or_idx]
       return elt unless elt.is_a?(Proc)
 
-      # Lazy element -> generate it
-      @elements[name] = elt.call
+        @elements[name_or_idx] = elt.call
+      when Integer
+        root[name_or_idx]
+      end
     end
 
     # Set value of element +name+. Element should be a {Types::Base}.
@@ -582,13 +591,13 @@ module RASN1
     private
 
     def generate_root(args)
-      opts = args.slice(:explicit, :implicit, :optional, :class, :default, :constructed, :tag_value)
+      opts = args.slice(:name, :explicit, :implicit, :optional, :class, :default, :constructed, :tag_value)
       root = self.class.class_eval { @root }
       root_options = self.class.options || {}
       root_options.merge!(opts)
+      @root_name = args[:name] || root.name
       @root = generate_element(root, root_options)
-      @root_name = root.name
-      @elements[root.name] = @root
+      @elements[@root_name] = @root
     end
 
     def generate_element(elt, opts={})
@@ -596,10 +605,13 @@ module RASN1
       when BaseElem
         generate_base_element(elt, opts)
       when ModelElem
+        opts[:name] ||= elt.name
         elt.klass.new(opts)
       when WrapElem
         wrapped = elt.element.is_a?(ModelElem) ? elt.element.klass : generate_element(elt.element)
-        wrapper = Wrapper.new(wrapped, elt.options.merge(opts))
+        options = elt.options.merge(opts)
+        options[:name] = elt.element.name if elt.element.is_a?(ModelElem)
+        wrapper = Wrapper.new(wrapped, options)
         @elements[elt.element.name] = proc { wrapper.element }
         wrapper
       end
