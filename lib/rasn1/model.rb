@@ -638,8 +638,9 @@ module RASN1
     # @author adfoster-r7
     def private_to_h(element=nil) # rubocop:disable Metrics/CyclomaticComplexity
       my_element = element || root
-      my_element = my_element.root if my_element.is_a?(Model)
       value = case my_element
+              when Model
+                model_to_h(my_element)
               when Types::SequenceOf
                 sequence_of_to_h(my_element)
               when Types::Sequence
@@ -658,6 +659,15 @@ module RASN1
       end
     end
 
+    def model_to_h(elt)
+      hsh = elt.to_h
+      if root.is_a?(Types::Choice)
+        hsh[hsh.keys.first]
+      else
+        { @elements.key(elt) => hsh[hsh.keys.first] }
+      end
+    end
+
     def sequence_of_to_h(elt)
       if elt.of_type < Model
         elt.value&.map { |el| el.to_h.values.first }
@@ -672,8 +682,7 @@ module RASN1
 
         case el
         when Model
-          hsh = el.to_h
-          [@elements.key(el), hsh[hsh.keys.first]]
+          model_to_h(el).to_a[0]
         when Wrapper
           [unwrap_keyname(@elements.key(el)), wrapper_to_h(el)]
         else
