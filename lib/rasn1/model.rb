@@ -381,15 +381,24 @@ module RASN1
       lazy_initialize(args) unless args.empty?
     end
 
-    # Access an element of the model by its name
-    # @param [Symbol] name
-    # @return [Model, Types::Base, Wrapper]
-    def [](name)
-      elt = @elements[name]
-      return elt unless elt.is_a?(Proc)
+    # @overload [](name)
+    #  Access an element of the model by its name
+    #  @param [Symbol] name
+    #  @return [Model, Types::Base, Wrapper]
+    # @overload [](idx)
+    #  Access an element of root element by its index. Root element must be a {Sequence} or {SequenceOf}.
+    #  @param [Integer] idx
+    #  @return [Model, Types::Base, Wrapper]
+    def [](name_or_idx)
+      case name_or_idx
+      when Symbol
+        elt = @elements[name_or_idx]
+        return elt unless elt.is_a?(Proc)
 
-      # Lazy element -> generate it
-      @elements[name] = elt.call
+        @elements[name_or_idx] = elt.call
+      when Integer
+        root[name_or_idx]
+      end
     end
 
     # Set value of element +name+. Element should be a {Types::Base}.
@@ -582,13 +591,13 @@ module RASN1
     private
 
     def generate_root(args)
-      opts = args.slice(:explicit, :implicit, :optional, :class, :default, :constructed, :tag_value)
+      opts = args.slice(:name, :explicit, :implicit, :optional, :class, :default, :constructed, :tag_value)
       root = self.class.class_eval { @root }
       root_options = self.class.options || {}
       root_options.merge!(opts)
+      @root_name = args[:name] || root.name
       @root = generate_element(root, root_options)
-      @root_name = root.name
-      @elements[root.name] = @root
+      @elements[@root_name] = @root
     end
 
     def generate_element(elt, opts={})
@@ -596,13 +605,21 @@ module RASN1
       when BaseElem
         generate_base_element(elt, opts)
       when ModelElem
+        opts[:name] ||= elt.name
         elt.klass.new(opts)
       when WrapElem
-        wrapped = elt.element.is_a?(ModelElem) ? elt.element.klass : generate_element(elt.element)
-        wrapper = Wrapper.new(wrapped, elt.options.merge(opts))
-        @elements[elt.element.name] = proc { wrapper.element }
-        wrapper
+        generate_wrapper_element(elt, opts)
       end
+    end
+
+    def generate_wrapper_element(elt, opts)
+      wrapped = elt.element.is_a?(ModelElem) ? elt.element.klass : generate_element(elt.element)
+      options = elt.options.merge(opts)
+      options[:name] = elt.element.name if elt.element.is_a?(ModelElem)
+      wrapper = Wrapper.new(wrapped, options)
+      # Use a proc as wrapper may be lazy
+      @elements[elt.element.name] = proc { wrapper.element }
+      wrapper
     end
 
     def generate_base_element(elt, opts)
@@ -616,19 +633,20 @@ module RASN1
       element
     end
 
+    # @author sdaubert
+    # @author lemontree55
+    # @author adfoster-r7
     def private_to_h(element=nil) # rubocop:disable Metrics/CyclomaticComplexity
       my_element = element || root
-      my_element = my_element.root if my_element.is_a?(Model)
       value = case my_element
+              when Model
+                model_to_h(my_element)
               when Types::SequenceOf
                 sequence_of_to_h(my_element)
               when Types::Sequence
                 sequence_to_h(my_element)
-              # @author adfoster-r7
               when Types::Choice
-                raise ChoiceError.new(my_element) if my_element.chosen.nil?
-
-                private_to_h(my_element.value[my_element.chosen])
+                choice_to_h(my_element)
               when Wrapper
                 wrapper_to_h(my_element)
               else
@@ -638,6 +656,15 @@ module RASN1
         { @root_name => value }
       else
         value
+      end
+    end
+
+    def model_to_h(elt)
+      hsh = elt.to_h
+      if root.is_a?(Types::Choice)
+        hsh[hsh.keys.first]
+      else
+        { @elements.key(elt) => hsh[hsh.keys.first] }
       end
     end
 
@@ -655,8 +682,7 @@ module RASN1
 
         case el
         when Model
-          hsh = el.to_h
-          [@elements.key(el), hsh[hsh.keys.first]]
+          model_to_h(el).to_a[0]
         when Wrapper
           [unwrap_keyname(@elements.key(el)), wrapper_to_h(el)]
         else
@@ -664,6 +690,13 @@ module RASN1
         end
       end
       ary.compact.to_h
+    end
+
+    def choice_to_h(elt)
+      raise ChoiceError.new(elt) if elt.chosen.nil?
+
+      chosen = elt.value[elt.chosen]
+      { chosen.name => private_to_h(chosen) }
     end
 
     def unwrap_keyname(key)

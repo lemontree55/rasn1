@@ -183,7 +183,7 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
       end
       expect(io.string).to eq(<<~ENDOFDATA
         seq [ 16 ] SEQUENCE (0x30), len: 13 (0x0d)
-          record [ CONTEXT 5 ] IMPLICIT SEQUENCE (0xa5), len: 11 (0x0b)
+          a_record [ CONTEXT 5 ] IMPLICIT SEQUENCE (0xa5), len: 11 (0x0b)
             id [ 2 ] INTEGER (0x02), len: 1 (0x01)    16 (0x10)
             room [ CONTEXT 0 ] IMPLICIT INTEGER OPTIONAL (0x80), len: 1 (0x01)    7 (0x07)
             house [ CONTEXT 1 ] EXPLICIT INTEGER (0x81), len: 3 (0x03)

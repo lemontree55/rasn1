@@ -68,6 +68,23 @@ module TestModel
                      model(:a_record, ModelTest)]
   end
 
+  class ImplicitModelChoice < RASN1::Model
+    choice :choice,
+           content: [integer(:id, class: :application, implicit: 0),
+                     wrapper(model(:a_record, ModelTest), class: :application, implicit: 1)]
+  end
+
+  class NestedModelChoice < RASN1::Model
+    sequence :seq,
+           content: [octet_string(:os),
+                     choice(:first_choice,
+                            content: [integer(:int, class: :application, implicit: 2),
+                                      sequence(:more, class: :application, implicit: 3,
+                                               content: [model(:nested_choice, ImplicitModelChoice)])
+                                     ])
+                    ]
+  end
+
   class ExplicitTaggedSeq < RASN1::Model
     sequence :seq, explicit: 0, class: :application,
                    content: [integer(:id), integer(:extern_id)]
