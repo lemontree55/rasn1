@@ -1,7 +1,7 @@
-require:
+plugins:
   - rubocop-performance
 AllCops:
-  TargetRubyVersion: '3.0'
+  TargetRubyVersion: "3.0"
   NewCops: enable
   Exclude:
     - .git/**/*
@@ -20,11 +20,11 @@ Lint/EmptyWhen:
 Lint/Void:
   Enabled: false
 Metrics/AbcSize:
-    Max: 20
+  Max: 20
 Metrics/ClassLength:
-    Max: 200
+  Max: 200
 Metrics/MethodLength:
-    Max: 20
+  Max: 20
 Metrics/ParameterLists:
   MaxOptionalParameters: 4
 Style/AccessModifierDeclarations:
@@ -46,7 +46,7 @@ Style/PerlBackrefs:
   Enabled: false
 Style/RaiseArgs:
   EnforcedStyle: exploded
-  AllowedCompactTypes: ['ConstraintError', 'ChoiceError']
+  AllowedCompactTypes: ["ConstraintError", "ChoiceError"]
 Style/RedundantSelf:
   Enabled: false
 Style/StructInheritance:

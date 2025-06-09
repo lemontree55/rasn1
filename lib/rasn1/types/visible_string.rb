@@ -4,7 +4,7 @@ module RASN1
   module Types
     # Create VisibleString as a Constrained subclass of IA5String
     Types.define_type(:VisibleString, from: IA5String) do |value|
-      value.nil? || value.chars.all? { |c| c.ord >= 32 && c.ord <= 126 }
+      value.nil? || value.chars.all? { |c| c.ord.between?(32, 126) }
     end
 
     # ASN.1 Visible String

@@ -26,7 +26,7 @@ module RASN1
   # @param [String] der binary string to parse
   # @param [Boolean] ber if +true+, decode a BER string, else a DER one
   # @return [Types::Base]
-  def self.parse(der, ber: false) # rubocop:disable Metrics:AbcSize
+  def self.parse(der, ber: false) # rubocop:disable Metrics/AbcSize
     type = Types.id2type(der)
     type.parse!(der, ber: ber)
 

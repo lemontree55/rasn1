@@ -359,7 +359,7 @@ module RASN1
             lines << str
           end
           str[compute_trace_index(byte_count, 3), 2] = '%02x' % byte
-          str[compute_trace_index(byte_count, 1, 49)] = byte >= 32 && byte <= 126 ? byte.chr : '.'
+          str[compute_trace_index(byte_count, 1, 49)] = byte.between?(32, 126) ? byte.chr : '.'
           byte_count += 1
         end
         lines.map(&:rstrip).join << "\n"
@@ -546,7 +546,11 @@ module RASN1
         end
       end
 
-      def check_id(der)
+      # Check ID from +der+ is the one expected
+      # @return [Boolean] +true+ is ID is expected, +false+ if it is not but +self+ is {#optional?}
+      #   or has a {#default} value.
+      # @raise [ASN1Error] ID was not expected, is not optional and has no default value
+      def check_id(der) # rubocop:disable Naming/PredicateMethod
         expected_id = encode_identifier_octets
         real_id = der[0, expected_id.size]
         return true if real_id == expected_id

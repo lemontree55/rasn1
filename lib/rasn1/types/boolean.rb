@@ -14,7 +14,7 @@ module RASN1
       DER_FALSE = 0
 
       # @return [false]
-      def void_value
+      def void_value # rubocop:disable Naming/PredicateMethod
         false
       end
 
