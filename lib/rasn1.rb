@@ -25,22 +25,24 @@ module RASN1
   #       generate {Types::Base} objects.
   # @param [String] der binary string to parse
   # @param [Boolean] ber if +true+, decode a BER string, else a DER one
-  # @return [Types::Base]
+  # @return [Types::Base, Array[Types::Base]]
   def self.parse(der, ber: false) # rubocop:disable Metrics/AbcSize
-    type = Types.id2type(der)
-    type.parse!(der, ber: ber)
+    result = []
+    until der.nil? || der.empty?
+      type = Types.id2type(der)
+      size = type.parse!(der, ber: ber)
 
-    if CONTAINER_CLASSES.include?(type.class)
-      subder = type.value
-      ary = []
-      RASN1.tracer.tracing_level += 1 unless RASN1.tracer.nil?
-      until subder.empty?
-        ary << self.parse(subder)
-        subder = subder[ary.last.to_der.size..]
+      if CONTAINER_CLASSES.include?(type.class)
+        RASN1.tracer.tracing_level += 1 unless RASN1.tracer.nil?
+        content = self.parse(type.value)
+        type.value = content.is_a?(Array) ? content : [content]
+        RASN1.tracer.tracing_level -= 1 unless RASN1.tracer.nil?
       end
-      RASN1.tracer.tracing_level -= 1 unless RASN1.tracer.nil?
-      type.value = ary
+
+      result << type
+      der = der[size..]
     end
-    type
+
+    result.size == 1 ? result[0] : result
   end
 end

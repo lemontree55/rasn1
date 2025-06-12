@@ -150,7 +150,7 @@ describe RASN1 do
         expect(obj.value).to eq(RASN1::Types::Sequence.new(value: [@bool, @int]).to_der)
       end
 
-      context '(complex example)' do
+      context '(complex examples)' do
         it 'decodes a complex example' do
           der = File.read(File.join(__dir__, 'cert_example.der')).b
           cert = RASN1.parse(der)
@@ -193,6 +193,41 @@ describe RASN1 do
           expect(cert.value[0].value[7].asn1_class).to eq(:context)
           expect(cert.value[0].value[7].constructed?).to eq(true)
           expect(cert.value[0].value[7].id).to eq(3)
+        end
+
+        it 'decodes a 2-pass example' do
+          der = ["303d040c800007db0300259e5d7f12860400a22b02046d192dad020100020100301d301b06132b060104018f5b067301010101288fc080c0000204ffffffff"].pack("H*")
+
+          # 1st pass
+          pdu = RASN1.parse(der)
+          expect(pdu).to be_a(RASN1::Types::Sequence)
+          expect(pdu.value.size).to eq(3)
+          expect(pdu.value[0]).to be_a(RASN1::Types::OctetString)
+          expect(pdu.value[0].value.length).to eq(12)
+          expect(pdu.value[1]).to be_a(RASN1::Types::OctetString)
+          expect(pdu.value[1].value.length).to eq(0)
+          expect(pdu.value[2]).to be_a(RASN1::Types::Base)
+          expect(pdu.value[2].asn1_class).to eq(:context)
+          expect(pdu.value[2].value.length).to eq(43)
+
+          # 2nd pass
+          subpdus = RASN1.parse(pdu.value[2].value)
+          expect(subpdus).to be_a(Array)
+          expect(subpdus.size).to eq(4)
+          expect(subpdus[0]).to be_a(RASN1::Types::Integer)
+          expect(subpdus[0].to_i).to eq(1830366637)
+          expect(subpdus[1]).to be_a(RASN1::Types::Integer)
+          expect(subpdus[1].to_i).to eq(0)
+          expect(subpdus[2]).to be_a(RASN1::Types::Integer)
+          expect(subpdus[2].to_i).to eq(0)
+          expect(subpdus[3]).to be_a(RASN1::Types::Sequence)
+          expect(subpdus[3].value.size).to eq(1)
+          expect(subpdus[3].value[0]).to be_a(RASN1::Types::Sequence)
+          expect(subpdus[3].value[0].value.size).to eq(2)
+          expect(subpdus[3].value[0].value[0]).to be_a(RASN1::Types::ObjectId)
+          expect(subpdus[3].value[0].value[0].value).to eq("1.3.6.1.4.1.2011.6.115.1.1.1.1.40.4160757760")
+          expect(subpdus[3].value[0].value[1]).to be_a(RASN1::Types::Integer)
+          expect(subpdus[3].value[0].value[1].value).to eq(-1)
         end
       end
     end
