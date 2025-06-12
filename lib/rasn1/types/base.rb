@@ -95,6 +95,7 @@ module RASN1
       # Parse a DER or BER string
       # @param [String] der_or_ber string to parse
       # @param [Hash] options
+      # @return [Base]
       # @option options [Boolean] :ber if +true+, parse a BER string, else a DER one
       # @note More options are supported. See {Base#initialize}.
       def self.parse(der_or_ber, options={})
