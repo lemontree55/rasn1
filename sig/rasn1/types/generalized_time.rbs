@@ -1,0 +1,63 @@
+module RASN1
+  module Types
+    # ASN.1 GeneralizedTime
+    #
+    # +{#value} of a {GeneralizedTime} should be a ruby Time.
+    #
+    # ===Notes
+    # When encoding, resulting string is always a UTC time, appended with +Z+.
+    # Minutes and seconds are always generated. Fractions of second are generated
+    # if value Time object have them.
+    #
+    # On parsing, are supported:
+    # * UTC times (ending with +Z+),
+    # * local times (no suffix),
+    # * local times with difference between UTC and this local time (ending with
+    #   +sHHMM+, where +s+ is +++ or +-+, and +HHMM+ is the time differential
+    #   betwen UTC and local time).
+    # These times may include minutes and seconds. Fractions of hour, minute and
+    # second are supported.
+    # @author Sylvain Daubert
+    class GeneralizedTime < Primitive
+      @value: untyped
+
+      # GeneralizedTime id value
+      ID: 24
+
+      # @private
+      HOUR_TO_SEC: 3600
+
+      # @private
+      MINUTE_TO_SEC: 60
+
+      # @private
+      SECOND_TO_SEC: 1
+
+      # Get ASN.1 type
+      # @return [String]
+      def self.type: () -> "GeneralizedTime"
+
+      # @return [Time]
+      def void_value: () -> untyped
+
+      private
+
+      def value_when_fraction_empty: (untyped date_hour) -> untyped
+
+      # Ruby 3.0: special handle for timezone
+      #   From 3.1: "Z" and "-0100" are supported
+      #   Below 3.1: should be "-01:00" or "+00:00"
+      def compute_tz: (untyped date_hour) -> ("+00:00" | ::String | nil)
+
+      def value_when_fraction_ends_with_z: (untyped date_hour, untyped fraction) -> untyped
+
+      def value_on_others_cases: (untyped date_hour, untyped fraction) -> untyped
+
+      def fix_value: (untyped fraction, untyped frac_base) -> untyped
+
+      def compute_frac_base: (untyped date_hour) -> untyped
+
+      def trace_data: () -> untyped
+    end
+  end
+end

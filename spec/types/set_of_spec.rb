@@ -1,6 +1,6 @@
 require_relative '../spec_helper'
 
-module RASN1
+module RASN2
   module Types
     describe SetOf do
       it '.type gets ASN.1 type' do

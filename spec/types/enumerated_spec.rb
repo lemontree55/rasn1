@@ -3,7 +3,7 @@
 require_relative '../spec_helper'
 
 # rubocop:disable Metrics/BlockLength
-module RASN1::Types # rubocop:disable Metrics/ModuleLength
+module RASN2::Types # rubocop:disable Metrics/ModuleLength
   describe Enumerated do
     let(:enumerated) { { a: 0, b: 1, c: 2 } }
 
@@ -23,15 +23,15 @@ module RASN1::Types # rubocop:disable Metrics/ModuleLength
       end
 
       it 'raises when enum key is absent' do
-        expect { Enumerated.new }.to raise_error(RASN1::EnumeratedError,
+        expect { Enumerated.new }.to raise_error(RASN2::EnumeratedError,
                                                  'no enumeration given')
       end
 
       it 'raises on unknown default value' do
         expect { Enumerated.new(enum: enumerated, default: 53) }
-          .to raise_error(RASN1::EnumeratedError, /default value/)
+          .to raise_error(RASN2::EnumeratedError, /default value/)
         expect { Enumerated.new(enum: enumerated, default: :e) }
-          .to raise_error(RASN1::EnumeratedError, /default value/)
+          .to raise_error(RASN2::EnumeratedError, /default value/)
         expect { Enumerated.new(enum: enumerated, default: Object.new) }
           .to raise_error(TypeError, /default value/)
       end
@@ -67,17 +67,17 @@ module RASN1::Types # rubocop:disable Metrics/ModuleLength
       end
 
       it 'raises on unknown integer' do
-        expect { enum.value = 43 }.to raise_error(RASN1::EnumeratedError,
+        expect { enum.value = 43 }.to raise_error(RASN2::EnumeratedError,
                                                   /not in enumeration/)
       end
 
       it 'raises on unknown name' do
-        expect { enum.value = :d }.to raise_error(RASN1::EnumeratedError,
+        expect { enum.value = :d }.to raise_error(RASN2::EnumeratedError,
                                                   /unknwon enumerated value/)
       end
 
       it 'raises on setting object which is not an Integer nor a String nor a Symbol' do
-        expect { enum.value = Object.new }.to raise_error(RASN1::EnumeratedError,
+        expect { enum.value = Object.new }.to raise_error(RASN2::EnumeratedError,
                                                           /not in enumeration/)
       end
     end

@@ -1,0 +1,51 @@
+module RASN1
+  module Types
+    # ASN.1 Bit String
+    # @author Sylvain Daubert
+    class BitString < Primitive
+      @default_bit_length: int
+
+      @bit_length: int
+
+      @value: untyped
+
+      # BitString id value
+      ID: 3
+
+      # @return [Integer]
+      attr_accessor bit_length: int
+
+      # @param [Hash] options
+      # @option options [Object] :bit_length default bit_length value. Should be
+      #   present if +:default+ is set
+      # @see Base#initialize common options to all ASN.1 types
+      def initialize: (?::Hash[untyped, untyped] options) -> void
+
+      # @param [Integer] level
+      # @return [String]
+      def inspect: (?::Integer level) -> string
+
+      # Same as {Base#can_build?} but also check bit_length
+      # @see Base#can_build?
+      # @return [Boolean]
+      def can_build?: () -> bool
+
+      # Make value from DER/BER string. Also set {#bit_length}.
+      # @param [String] der
+      # @param [::Boolean] ber
+      # @return [void]
+      # @see Types::Base#der_to_value
+      def der_to_value: (string der, ?ber: bool) -> void
+
+      private
+
+      # @author Sylvain Daubert
+      # @author adfoster-r7
+      def value_to_der: () -> untyped
+
+      def generate_value_with_correct_length: () -> untyped
+
+      def explicit_type: () -> untyped
+    end
+  end
+end

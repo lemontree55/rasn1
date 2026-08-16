@@ -1,0 +1,30 @@
+# Root rule to parse an ASN.1 module text
+Module          <-  ModuleIdentifier 'DEFINITIONS' TagDefault '::=' 'BEGIN' ModuleBody 'END'
+
+ModuleIdentifier <-  Modref ASSIGN?
+Modref          <-  [A-Z] [A-Za-z0-9_-]*
+TagDefault      <-  ('EXPLICIT' / 'IMPLICIT' / 'AUTOMATIC')? 'TAGS' / ''
+
+ModuleBody      <-  Assignment*
+
+Assignment      <-  TypeAssignment / ValueAssignment
+TypeAssignment  <-  Typeref '::=' Type
+ValueAssignment <-  Identifier Typeref '::=' Value
+
+# Types
+Type            <-  BuiltinType / DefinedType
+BuiltinType     <-  BooleanType / IntegerType / SequenceType / OctetStringType
+BooleanType     <-  'BOOLEAN'
+IntegerType     <-  'INTEGER'
+OctetStringType <-  'OCTET STRING'
+
+SequenceType    <-  'SEQUENCE' '{' (ComponentType (',' ComponentType)*)? '}'
+ComponentType   <-  Identifier Type
+
+DefinedType     <-  Typeref
+Typeref         <-  [A-Z] [A-Za-z0-9_-]*
+Identifier      <-  [a-z] [A-Za-z0-9_-]*
+
+Value           <-  SignedNumber / Identifier
+SignedNumber    <-  '-'? [0-9]+
+ASSIGN          <-  '::='

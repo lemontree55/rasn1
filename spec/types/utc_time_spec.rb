@@ -3,7 +3,7 @@
 require_relative '../spec_helper'
 
 # rubocop:disable Metrics/BlockLength
-module RASN1::Types
+module RASN2::Types
   describe UtcTime do
     describe '.type' do
       it 'gets ASN.1 type' do
@@ -54,7 +54,7 @@ module RASN1::Types
       end
 
       it 'raises ASN1Error on unknown format' do
-        expect { utc.parse!("\x17\x05aaaaa") }.to raise_error(RASN1::ASN1Error).with_message(/unrecognized format/)
+        expect { utc.parse!("\x17\x05aaaaa") }.to raise_error(RASN2::ASN1Error).with_message(/unrecognized format/)
       end
     end
   end

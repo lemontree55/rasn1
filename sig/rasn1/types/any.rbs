@@ -1,0 +1,43 @@
+module RASN1
+  module Types
+    # ASN.1 ANY: accepts any types
+    #
+    # If `any#value` is `nil` and Any object is not {#optional?}, `any` will be encoded as a {Null} object.
+    # @author Sylvain Daubert
+    class Any < Base
+      @no_value: untyped
+
+      @value: untyped
+
+      # @return [String] DER-formated string
+      def to_der: () -> (untyped | "" | untyped)
+
+      def can_build?: () -> untyped
+
+      # Parse a DER string. This method updates object: {#value} will be a DER
+      # string.
+      # @param [String] der DER string
+      # @param [Boolean] ber if +true+, accept BER encoding
+      # @return [Integer] total number of parsed bytes
+      def parse!: (untyped der, ?ber: bool) -> untyped
+
+      # @param [::Integer] level
+      # @return [String]
+      def inspect: (?::Integer level) -> untyped
+
+      # @private Tracer private API
+      # @return [String]
+      def trace: () -> untyped
+
+      private
+
+      def common_inspect: (untyped level) -> untyped
+
+      # @private
+      # @see Types::Base#do_parse
+      def do_parse: (untyped der, ?ber: bool) -> (::Array[0 | ""] | ::Array[untyped])
+
+      def trace_any: () -> untyped
+    end
+  end
+end

@@ -1,0 +1,342 @@
+module RASN1
+  module Types
+    # @abstract This is base class for all ASN.1 types.
+    #
+    #   Subclasses SHOULD define:
+    #   * an ID constant defining ASN.1 BER/DER identification number,
+    #   * a method {#der_to_value} converting DER into {#value}.
+    #   * a private method {#value_to_der} converting its {#value} to DER,
+    #
+    # ==Define an optional value
+    # An optional value may be defined using +:optional+ key from {#initialize}:
+    #   Integer.new(:int, optional: true)
+    # An optional value implies:
+    # * while parsing, if decoded ID is not optional expected ID, no {ASN1Error}
+    #   is raised, and parser tries next field,
+    # * while encoding, if {#value} is +nil+, this value is not encoded.
+    # ==Define a default value
+    # A default value may be defined using +:default+ key from {#initialize}:
+    #  Integer.new(:int, default: 0)
+    # A default value implies:
+    # * while parsing, if decoded ID is not expected one, no {ASN1Error} is raised
+    #   and parser sets default value to this ID. Then parser tries next field,
+    # * while encoding, if {#value} is equal to default value, this value is not
+    #   encoded.
+    # ==Define a tagged value
+    # ASN.1 permits to define tagged values.
+    # By example:
+    #  -- context specific tag
+    #  CType ::= [0] EXPLICIT INTEGER
+    #  -- application specific tag
+    #  AType ::= [APPLICATION 1] EXPLICIT INTEGER
+    #  -- private tag
+    #  PType ::= [PRIVATE 2] EXPLICIT INTEGER
+    # These types may be defined as:
+    #  ctype = Rasn2::Types::Integer.new(explicit: 0)                      # with explicit, default #asn1_class is :context
+    #  atype = Rasn2::Types::Integer.new(explicit: 1, class: :application)
+    #  ptype = Rasn2::Types::Integer.new(explicit: 2, class: :private)
+    # Sometimes, an EXPLICIT type should be CONSTRUCTED. To do that, use +:constructed+
+    # option:
+    #  ptype = Rasn2::Types::Integer.new(explicit: 2, class: :private, constructed: true)
+    #
+    # Implicit tagged values may also be defined:
+    #  ctype_implicit = Rasn2::Types::Integer.new(implicit: 0)
+    # @author Sylvain Daubert
+    class Base
+      self.@type: untyped
+
+      @constructed: untyped
+
+      @raw_data: untyped
+
+      @raw_length: untyped
+
+      @value: untyped
+
+      @no_value: untyped
+
+      @default: untyped
+
+      @name: untyped
+
+      @options: untyped
+
+      @asn1_class: untyped
+
+      @optional: untyped
+
+      @tag: untyped
+
+      @id_value: untyped
+
+      # Allowed ASN.1 classes
+      CLASSES: { universal: 0, application: 64, context: 128, private: 192 }
+
+      # Binary mask to get class
+      # @private
+      CLASS_MASK: 192
+
+      # @private first octet identifier for multi-octets identifier
+      MULTI_OCTETS_ID: 31
+
+      # Length value for indefinite length
+      INDEFINITE_LENGTH: 128
+
+      # @return [String,nil]
+      attr_reader name: untyped
+
+      # @return [Symbol]
+      attr_reader asn1_class: untyped
+
+      # @return [Object,nil] default value, if defined
+      attr_reader default: untyped
+
+      # @return [Hash[Symbol, Object]]
+      attr_reader options: untyped
+
+      private
+
+      # @return [String] raw parsed data
+      attr_reader raw_data: untyped
+
+      # @return [String] raw parsed length
+      attr_reader raw_length: untyped
+
+      public
+
+      # Get ASN.1 type
+      # @return [String]
+      def self.type: () -> untyped
+
+      # Get ASN.1 type used to encode this one
+      # @return [String]
+      def self.encoded_type: () -> untyped
+
+      # Parse a DER or BER string
+      # @param [String] der_or_ber string to parse
+      # @param [Hash] options
+      # @return [Base]
+      # @option options [Boolean] :ber if +true+, parse a BER string, else a DER one
+      # @note More options are supported. See {Base#initialize}.
+      def self.parse: (untyped der_or_ber, ?::Hash[untyped, untyped] options) -> untyped
+
+      # Say if a type is constrained.
+      # Always return +false+ for predefined types
+      # @return [Booleran]
+      def self.constrained?: () -> false
+
+      def self.start_tracing: -> void
+
+      # @param [Hash] options
+      # @option options [Symbol] :class ASN.1 class. Default value is +:universal+.
+      #  If +:explicit+ or +:implicit:+ is defined, default value is +:context+.
+      # @option options [::Boolean] :optional define this tag as optional. Default
+      #   is +false+
+      # @option options [Object] :default default value (ASN.1 DEFAULT)
+      # @option options [Object] :value value to set
+      # @option options [::Integer] :implicit define an IMPLICIT tagged type
+      # @option options [::Integer] :explicit define an EXPLICIT tagged type
+      # @option options [::Boolean] :constructed if +true+, set type as constructed.
+      #  May only be used when +:explicit+ is defined, else it is discarded.
+      # @option options [::String] :name name for this node
+      def initialize: (?::Hash[untyped, untyped] options) -> void
+
+      # @abstract To help subclass initialize itself. Default implementation do nothing.
+      def specific_initializer: () -> nil
+
+      # Deep copy @value and @default.
+      def initialize_copy: (*untyped) -> untyped
+
+      # Get value or default value
+      def value: () -> untyped
+
+      # Set value. If +val+ is +nil+, unset value
+      # @param [Object,nil] val
+      def value=: (untyped val) -> untyped
+
+      # @abstract Define 'void' value (i.e. 'value' when no value was set)
+      def void_value: () -> ""
+
+      # Say if this type is optional
+      # @return [::Boolean]
+      def optional?: () -> untyped
+
+      # Say if this type is tagged or not
+      # @return [::Boolean]
+      def tagged?: () -> untyped
+
+      # Say if a tagged type is explicit
+      # @return [::Boolean,nil] return +nil+ if not tagged, return +true+
+      #   if explicit, else +false+
+      def explicit?: () -> (untyped | nil)
+
+      # Say if a tagged type is implicit
+      # @return [::Boolean,nil] return +nil+ if not tagged, return +true+
+      #   if implicit, else +false+
+      def implicit?: () -> (untyped | nil)
+
+      # @abstract This method SHOULD be partly implemented by subclasses, which
+      #   SHOULD respond to +#value_to_der+.
+      # @return [String] DER-formated string
+      def to_der: () -> untyped
+
+      # @return [::Boolean] +true+ if this is a primitive type
+      def primitive?: () -> untyped
+
+      # @return [::Boolean] +true+ if this is a constructed type
+      def constructed?: () -> untyped
+
+      # Get ASN.1 type
+      # @return [String]
+      def type: () -> untyped
+
+      # Get identifier value
+      # @return [Integer]
+      def id: () -> untyped
+
+      # @abstract This method SHOULD be partly implemented by subclasses to parse
+      #  data. Subclasses SHOULD respond to +#der_to_value+.
+      # Parse a DER string. This method updates object.
+      # @param [String] der DER string
+      # @param [Boolean] ber if +true+, accept BER encoding
+      # @return [Integer] total number of parsed bytes
+      # @raise [ASN1Error] error on parsing
+      def parse!: (untyped der, ?ber: bool) -> (0 | untyped)
+
+      # Give size in octets of encoded value
+      # @return [Integer]
+      def value_size: () -> untyped
+
+      # @param [Integer] level
+      # @return [String]
+      def inspect: (?::Integer level) -> untyped
+
+      # Objects are equal if they have same class AND same DER
+      # @param [Base] other
+      # @return [Boolean]
+      def ==: (untyped other) -> untyped
+
+      # Set options to this object
+      # @param [Hash] options
+      # @return [void]
+      # @since 0.12
+      def options=: (untyped options) -> untyped
+
+      # Say if a value is set
+      # @return [Boolean]
+      # @since 0.12.0
+      def value?: () -> untyped
+
+      # Say if DER can be built (not default value, not optional without value, has a value)
+      # @return [Boolean]
+      # @since 0.12.0
+      def can_build?: () -> untyped
+
+      # @private Tracer private API
+      # @return [String]
+      def trace: () -> untyped
+
+      # @private Parse tage and length from binary string. Return data length and binary data.
+      # @param [String] der
+      # @param [Boolean] ber
+      # @return [Array(::Integer, String)]
+      # @since 0.15.0 was private before
+      def do_parse: (untyped der, ?ber: bool) -> (::Array[0 | ""] | ::Array[untyped])
+
+      # @private Delegate to #explicit type to generate sub-value
+      # @param [String] data
+      # @return [void]
+      # @since 0.15.0 was private before
+      def do_parse_explicit: (untyped data) -> untyped
+
+      # Make value from DER/BER string
+      # @param [String] der
+      # @param [::Boolean] ber
+      # @return [void]
+      # @since 0.15.0 was private before
+      def der_to_value: (string der, ?ber: bool) -> void
+
+      private
+
+      def trace_real: () -> untyped
+
+      def trace_data: (?untyped? data) -> untyped
+
+      def trace_format_new_data_line: (untyped count) -> untyped
+
+      def compute_trace_index: (untyped byte_count, ?::Integer byte_count_mul, ?::Integer offset) -> untyped
+
+      def unpack: (untyped binstr) -> untyped
+
+      def asn1_class_to_s: () -> ("" | untyped)
+
+      def msg_type: (?no_id: bool) -> untyped
+
+      def pc_bit: () -> untyped
+
+      def common_inspect: (untyped level) -> untyped
+
+      def inspect_value: () -> (untyped | "(NO VALUE)")
+
+      def value_to_der: -> string
+
+      def set_class: (untyped asn1_class) -> untyped
+
+      def set_optional: (untyped optional) -> untyped
+
+      def set_default: (untyped default) -> untyped
+
+      # handle undocumented option +:tag_value+, used internally by
+      # {Rasn2.parse} to parse non-universal class tags.
+      def set_tag: (untyped options) -> untyped
+
+      # Convert a tag id to an integer.
+      # If given a String or Symbol, interprets the characters as big-endian octets
+      # (like Apple 4-character codes / 4CCs). Integers are returned as-is.
+      # @param [::Integer, String, Symbol] value tag value
+      # @return [::Integer]
+      def tag_id_to_integer: (untyped value) -> Integer
+
+      def set_value: (untyped value) -> untyped
+
+      def build: () -> (untyped | "")
+
+      def id_value: () -> untyped
+
+      def encode_identifier_octets: () -> untyped
+
+      def id2octets: () -> string
+
+      # Encode an unsigned integer on multiple octets.
+      # Value is encoded on bit 6-0 of each octet, bit 7(MSB) indicates wether
+      # further octets follow.
+      def unsigned_to_chained_octets: (untyped value) -> untyped
+
+      def encode_size: (untyped size) -> untyped
+
+      # Check ID from +der+ is the one expected
+      # @return [Boolean] +true+ is ID is expected, +false+ if it is not but +self+ is {#optional?}
+      #   or has a {#default} value.
+      # @raise [ASN1Error] ID was not expected, is not optional and has no default value
+      def check_id: (untyped der) -> (true | false)
+
+      def get_data: (untyped der, untyped ber) -> (::Array[0 | ""] | ::Array[untyped])
+
+      def get_length: (untyped der, untyped ber) -> ::Array[untyped]
+
+      def raise_on_indefinite_length: (untyped ber) -> untyped
+
+      def explicit_type: () -> untyped
+
+      def raise_id_error: (untyped der) -> untyped
+
+      def self2name: () -> untyped
+
+      def der2name: (untyped der) -> ("no ID" | untyped)
+
+      def find_type: (untyped id) -> untyped
+
+      def bin2hex: (untyped str) -> untyped
+    end
+  end
+end

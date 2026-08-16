@@ -1,0 +1,4 @@
+module RASN1
+  # Rasn2 version number
+  VERSION: "0.16.0"
+end

@@ -3,7 +3,7 @@
 require_relative '../spec_helper'
 
 # rubocop:disable Metrics/BlockLength
-module RASN1::Types
+module RASN2::Types
   describe Boolean do
     describe '.type' do
       it 'gets ASN.1 type' do
@@ -70,14 +70,14 @@ module RASN1::Types
       end
 
       it 'raises on a BER BOOLEAN string if ber parameter is not set' do
-        expect { bool.parse!(ber) }.to raise_error(RASN1::ASN1Error, /bad value 0x56/)
+        expect { bool.parse!(ber) }.to raise_error(RASN2::ASN1Error, /bad value 0x56/)
       end
 
       it 'raises on malformed BOOLEAN (size not equak 1)' do
         ber = "\x01\x00".b
-        expect { bool.parse!(ber) }.to raise_error(RASN1::ASN1Error, /length of 1/)
+        expect { bool.parse!(ber) }.to raise_error(RASN2::ASN1Error, /length of 1/)
         ber = "\x01\x02\xff\xff".b
-        expect { bool.parse!(ber) }.to raise_error(RASN1::ASN1Error, /length of 1/)
+        expect { bool.parse!(ber) }.to raise_error(RASN2::ASN1Error, /length of 1/)
       end
     end
   end

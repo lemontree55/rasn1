@@ -3,7 +3,7 @@
 require_relative '../spec_helper'
 
 # rubocop:disable Metrics/BlockLength
-module RASN1::Types
+module RASN2::Types
   describe Null do
     describe '.type' do
       it 'gets ASN.1 type' do
@@ -40,15 +40,15 @@ module RASN1::Types
 
       it 'raises on malformed NULL tag' do
         der = "\x05\x01\x01".b
-        expect { null.parse!(der) }.to raise_error(RASN1::ASN1Error, /not have content/)
+        expect { null.parse!(der) }.to raise_error(RASN2::ASN1Error, /not have content/)
       end
     end
 
     describe '#inspect' do
       it 'returns inspect string' do
-        expect(Null.new.inspect).to eq('NULL')
-        expect(Null.new(name: :data).inspect).to eq('data NULL')
-        expect(Null.new(optional: true).inspect).to eq('NULL OPTIONAL')
+        expect(Null.new.inspect(color: false)).to eq('NULL')
+        expect(Null.new(name: :data).inspect(color: false)).to eq('data NULL')
+        expect(Null.new(optional: true).inspect(color: false)).to eq('NULL OPTIONAL')
       end
     end
   end

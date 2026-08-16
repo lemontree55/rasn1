@@ -1,0 +1,53 @@
+module RASN1
+  module Types
+    # ASN.1 sequence
+    #
+    # A sequence is a collection of another ASN.1 types.
+    #
+    # To encode this ASN.1 example:
+    #  Record ::= SEQUENCE {
+    #    id        INTEGER,
+    #    room  [0] INTEGER OPTIONAL,
+    #    house [1] IMPLICIT INTEGER DEFAULT 0
+    #  }
+    # do:
+    #  seq = Rasn2::Types::Sequence.new
+    #  seq.value = [
+    #               Rasn2::Types::Integer.new
+    #               Rasn2::Types::Integer.new(explicit: 0, optional: true),
+    #               Rasn2::Types::Integer.new(implicit: 1, default: 0)
+    #              ]
+    #
+    # A sequence may also be used without value to not parse sequence content:
+    #  seq = Rasn2::Types::Sequence.new(:seq)
+    #  seq.parse!(der_string)
+    #  seq.value    # => String
+    # @author Sylvain Daubert
+    class Sequence < Constructed
+      @no_value: untyped
+
+      @value: untyped
+
+      # Sequence id value
+      ID: 16
+
+      # @see Base#initialize
+      def initialize: (?::Hash[untyped, untyped] options) -> void
+
+      # Deep copy @value
+      def initialize_copy: (*untyped) -> untyped
+
+      # @return [Array]
+      def void_value: () -> ::Array[untyped]
+
+      # Get element at index +idx+, or element of name +name+
+      # @param [Integer, String, Symbol] idx_or_name
+      # @return [Object,nil]
+      def []: (untyped idx_or_name) -> (nil | untyped)
+
+      private
+
+      def explicit_type: () -> untyped
+    end
+  end
+end

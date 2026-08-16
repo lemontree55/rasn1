@@ -4,7 +4,7 @@
 require_relative '../spec_helper'
 
 # rubocop:disable Metrics/BlockLength
-module RASN1::Types
+module RASN2::Types
   describe PrintableString do
     describe '.type' do
       it 'gets ASN.1 type' do
@@ -54,7 +54,7 @@ module RASN1::Types
       it 'raises on illegal character' do
         printable = PrintableString.new
         printable.value = ';'
-        expect { printable.to_der }.to raise_error(RASN1::ASN1Error, /invalid char.*';'$/)
+        expect { printable.to_der }.to raise_error(RASN2::ASN1Error, /invalid char.*';'$/)
       end
     end
 
@@ -68,7 +68,7 @@ module RASN1::Types
 
       it 'raises on illegal character' do
         expect { printable.parse!("\x13\x03ab;".b) }
-          .to raise_error(RASN1::ASN1Error, /invalid char.*';'$/)
+          .to raise_error(RASN2::ASN1Error, /invalid char.*';'$/)
       end
     end
   end

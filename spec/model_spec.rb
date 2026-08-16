@@ -4,32 +4,32 @@ require 'spec_helper'
 
 module RASN1Test
   module X509Example
-    class AttributeTypeAndValue < RASN1::Model
+    class AttributeTypeAndValue < RASN2::Model
       sequence :attributeTypeAndValue,
                content: [objectid(:type),
                          any(:value)]
     end
 
-    class AlgorithmIdentifier < RASN1::Model
+    class AlgorithmIdentifier < RASN2::Model
       sequence :algorithmIdentifier
     end
 
-    class RelativeDN < RASN1::Model
+    class RelativeDN < RASN2::Model
       set_of :relativeDN, AttributeTypeAndValue
     end
 
-    class X509Name < RASN1::Model
+    class X509Name < RASN2::Model
       sequence_of :rdnSequence, RelativeDN
     end
 
-    class Extension < RASN1::Model
+    class Extension < RASN2::Model
       sequence :extension,
                content: [objectid(:extnID),
                          boolean(:critical, default: false),
                          octet_string(:extnValue)]
     end
 
-    class TBSCertificate < RASN1::Model
+    class TBSCertificate < RASN2::Model
       sequence :tbsCertificate,
                content: [integer(:version, explicit: 0, constructed: true,
                                            default: 0, enum: { v1: 0, v2: 1, v3: 2 }),
@@ -45,7 +45,7 @@ module RASN1Test
                                                              optional: true)]
     end
 
-    class X509Certificate < RASN1::Model
+    class X509Certificate < RASN2::Model
       sequence :certificate,
                content: [model(:tbsCertificate, TBSCertificate),
                          model(:signatureAlgorithm, AlgorithmIdentifier),
@@ -53,19 +53,19 @@ module RASN1Test
     end
   end
 
-  class OptionalWrappedSubModel < RASN1::Model
+  class OptionalWrappedSubModel < RASN2::Model
     sequence :s, content: [integer(:superid),
                            wrapper(model(:submodel, TestModel::ModelTest), optional: true, explicit: 5)]
   end
 
-  class OptionalWrappedConstructedSubModel < RASN1::Model
+  class OptionalWrappedConstructedSubModel < RASN2::Model
     sequence :s, content: [integer(:superid),
                            wrapper(model(:submodel, TestModel::ConstructedModelTest), optional: true, explicit: 5)]
   end
 end
 
 # rubocop:disable Metrics/BlockLength
-module RASN1 # rubocop:disable Metrics/moduleLength
+module RASN2 # rubocop:disable Metrics/moduleLength
   include TestModel
 
   class NamedModelTest < ModelTest
@@ -109,13 +109,13 @@ module RASN1 # rubocop:disable Metrics/moduleLength
 
     %i[sequence sequence_of set set_of choice].each do |method_name|
       describe ".#{method_name}" do
-        it 'has a line number and source location associated with the rasn1 namespace' do
+        it 'has a line number and source location associated with the rasn2 namespace' do
           method = described_class.method(method_name)
           method_source_file, method_source_line = method.source_location
 
           # By default this will be `["(eval)", 1]` if line/source are not passed to eval
-          # This verifies it is located within the rasn1 namespace
-          expect(method_source_file).to match(/rasn1/)
+          # This verifies it is located within the rasn2 namespace
+          expect(method_source_file).to match(/rasn2/)
           expect(method_source_line).to be_an_instance_of(Integer)
         end
       end
@@ -236,7 +236,7 @@ module RASN1 # rubocop:disable Metrics/moduleLength
       end
 
       it 'raises if element is a Model' do
-        expect { model[:a_record] = ModelTest.new }.to raise_error(RASN1::Error)
+        expect { model[:a_record] = ModelTest.new }.to raise_error(RASN2::Error)
       end
     end
 
@@ -275,7 +275,7 @@ module RASN1 # rubocop:disable Metrics/moduleLength
 
         model = ModelChoice.new
         expect { model.to_h }
-          .to raise_error(an_instance_of(RASN1::ChoiceError).and having_attributes({"message" => "CHOICE choice: #chosen not set"}))
+          .to raise_error(an_instance_of(RASN2::ChoiceError).and having_attributes({"message" => "CHOICE choice: #chosen not set"}))
       end
 
       it 'generates a Hash image of a model with an implicit wrapped submodel' do
@@ -446,6 +446,7 @@ module RASN1 # rubocop:disable Metrics/moduleLength
 
     it 'parses a recursive model' do
       recursive = TestModel::RecursiveModel.parse("\x82\x07\x82\x05\x81\x03abc".b)
+      puts(recursive)
       expect(recursive[:recursive].chosen).to eq(1)
       expect(recursive[:recursive].chosen_value).to be_a(TestModel::RecursiveModel)
       expect(recursive[:recursive].chosen_value.chosen_value).to be_a(TestModel::RecursiveModel)

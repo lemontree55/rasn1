@@ -1,0 +1,21 @@
+module RASN1
+  module Types
+    # ASN.1 Numeric String
+    # @author Sylvain Daubert
+    class NumericString < OctetString
+      # NumericString id value
+      ID: 18
+
+      # Invalid characters in NumericString
+      INVALID_CHARS: ::Regexp
+
+      # Get ASN.1 type
+      # @return [String]
+      def self.type: () -> "NumericString"
+
+      private
+
+      def check_characters: () -> (untyped | nil)
+    end
+  end
+end

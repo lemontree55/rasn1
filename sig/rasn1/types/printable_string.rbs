@@ -1,0 +1,30 @@
+module RASN1
+  module Types
+    # ASN.1 Printable String
+    # @author Sylvain Daubert
+    class PrintableString < OctetString
+      # PrintableString id value
+      ID: 19
+
+      # Invalid characters in PrintableString
+      INVALID_CHARS: ::Regexp
+
+      # Get ASN.1 type
+      # @return [String]
+      def self.type: () -> "PrintableString"
+
+      # Make string value from +der+ string
+      # @param [String] der
+      # @param [::Boolean] ber
+      # @return [void]
+      # @raise [ASN1Error] invalid characters detected
+      def der_to_value: (untyped der, ?ber: bool) -> untyped
+
+      private
+
+      def value_to_der: () -> untyped
+
+      def check_characters: () -> untyped
+    end
+  end
+end

@@ -1,0 +1,62 @@
+module RASN1
+  module Types
+    # ASN.1 Integer
+    # @author Sylvain Daubert
+    class Integer < Primitive
+      @no_value: untyped
+
+      @value: untyped
+
+      @enum: untyped
+
+      @default: untyped
+
+      # @return [Hash,nil]
+      attr_reader enum: Hash[untyped, untyped]?
+
+      # Integer id value
+      ID: 2
+
+      # @option options [Hash] :enum enumeration hash. Keys are names, and values
+      #   are integers.
+      # @raise [EnumeratedError] +:default+ value is unknown when +:enum+ key is present
+      # @see Base#initialize common options to all ASN.1 types
+      def initialize: (?::Hash[untyped, untyped] options) -> void
+
+      # @param [Integer,String,Symbol,nil] val
+      # @return [void]
+      def value=: (untyped val) -> untyped
+
+      # @return [Integer]
+      def void_value: () -> 0
+
+      # Integer value
+      # @return [Integer]
+      def to_i: () -> int
+
+      private
+
+      def initialize_enum: (untyped enum) -> (nil | untyped)
+
+      def check_enum_default: () -> untyped
+
+      def value_from_string_or_symbol: (untyped val) -> untyped
+
+      def value_from_integer: (untyped val) -> untyped
+
+      def int_value_to_der: (untyped value) -> untyped
+
+      def compute_size: (untyped value) -> untyped
+
+      def value_to_der: () -> untyped
+
+      def der_to_int_value: (untyped der, ?ber: bool) -> untyped
+
+      def int_to_enum: (untyped int, ?check_enum: bool) -> untyped
+
+      def explicit_type: () -> untyped
+
+      def trace_data: () -> (untyped | ::String)
+    end
+  end
+end

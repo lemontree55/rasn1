@@ -3,7 +3,7 @@
 require_relative '../spec_helper'
 
 # rubocop:disable Metrics/BlockLength
-module RASN1
+module RASN2
   module Types
     describe Sequence do
       before(:each) do
@@ -94,6 +94,9 @@ module RASN1
 
       describe '#inspect' do
         let(:inspect_str) { @seq.inspect }
+        after do
+          puts inspect_str
+        end
 
         it 'prints a line per value' do
           expect(inspect_str.split("\n").size).to eq(4)

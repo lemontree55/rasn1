@@ -1,0 +1,18 @@
+# Rasn1 is a pure ruby library to parse, decode and encode ASN.1 data.
+# @author Sylvain Daubert
+module RASN1
+  # @private
+  CONTAINER_CLASSES: ::Array[Class]
+
+  # Parse a DER/BER string without checking a model
+  # @note If you want to check ASN.1 grammary, you should define a {Model}
+  #       and use {Model#parse}.
+  # @note This method will never decode SEQUENCE OF or SET OF objects, as these
+  #       ones use the same encoding as SEQUENCE and SET, respectively.
+  # @note Real type of tagged value cannot be guessed. So, such tag will
+  #       generate {Types::Base} objects.
+  # @param [String] der binary string to parse
+  # @param [Boolean] ber if +true+, decode a BER string, else a DER one
+  # @return [Types::Base, Array[Types::Base]]
+  def self.parse: (string der, ?ber: bool) -> (Types::Base | Array[Types::Base])
+end

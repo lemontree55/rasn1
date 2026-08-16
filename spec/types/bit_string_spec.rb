@@ -2,7 +2,7 @@
 
 require_relative '../spec_helper'
 
-module RASN1::Types # rubocop:disable Metrics/ModuleLength
+module RASN2::Types # rubocop:disable Metrics/ModuleLength
   describe BitString do # rubocop:disable Metrics/BlockLength
     describe '.type' do
       it 'gets ASN.1 type' do
@@ -20,7 +20,7 @@ module RASN1::Types # rubocop:disable Metrics/ModuleLength
       end
 
       it 'raises if bit_length option is not set when default value is set' do
-        expect { BitString.new(default: '123') }.to raise_error(RASN1::ASN1Error)
+        expect { BitString.new(default: '123') }.to raise_error(RASN2::ASN1Error)
       end
     end
 
@@ -28,7 +28,7 @@ module RASN1::Types # rubocop:disable Metrics/ModuleLength
       it 'raises if bit length is not set' do
         bs = BitString.new
         bs.value = 'NOP'
-        expect { bs.to_der }.to raise_error(RASN1::ASN1Error)
+        expect { bs.to_der }.to raise_error(RASN2::ASN1Error)
       end
 
       it 'generates a DER string with unfrozen strings' do
@@ -109,16 +109,35 @@ module RASN1::Types # rubocop:disable Metrics/ModuleLength
       end
     end
 
-    describe '#inspect' do
+
+
+
+    shared_examples :inspect do |color|
+      include RASN2::Helpers::Colorize
+
+      before :each do
+        Rainbow.enabled = color
+      end
+
       it 'gets inspect string' do
         bs = BitString.new(value: 'abcd', bit_length: 30)
-        expect(bs.inspect).to eq('BIT STRING: "abcd" (bit length: 30)')
+        expect(bs.inspect(color: color)).to eq("#{colorize_class('BIT STRING')}: (bit length: 30): \"abcd\"")
       end
 
       it 'gets inspect string with name' do
         bs = BitString.new(value: 'abcd', name: :bs, bit_length: 30)
-        expect(bs.inspect).to eq('bs BIT STRING: "abcd" (bit length: 30)')
+        expect(bs.inspect(color: color)).to eq("#{colorize_name('bs')} #{colorize_class('BIT STRING')}: (bit length: 30): \"abcd\"")
       end
     end
+
+    context 'with color' do
+      it_behaves_like :inspect, true
+    end
+
+    context 'without color' do
+      it_behaves_like :inspect, false
+    end
+
+
   end
 end

@@ -13,3 +13,5 @@
 /vendor/
 
 *.code-workspace
+
+.gem_rbs_collection/

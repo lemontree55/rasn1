@@ -4,22 +4,22 @@ require_relative '../spec_helper'
 
 module RASN1Test
   module Constrained
-    RASN1::Types.define_type('UInt32', from: RASN1::Types::Integer, in_module: self) do |val|
+    RASN2::Types.define_type('UInt32', from: RASN2::Types::Integer, in_module: self) do |val|
       (val >= 0) && (val < (2**32))
     end
-    RASN1::Types.define_type('Int', from: RASN1::Types::Integer, in_module: self)
-    RASN1::Types.define_type('MySeq', from: RASN1::Types::Sequence, in_module: self)
+    RASN2::Types.define_type('Int', from: RASN2::Types::Integer, in_module: self)
+    RASN2::Types.define_type('MySeq', from: RASN2::Types::Sequence, in_module: self)
 
-    RASN1::Types.define_type('Int32', from: RASN1::Types::Integer, in_module: self) do |value|
+    RASN2::Types.define_type('Int32', from: RASN2::Types::Integer, in_module: self) do |value|
       (value >= -2**31) && (value < 2**31)
     end
-    RASN1::Types.define_type('LocalSeq', from: RASN1::Types::Sequence, in_module: self)
+    RASN2::Types.define_type('LocalSeq', from: RASN2::Types::Sequence, in_module: self)
 
     module AnotherModule; end
 
-    RASN1::Types.define_type('AnotherType', from: UInt32, in_module: AnotherModule)
+    RASN2::Types.define_type('AnotherType', from: UInt32, in_module: AnotherModule)
 
-    class MyDefinedModel < RASN1::Model
+    class MyDefinedModel < RASN2::Model
       local_seq :myseq, content: [
         int32(:id),
         integer(:normal_integer)
@@ -29,7 +29,7 @@ module RASN1Test
 end
 
 # rubocop:disable Metrics/BlockLength
-module RASN1::Types
+module RASN2::Types
   describe Constrained do
     it 'is defined in given module' do
       expect(RASN1Test::Constrained::AnotherModule.constants).to include(:AnotherType)
@@ -58,7 +58,7 @@ module RASN1::Types
         end
 
         it 'raises with a value out of constraint' do
-          expect { uint32.value = -1 }.to raise_error(RASN1::ConstraintError)
+          expect { uint32.value = -1 }.to raise_error(RASN2::ConstraintError)
         end
       end
 
@@ -90,7 +90,7 @@ module RASN1::Types
         end
 
         it 'raises on DER whose value is out of constraint' do
-          expect { uint32.parse!(der_minus1) }.to raise_error(RASN1::ConstraintError)
+          expect { uint32.parse!(der_minus1) }.to raise_error(RASN2::ConstraintError)
         end
       end
 
@@ -107,7 +107,7 @@ module RASN1::Types
   end
 end
 
-module RASN1
+module RASN2
   describe Model do
     it 'gives access to defined type fields' do
       mdm = RASN1Test::Constrained::MyDefinedModel.new(id: 123, normal_integer: 124)

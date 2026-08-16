@@ -3,7 +3,7 @@
 require_relative '../spec_helper'
 
 # rubocop:disable Metrics/BlockLength
-module RASN1::Types
+module RASN2::Types
   describe GeneralizedTime do
     describe '.type' do
       it 'gets ASN.1 type' do

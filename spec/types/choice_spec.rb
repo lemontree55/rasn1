@@ -3,7 +3,7 @@
 require_relative '../spec_helper'
 
 # rubocop:disable Metrics/BlockLength
-module RASN1::Types
+module RASN2::Types
   describe Choice do
     describe '.type' do
       it 'gets ASN.1 type' do
@@ -38,7 +38,7 @@ module RASN1::Types
         end
 
         it 'raises if chosen is not set' do
-          expect { @choice.set_chosen_value 45 }.to raise_error(RASN1::ChoiceError).with_message(/#chosen not set$/)
+          expect { @choice.set_chosen_value 45 }.to raise_error(RASN2::ChoiceError).with_message(/#chosen not set$/)
         end
       end
 
@@ -54,7 +54,7 @@ module RASN1::Types
         end
 
         it 'raises if chosen is not set' do
-          expect { @choice.chosen_value }.to raise_error(RASN1::ChoiceError)
+          expect { @choice.chosen_value }.to raise_error(RASN2::ChoiceError)
         end
       end
 
@@ -71,7 +71,7 @@ module RASN1::Types
 
         it 'raises if chosen is not set' do
           expect { @choice.to_der }
-            .to raise_error(an_instance_of(RASN1::ChoiceError).and having_attributes({"message" => "CHOICE mock_choice_name: #chosen not set"}))
+            .to raise_error(an_instance_of(RASN2::ChoiceError).and having_attributes({"message" => "CHOICE mock_choice_name: #chosen not set"}))
         end
       end
     end
@@ -95,12 +95,12 @@ module RASN1::Types
       end
 
       context 'when parsing a DER string which does not contain any type from CHOICE' do
-        it 'raises RASN1::ASN1Error' do
+        it 'raises RASN2::ASN1Error' do
           str = Boolean.new(value: false).to_der
-          expect { @choice.parse! str }.to raise_error(RASN1::ASN1Error, /no type matching/)
+          expect { @choice.parse! str }.to raise_error(RASN2::ASN1Error, /no type matching/)
         end
 
-        it 'does not raise RASN1::ASN1Error when optional' do
+        it 'does not raise RASN2::ASN1Error when optional' do
           str = Boolean.new(value: false).to_der
           @choice.options = @choice.options.merge optional: true
           expect { @choice.parse! str }.not_to raise_error
@@ -108,25 +108,28 @@ module RASN1::Types
       end
     end
 
-    describe '#inspect' do
+    shared_examples :inspect do |color|
       before(:each) do
         @choice = Choice.new
         @choice.value = [Integer.new, OctetString.new]
       end
 
       it 'gets inspect string' do
-        expect(@choice.inspect).to eq('CHOICE: not chosen!')
+        expect(@choice.inspect(color: color)).to eq('CHOICE: not chosen!')
         @choice.chosen = 0
-        expect(@choice.inspect).to eq("CHOICE:\n  #{@choice.value[0].inspect}")
+        expect(@choice.inspect(color: color)).to eq("CHOICE:\n  #{@choice.value[0].inspect}")
       end
 
       it 'gets inspect string with name' do
         @choice.instance_eval { @name = :ch }
-        expect(@choice.inspect).to eq('ch CHOICE: not chosen!')
+        expect(@choice.inspect(color: color)).to eq('ch CHOICE: not chosen!')
         @choice.chosen = 0
-        expect(@choice.inspect).to eq("ch CHOICE:\n  #{@choice.value[0].inspect}")
+        expect(@choice.inspect(color: color)).to eq("ch CHOICE:\n  #{@choice.value[0].inspect}")
       end
     end
+
+    it_behaves_like :inspect, true
+    it_behaves_like :inspect, false
   end
 end
 # rubocop:enable Metrics/BlockLength

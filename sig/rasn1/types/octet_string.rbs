@@ -1,0 +1,31 @@
+module RASN1
+  module Types
+    # ASN.1 Octet String
+    #
+    # An OCTET STRINT may contain another primtive object:
+    #  os = OctetString.new
+    #  int = Integer.new
+    #  int.value = 12
+    #  os.value = int
+    #  os.to_der   # => DER string with INTEGER in OCTET STRING
+    # @author Sylvain Daubert
+    class OctetString < Primitive
+      @value: untyped
+
+      # OctetString id value
+      ID: 4
+
+      # Make string value from +der+ string. Force encoding to UTF-8
+      # @param [String] der
+      # @param [::Boolean] ber
+      # @return [void]
+      # @since 0.15.0 Handle ENCODING constant, if defined by subclass
+      def der_to_value: (untyped der, ?ber: bool) -> untyped
+
+      private
+
+      # @since 0.15.0 Handle ENCODING constant, if defined by subclass
+      def value_to_der: () -> untyped
+    end
+  end
+end

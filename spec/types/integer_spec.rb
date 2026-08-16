@@ -3,7 +3,7 @@
 require_relative '../spec_helper'
 
 # rubocop:disable Metrics/BlockLength
-module RASN1::Types # rubocop:disable Metrics/ModuleLength
+module RASN2::Types # rubocop:disable Metrics/ModuleLength
   describe Integer do
     let(:hsh) { { one: 1, two: 2 } }
 
@@ -34,9 +34,9 @@ module RASN1::Types # rubocop:disable Metrics/ModuleLength
 
       it 'raises when default value is not in enum' do
         expect { Integer.new(default: :three, enum: hsh) }
-          .to raise_error(RASN1::EnumeratedError, /default value/)
+          .to raise_error(RASN2::EnumeratedError, /default value/)
         expect { Integer.new(default: 3, enum: hsh) }
-          .to raise_error(RASN1::EnumeratedError, /default value/)
+          .to raise_error(RASN2::EnumeratedError, /default value/)
         expect { Integer.new(default: Object.new, enum: hsh) }
           .to raise_error(TypeError, /default value/)
       end

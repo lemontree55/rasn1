@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-module RASN1
+module RASN2
   describe Types do
     describe '.primitives' do
       it 'gives all subclasses of Primitive' do

@@ -1,0 +1,28 @@
+module RASN1
+  module Types
+    # ASN.1 Object ID
+    # @author Sylvain Daubert
+    # @author LemonTree55
+    class ObjectId < Primitive
+      @value: untyped
+
+      # ObjectId id value
+      ID: 6
+
+      # Make object id value from +der+ string
+      # @param [String] der
+      # @param [::Boolean] ber
+      # @return [void]
+      def der_to_value: (untyped der, ?ber: bool) -> untyped
+
+      private
+
+      # @raise [ASN1Error]
+      def value_to_der: () -> untyped
+
+      # @param [Array[::Integer]] ids
+      # @raise [ASN1Error]
+      def check_first_ids: (untyped ids) -> untyped
+    end
+  end
+end

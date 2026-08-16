@@ -4,7 +4,7 @@ require_relative '../spec_helper'
 
 module RASN1Test
   module SeqOf
-    class SimpleModel < RASN1::Model
+    class SimpleModel < RASN2::Model
       sequence :seq,
                content: [boolean(:bool), integer(:int)]
     end
@@ -12,7 +12,7 @@ module RASN1Test
 end
 
 # rubocop:disable Metrics/BlockLength
-module RASN1
+module RASN2
   module Types # rubocop:disable Metrics/ModuleLength
     describe SequenceOf do
       before(:each) do
@@ -146,23 +146,23 @@ module RASN1
         it 'gets inspect string' do
           @seqof << [true, 12, 'abcd']
           @seqof << [false, 65_534, 'nop']
-          expect(@seqof.inspect).to eq(<<~EOSEQOF
+          result = <<~ENDOFSEQUENCE
             SEQUENCE OF:
               SEQUENCE:
-                BOOLEAN: true DEFAULT true
+                BOOLEAN: true DEFAULT VALUE true
                 INTEGER: 12
                 OCTET STRING: "abcd"
               SEQUENCE:
-                BOOLEAN: false DEFAULT true
+                BOOLEAN: false DEFAULT VALUE true
                 INTEGER: 65534
                 OCTET STRING: "nop"
-          EOSEQOF
-                                      )
+            ENDOFSEQUENCE
+          expect(@seqof.inspect(color: false)).to eq(result.chomp)
 
           seqof = SequenceOf.new(RASN1Test::SeqOf::SimpleModel, name: :seqof)
           seqof << RASN1Test::SeqOf::SimpleModel.new(bool: true, int: 1)
           seqof << RASN1Test::SeqOf::SimpleModel.new(bool: false, int: 2)
-          expect(seqof.inspect).to eq(<<~EOSEQOF
+          expect(seqof.inspect(color: false)).to eq(<<~EOSEQOF
             seqof SEQUENCE OF:
               (SimpleModel) seq SEQUENCE:
                 bool BOOLEAN: true

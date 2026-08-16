@@ -2,7 +2,7 @@
 
 require_relative '../spec_helper'
 
-module RASN1::Types # rubocop:disable Metrics/ModuleLength
+module RASN2::Types # rubocop:disable Metrics/ModuleLength
   describe Base do # rubocop:disable Metrics/BlockLength
     describe '#initialize' do # rubocop:disable Metrics/BlockLength
       it 'sets value' do
@@ -24,8 +24,8 @@ module RASN1::Types # rubocop:disable Metrics/ModuleLength
       end
 
       it 'raises on unknown class' do
-        expect { Base.new(class: :unknown) }.to raise_error(RASN1::ClassError).with_message(/^Tag class should be a symbol among/)
-        expect { Base.new(class: 'not a symbol') }.to raise_error(RASN1::ClassError)
+        expect { Base.new(class: :unknown) }.to raise_error(RASN2::ClassError).with_message(/^Tag class should be a symbol among/)
+        expect { Base.new(class: 'not a symbol') }.to raise_error(RASN2::ClassError)
       end
 
       it 'sets optional option' do
@@ -81,10 +81,17 @@ module RASN1::Types # rubocop:disable Metrics/ModuleLength
 
     describe '#parse!' do # rubocop:disable Metrics/BlockLength
       let(:unexpected_der) { "\x02\x02\xca\xfe".b }
+      before do
+        Rainbow.enabled = false
+      end
+
+      after do
+        Rainbow.enabled = true
+      end
 
       it 'raises on unexpected ID value' do
         bool = Boolean.new
-        expect { bool.parse!(unexpected_der) }.to raise_error(RASN1::ASN1Error)
+        expect { bool.parse!(unexpected_der) }.to raise_error(RASN2::ASN1Error)
           .with_message('Expected UNIVERSAL PRIMITIVE BOOLEAN but get UNIVERSAL PRIMITIVE INTEGER')
       end
 
@@ -140,7 +147,7 @@ module RASN1::Types # rubocop:disable Metrics/ModuleLength
       it 'raises on indefinite length with primitive types' do
         bool = Boolean.new
         der = "\x01\x80\xff\x00\x00".b
-        expect { bool.parse!(der) }.to raise_error(RASN1::ASN1Error)
+        expect { bool.parse!(der) }.to raise_error(RASN2::ASN1Error)
           .with_message('malformed BOOLEAN: indefinite length forbidden for primitive types')
       end
 
@@ -149,7 +156,7 @@ module RASN1::Types # rubocop:disable Metrics/ModuleLength
         let(:seq) { Sequence.new.tap { |s| s.value = [Boolean.new] } }
 
         it 'on DER encoding' do
-          expect { seq.parse!(der) }.to raise_error(RASN1::ASN1Error)
+          expect { seq.parse!(der) }.to raise_error(RASN2::ASN1Error)
         end
 
         it 'on BER encoding' do
@@ -218,6 +225,38 @@ module RASN1::Types # rubocop:disable Metrics/ModuleLength
           expect(type.implicit?).to be(true)
           expect(type.asn1_class).to eq(:private)
           expect(type.id).to eq(15)
+        end
+
+        it 'creates an explicit tagged type from a string (4CC-style)' do
+          type = Integer.new(explicit: 'ftyp')
+          expected_id = 'ftyp'.bytes.reduce(0) { |acc, b| (acc << 8) | b }
+          expect(type.tagged?).to be(true)
+          expect(type.explicit?).to be(true)
+          expect(type.id).to eq(expected_id)
+        end
+
+        it 'creates an implicit tagged type from a string (4CC-style)' do
+          type = Integer.new(implicit: 'moov')
+          expected_id = 'moov'.bytes.reduce(0) { |acc, b| (acc << 8) | b }
+          expect(type.tagged?).to be(true)
+          expect(type.implicit?).to be(true)
+          expect(type.id).to eq(expected_id)
+        end
+
+        it 'creates an explicit tagged type from a symbol (4CC-style)' do
+          type = Integer.new(explicit: :ftyp)
+          expected_id = 'ftyp'.bytes.reduce(0) { |acc, b| (acc << 8) | b }
+          expect(type.tagged?).to be(true)
+          expect(type.explicit?).to be(true)
+          expect(type.id).to eq(expected_id)
+        end
+
+        it 'creates an implicit tagged type from a symbol (4CC-style)' do
+          type = Integer.new(implicit: :moov)
+          expected_id = 'moov'.bytes.reduce(0) { |acc, b| (acc << 8) | b }
+          expect(type.tagged?).to be(true)
+          expect(type.implicit?).to be(true)
+          expect(type.id).to eq(expected_id)
         end
       end
 
@@ -301,12 +340,12 @@ module RASN1::Types # rubocop:disable Metrics/ModuleLength
       end
 
       it 'gives OPTIONAL information' do
-        expect(Integer.new(value: 0, optional: true).inspect).to eq('INTEGER: 0 OPTIONAL')
+        expect(Integer.new(value: 0, optional: true).inspect).to eq('INTEGER OPTIONAL: 0')
       end
 
       it 'gives DEFAULT information' do
-        expect(Integer.new(value: 0, default: 0).inspect).to eq('INTEGER: 0 DEFAULT 0')
-        expect(Integer.new(value: 1, default: 0).inspect).to eq('INTEGER: 1 DEFAULT 0')
+        expect(Integer.new(value: 0, default: 0).inspect).to eq('INTEGER: 0 DEFAULT VALUE 0')
+        expect(Integer.new(value: 1, default: 0).inspect).to eq('INTEGER: 1 DEFAULT VALUE 0')
       end
     end
 

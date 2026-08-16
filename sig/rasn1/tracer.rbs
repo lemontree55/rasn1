@@ -1,0 +1,49 @@
+module RASN1
+  self.@tracer: untyped
+
+  # @private
+  class Tracer
+    @io: untyped
+
+    @tracing_level: untyped
+
+    # @return [IO]
+    attr_reader io: untyped
+
+    # @return [Integer]
+    attr_accessor tracing_level: untyped
+
+    TRACED_CLASSES: ::Array[untyped]
+
+    # @param [IO] io
+    def initialize: (untyped io) -> void
+
+    # Puts +msg+ onto {#io}.
+    # @param [String] msg
+    # @return [void]
+    def trace: (untyped msg) -> untyped
+
+    # Return identation for given +level+. If +nil+, use {#tracing_level}.
+    # @param [Integer,nil] level
+    # @return [String]
+    def indent: (?untyped? level) -> untyped
+
+    def self.tracing_level: -> int
+  end
+
+  # Trace Rasn2 parsing to +io+.
+  # All parsing methods called in block are traced to +io+. Each ASN.1 element is
+  # traced in a line showing element's id, its length and its data.
+  # @param [IO] io
+  # @example
+  #   Rasn2.trace do
+  #     Rasn2.parse("\x02\x01\x01")  # puts "INTEGER id: 2 (0x02), len: 1 (0x01), data: 0x01"
+  #   end
+  #   Rasn2.parse("\x01\x01\xff")    # puts nothing onto STDOUT
+  # @return [void]
+  def self.trace: (?untyped io) { (untyped) -> untyped } -> untyped
+
+  # @private
+  def self.tracer: () -> untyped
+
+end

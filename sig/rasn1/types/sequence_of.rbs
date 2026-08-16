@@ -1,0 +1,120 @@
+module RASN1
+  module Types
+    # ASN.1 SEQUENCE OF
+    #
+    # A SEQUENCE OF is an array of one ASN.1 type.
+    #
+    # == Use with {Primitive} types
+    # To encode this ASN.1 example:
+    #  Integers ::= SEQUENCE OF INTEGER
+    # do:
+    #  # Create a SEQUENCE OF INTEGER
+    #  seqof = Rasn2::Types::SequenceOf.new(Rasn2::Types::Integer)
+    #  # Set integer values
+    #  seqof.value = [1, 2, 3, 4].map { |i| Rasn2::Types::Integer.new(value: i) }
+    #  seqof << 5   # infer a Rasn2::Types::Integer with given value
+    #
+    # == Use with {Constructed} types
+    # SEQUENCE OF may be used to create sequence of composed types. For example:
+    #  composed_type = Rasn2::Types::Sequence.new
+    #  commposed_type.value = [Rasn2::Types::Integer,
+    #                          Rasn2::Types::OctetString]
+    #  seqof = Rasn2::Types::SequenceOf.new(composed_type)
+    #  seqof << [0, 'data0']
+    #  seqof << [1, 'data1']
+    #
+    # == Use with {Model}
+    # SEQUENCE OF may also be used with a Model type:
+    #  class MyModel < Rasn2::Model
+    #    sequence :seq,
+    #             content: [boolean(:bool), integer(:int)]
+    #  end
+    #
+    #  seqof = Rasn2::Types::SequenceOf.new(:record, MyModel)
+    #  # set values
+    #  seqof << { bool: true, int: 12 }
+    #  seqof << { bool: false, int: 65535 }
+    #  # Generate DER string
+    #  der = seqof.to_der    # => String
+    #  # parse
+    #  seqof.parse! der
+    #
+    # After parsing, a SEQUENCE OF may be accessed as an Array:
+    #  seqof[0]                # => MyModel
+    #  seqof[0][:bool].value   # => true
+    #  seqof[0][:int].value    # => 12
+    # @author Sylvain Daubert
+    class SequenceOf < Constructed
+      @of_type: untyped
+
+      @no_value: untyped
+
+      @value: untyped
+
+      # SequenceOf id value
+      ID: untyped
+
+      # @return [Class, Base]
+      attr_reader of_type: untyped
+
+      # A SEQUENCE OF is encoded as a SEQUENCE.
+      # @return ['SEQUENCE']
+      def self.encoded_type: () -> untyped
+
+      # @param [Class, Base] of_type base type for sequence of
+      # @see Base#initialize
+      def initialize: (untyped of_type, ?::Hash[untyped, untyped] options) -> void
+
+      # Clone @#of_type and values
+      def initialize_copy: (*untyped) -> untyped
+
+      # @return [Array]
+      def void_value: () -> ::Array[untyped]
+
+      # Add an item to SEQUENCE OF
+      # @param [Object] obj
+      # @note
+      #   * if a SEQUENCE OF primitive type, +obj+ is an instance of primitive type or equivalent Ruby type
+      #   * if a SEQUENCE OF composed type, +obj+ is an array of ruby type instances
+      #   * if a SEQUENCE OF model, +obj+ is either a Model or a Hash
+      def <<: (untyped obj) -> untyped
+
+      # Get element of index +idx+
+      # @param [Integer] idx
+      # @return [Base]
+      def []: (untyped idx) -> untyped
+
+      # Get length of SEQUENCE OF (ie number of elements)
+      # @return [Integer]
+      def length: () -> untyped
+
+      # @param [::Integer] level
+      # @return [String]
+      def inspect: (?::Integer level) -> untyped
+
+      # Make sequence of value from +der+ string
+      # @param [String] der
+      # @param [::Boolean] ber
+      # @return [void]
+      def der_to_value: (untyped der, ?ber: bool) -> untyped
+
+      private
+
+      def of_type_class: () -> untyped
+
+      def composed_of_type?: () -> untyped
+
+      def value_to_der: () -> untyped
+
+      def explicit_type: () -> untyped
+
+      def push_primitive: (untyped obj) -> untyped
+
+      def push_composed_array: (untyped obj) -> untyped
+
+      def push_model: (untyped obj) -> untyped
+
+      def trace_data: () -> ""
+    end
+  end
+end

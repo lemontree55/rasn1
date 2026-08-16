@@ -4,7 +4,7 @@
 require_relative '../spec_helper'
 
 # rubocop:disable Metrics/BlockLength
-module RASN1::Types
+module RASN2::Types
   describe VisibleString do
     describe '.type' do
       it 'gets ASN.1 type' do
@@ -53,7 +53,7 @@ module RASN1::Types
     describe '#value=' do
       it 'raises when including a non-visible character' do
         vs = VisibleString.new
-        expect { vs.value = 1.chr }.to raise_error(RASN1::ConstraintError)
+        expect { vs.value = 1.chr }.to raise_error(RASN2::ConstraintError)
       end
     end
 
@@ -67,7 +67,7 @@ module RASN1::Types
       end
 
       it 'raises when parsing a DER string containing a non-visible character' do
-        expect {vs.parse!("\x1a\x01\x01".b)}.to raise_error(RASN1::ConstraintError)
+        expect {vs.parse!("\x1a\x01\x01".b)}.to raise_error(RASN2::ConstraintError)
       end
     end
   end

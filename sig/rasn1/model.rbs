@@ -1,0 +1,383 @@
+module RASN1
+  # @abstract
+  # {Model} class is a base class to define ASN.1 models.
+  # == Create a simple ASN.1 model
+  # Given this ASN.1 example:
+  #  Record ::= SEQUENCE {
+  #    id        INTEGER,
+  #    room  [0] IMPLICIT INTEGER OPTIONAL,
+  #    house [1] EXPLICIT INTEGER DEFAULT 0
+  #  }
+  # you may create your model like this:
+  #  class Record < Rasn2::Model
+  #    sequence(:record,
+  #             content: [integer(:id),
+  #                       integer(:room, implicit: 0, optional: true),
+  #                       integer(:house, explicit: 1, default: 0)])
+  #  end
+  #
+  # Since 0.17.0, content may also be defined through a block. This is strictly
+  # equivalent to the +:content+ option:
+  #  class Record < Rasn2::Model
+  #    sequence :record do
+  #      integer :id
+  #      integer :room, implicit: 0, optional: true
+  #      integer :house, explicit: 1, default: 0
+  #    end
+  #  end
+  # Blocks may be nested, and may use all model helpers (+#model+, +#wrapper+, +#sequence_of+, ...):
+  #  class PersonnelRecord < Rasn2::Model
+  #    sequence :personnelRecord do
+  #      utf8_string :name
+  #      utf8_string :title
+  #      integer :age
+  #      boolean :employed
+  #    end
+  #  end
+  # When both +:content+ option and a block are given, block elements are appended to
+  # those defined by the option.
+  #
+  # In a model, each element must have a unique name.
+  #
+  # === Parse a DER-encoded string
+  #  record = Record.parse(der_string)
+  #  record[:id]             # => Rasn2::Types::Integer
+  #  record[:id].value       # => Integer
+  #  record[:id].to_i        # => Integer
+  #  record[:id].asn1_class  # => Symbol
+  #  record[:id].optional?   # => false
+  #  record[:id].default     # => nil
+  #  record[:room].optional  # => true
+  #  record[:house].default  # => 0
+  #
+  # You may also parse a BER-encoded string this way:
+  #  record = Record.parse(der_string, ber: true)
+  #
+  # === Generate a DER-encoded string
+  #  record = Record.new(id: 12, room: 24)
+  #  record.to_der
+  #
+  # == Create a more complex model
+  # Models may be nested. For example:
+  #  class Record2 < Rasn2::Model
+  #    sequence(:record2,
+  #             content: [boolean(:rented, default: false),
+  #                       model(:a_record, Record)])
+  #  end
+  # Set values like this:
+  #  record2 = Record2.new
+  #  record2[:rented] = true
+  #  record2[:a_record][:id] = 65537
+  #  record2[:a_record][:room] = 43
+  # or like this:
+  #  record2 = Record2.new(rented: true, a_record: { id: 65537, room: 43 })
+  # Same model, using a block:
+  #  class Record2 < Rasn2::Model
+  #    sequence :record2 do
+  #      boolean :rented, default: false
+  #      model :a_record, Record
+  #    end
+  #  end
+  #
+  # == Delegation
+  # {Model} may delegate some methods to its root element. Thus, if root element
+  # is, for example, a {Types::Choice}, model may delegate +#chosen+ and +#chosen_value+.
+  #
+  # All methods defined by root may be delegated by model, unless model also defines
+  # this method.
+  # @author Sylvain Daubert
+  # @author adfoster-r7 ModelValidationError, track source location for dynamic class methods
+  class Model
+    @elements: untyped
+
+    @root: untyped
+
+    @root_name: untyped
+
+    # @private Base Element
+    BaseElem: untyped
+
+    # @private Model Element
+    ModelElem: untyped
+
+    # @private Wrapper Element
+    WrapElem: untyped
+
+    # @private Sequence types
+    SEQUENCE_TYPES: ::Array[untyped]
+
+    # Define helper methods to define models
+    module Accel
+      @root: untyped
+
+      @content_builders: untyped
+
+      @options: untyped
+
+      @type: untyped
+
+      # @return [Hash]
+      attr_reader options: untyped
+
+      # Use another model in this model
+      # @param [String,Symbol] name
+      # @param [Class] model_klass
+      # @return [Elem]
+      def model: (untyped name, untyped model_klass) -> untyped
+
+      # Use a {Wrapper} around a {Types::Base} or a {Model} object
+      # @overload wrapper(element, options={})
+      #  @param [Types::Base,Model] element
+      #  @param [Hash] options
+      # @overload wrapper(options={}, &block)
+      #  Define the wrapped element through a block. The block must define exactly one element.
+      #  @param [Hash] options
+      #  @yieldreturn [void]
+      # @return [WrapElem]
+      # @since 0.12
+      # @since 0.17.0 block form
+      def wrapper: (?untyped? element, ?::Hash[untyped, untyped] options) ?{ (?) -> untyped } -> untyped
+
+      # @private Register +elem+ as a child of the block currently being evaluated, or as
+      #   the root element of the model when no block is being evaluated.
+      # @param [BaseElem,ModelElem,WrapElem] elem
+      # @return [BaseElem,ModelElem,WrapElem] elem
+      # @since 0.17.0
+      def push_element: (untyped elem) -> untyped
+
+      # @private Evaluate +block+ and collect all elements defined by it.
+      # @return [Array<BaseElem,ModelElem,WrapElem>]
+      # @since 0.17.0
+      def capture_content: () { (?) -> untyped } -> Array[BaseElem|ModelElem|WrapElem]
+
+      # Update options of root element.
+      # May be used when subclassing.
+      #  class Model1 < Rasn2::Model
+      #    sequence :seq, implicit: 0,
+      #             content: [bool(:bool), integer(:int)]
+      #  end
+      #
+      #  # same as Model1 but with implicit tag set to 1
+      #  class Model2 < Model1
+      #    root_options implicit: 1
+      #  end
+      # @param [Hash] options
+      # @return [void]
+      # @since 0.12.0 may change name through +:name+
+      def root_options: (untyped options) -> (nil | untyped)
+
+      # On inheritance, create +@root+ class variable
+      # @param [Class] klass
+      # @return [void]
+      def inherited: (untyped klass) -> untyped
+
+      # @private
+      # @param [String,Symbol] accel_name
+      # @param [Class] klass
+      # @since 0.11.0
+      # @since 0.12.0 track source location on error (adfoster-r7)
+      # @since 0.17.0 accept a block to define content
+      def define_type_accel_base: (untyped accel_name, untyped klass) -> untyped
+
+      # @private
+      # @param [String,Symbol] accel_name
+      # @param [Class] klass
+      # @since 0.11.0
+      # @since 0.12.0 track source location on error (adfoster-r7)
+      def define_type_accel_of: (untyped accel_name, untyped klass) -> untyped
+
+      # Define an accelarator to access a type in a model definition
+      # @param [String] accel_name
+      # @param [Class] klass class to instanciate
+      # @since 0.11.0
+      # @since 0.12.0 track source location on error (adfoster-r7)
+      def define_type_accel: (untyped accel_name, untyped klass) -> untyped
+
+      # @param [Symbol,String] name name of object in model
+      # @param [Hash] options
+      # @return [Elem]
+      # @note This method is named +objectid+ and not +object_id+ to not override
+      #   +Object#object_id+.
+      # @see Types::ObjectId#initialize
+      def objectid: (untyped name, ?::Hash[untyped, untyped] options) -> untyped
+
+      # @param [Symbol,String] name name of object in model
+      # @param [Hash] options
+      # @return [Elem]
+      # @see Types::Any#initialize
+      def any: (untyped name, ?::Hash[untyped, untyped] options) -> untyped
+
+      # Give type name (aka class name)
+      # @return [String]
+      def type: () -> untyped
+
+      # Parse a DER/BER encoded string
+      # @param [String] str
+      # @param [Boolean] ber accept BER encoding or not
+      # @return [Model]
+      # @raise [ASN1Error] error on parsing
+      def parse: (untyped str, ?ber: bool) -> untyped
+
+      private
+
+      # Remove from +builder+ the elements consumed by +elem+. This happens when sub-elements
+      # are defined as arguments (through +:content+ option or as +wrapper+ argument) inside a
+      # content block: they were already registered in +builder+ by their own definition.
+      # @return [void]
+      def remove_consumed_elements: (untyped builder, untyped elem) -> (nil | untyped)
+
+      # Merge content defined through +:content+ option with content defined through a block
+      # @return [Array]
+      def merge_content: (untyped option_content, untyped block_content) -> untyped
+
+      # Evaluate +block+ and ensure it defines exactly one element
+      # @return [BaseElem,ModelElem,WrapElem]
+      def single_element_from_block: (untyped helper_name) { (?) -> untyped } -> untyped
+    end
+
+    extend Accel
+
+    # @return [Model, Wrapper, Types::Base]
+    attr_reader root: untyped
+
+    # Create a new instance of a {Model}
+    # @param [Hash] args
+    def initialize: (?::Hash[untyped, untyped] args) -> void
+
+    # @overload [](name)
+    #  Access an element of the model by its name
+    #  @param [Symbol] name
+    #  @return [Model, Types::Base, Wrapper]
+    # @overload [](idx)
+    #  Access an element of root element by its index. Root element must be a {Sequence} or {SequenceOf}.
+    #  @param [Integer] idx
+    #  @return [Model, Types::Base, Wrapper]
+    def []: (untyped name_or_idx) -> untyped
+
+    # Set value of element +name+. Element should be a {Types::Base}.
+    # @param [String,Symbol] name
+    # @param [Object] value
+    # @return [Object] value
+    def []=: (untyped name, untyped value) -> untyped
+
+    # clone @elements and initialize @root from this new @element.
+    def initialize_copy: (untyped _other) -> untyped
+
+    # Give model name (a.k.a root name)
+    # @return [String]
+    def name: () -> untyped
+
+    # Get elements names
+    # @return [Array<Symbol,String>]
+    def keys: () -> untyped
+
+    # Return a hash image of model
+    # @return [Hash]
+    def to_h: () -> untyped
+
+    # @return [String]
+    def to_der: () -> untyped
+
+    # Give type name (aka class name)
+    # @return [String]
+    def type: () -> untyped
+
+    # Parse a DER/BER encoded string, and modify object in-place.
+    # @param [String] der
+    # @param [Boolean] ber accept BER encoding or not
+    # @return [Integer] number of parsed bytes
+    # @raise [ASN1Error] error on parsing
+    def parse!: (untyped der, ?ber: bool) -> untyped
+
+    # @private
+    # @see Types::Base#do_parse
+    def do_parse: (untyped der, ?ber: bool) -> untyped
+
+    # @overload value
+    #  Get value of root element
+    #  @return [Object,nil]
+    # @overload value(name, *args)
+    #  Direct access to the value of +name+ (nested) element of model.
+    #  @param [String,Symbol] name
+    #  @param [Array<Integer,String,Symbol>] args more argument to access element. May be
+    #     used to access content of a SequenceOf or a SetOf
+    #  @return [Object,nil]
+    # @return [Object,nil]
+    # @example
+    #  class MyModel1 < Rasn2::Model
+    #    sequence('seq', content: [boolean('boolean'), integer('int')])
+    #  end
+    #  class MyModel2 < Rasn2::Model
+    #    sequence('root', content: [sequence_of('list', MyModel1)])
+    #  end
+    #  model = MyModel2.new
+    #  model.parse!(der)
+    #  # access to 2nd MyModel1.int in list
+    #  model.value('list', 1, 'int')
+    def value: (?untyped? name, *untyped args) -> (untyped | nil | untyped)
+
+    # Return a hash image of model
+    # @return [Hash]
+    # Delegate some methods to root element
+    # @param [Symbol] meth
+    def method_missing: (untyped meth, *untyped args, **untyped kwargs) -> untyped
+
+    # @return [Boolean]
+    def respond_to_missing?: (untyped meth, *untyped) -> untyped
+
+    # @return [String]
+    def inspect: (?::Integer level) -> ::String
+
+    # Objects are equal if they have same class AND same DER
+    # @param [Base] other
+    # @return [Boolean]
+    def ==: (untyped other) -> untyped
+
+    # Initialize model elements from +args+
+    # @param [Hash,Array] args
+    # @return [void]
+    def lazy_initialize: (untyped args) -> untyped
+
+    # Initialize an element from a hash
+    # @param [Hash] args
+    # @return [void]
+    def lazy_initialize_hash: (untyped args) -> untyped
+
+    # Initialize an sequence element from an array
+    # @param [Array] args
+    # @return [void]
+    def lazy_initialize_array: (untyped ary) -> untyped
+
+    # Give a (nested) element from its name
+    # @param [String, Symbol] name
+    # @return [Model, Types::Base, nil]
+    def by_name: (untyped name) -> (untyped | nil)
+
+    private
+
+    def generate_root: (untyped args) -> untyped
+
+    def generate_element: (untyped elt, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def generate_wrapper_element: (untyped elt, untyped opts) -> untyped
+
+    def generate_base_element: (untyped elt, untyped opts) -> untyped
+
+    # @author sdaubert
+    # @author lemontree55
+    # @author adfoster-r7
+    def private_to_h: (?untyped? element) -> untyped
+
+    def model_to_h: (untyped elt) -> untyped
+
+    def sequence_of_to_h: (untyped elt) -> untyped
+
+    def sequence_to_h: (untyped seq) -> untyped
+
+    def choice_to_h: (untyped elt) -> ::Hash[untyped, untyped]
+
+    def unwrap_keyname: (untyped key) -> untyped
+
+    def wrapper_to_h: (untyped wrap) -> untyped
+  end
+end

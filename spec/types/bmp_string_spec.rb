@@ -3,7 +3,7 @@
 
 require_relative '../spec_helper'
 
-describe RASN1::Types::BmpString do # rubocop:disable Metrics/BlockLength
+describe RASN2::Types::BmpString do # rubocop:disable Metrics/BlockLength
   describe '.type' do
     it 'gets ASN.1 type' do
       expect(described_class.type).to eq('BmpString')

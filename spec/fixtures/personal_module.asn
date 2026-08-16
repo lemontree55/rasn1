@@ -1,0 +1,12 @@
+PersonnelModule DEFINITIONS IMPLICIT TAGS ::=
+BEGIN
+
+PersonnelRecord ::= SEQUENCE {
+    name        PrintableString,
+    title       VisibleString,
+    age         INTEGER (0..120),
+    employed    BOOLEAN DEFAULT TRUE,
+    comment     UTF8String OPTIONAL
+}
+
+END

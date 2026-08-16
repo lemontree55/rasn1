@@ -1,0 +1,31 @@
+module RASN1
+  module Types
+    # ASN.1 UTCTime
+    #
+    # +{#value} of a +UtcTime+ should be a ruby Time.
+    #
+    # ===Notes
+    # When encoding, resulting string is always a UTC time, appended with +Z+.
+    # Seconds are always generated.
+    #
+    # On parsing, UTC times (ending with +Z+) and local times (ending with
+    # +sHHMM+, where +s+ is +++ or +-+, and +HHMM+ is the time differential
+    # betwen UTC and local time) are both supported. Seconds may be present or
+    # not.
+    # @author Sylvain Daubert
+    class UtcTime < Primitive
+      @value: untyped
+
+      # UtcTime id value
+      ID: 23
+
+      # Get ASN.1 type
+      # @return [String]
+      def self.type: () -> "UTCTime"
+
+      private
+
+      def trace_data: () -> untyped
+    end
+  end
+end

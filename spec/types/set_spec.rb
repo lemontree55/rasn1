@@ -3,7 +3,7 @@
 require_relative '../spec_helper'
 
 # rubocop:disable Metrics/BlockLength
-module RASN1
+module RASN2
   module Types
     describe Set do
       before(:each) do

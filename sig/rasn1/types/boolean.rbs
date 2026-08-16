@@ -1,0 +1,36 @@
+module RASN1
+  module Types
+    # ASN.1 Boolean
+    # @author Sylvain Daubert
+    class Boolean < Primitive
+      @value: untyped
+
+      # Boolean id value
+      ID: 1
+
+      # DER true value
+      DER_TRUE: 255
+
+      # DER false value
+      DER_FALSE: 0
+
+      # @return [false]
+      def void_value: () -> false
+
+      # Make boolean value from DER/BER string.
+      # @param [String] der
+      # @param [::Boolean] ber
+      # @return [void]
+      # @see Types::Base#der_to_value
+      # @raise [ASN1Error] +der+ is not 1-byte long
+      # @raise [ASN1Error] +der+ is not {DER_TRUE} nor {DER_FALSE} and +ber+ is +false+
+      def der_to_value: (untyped der, ?ber: bool) -> untyped
+
+      private
+
+      def value_to_der: () -> untyped
+
+      def trace_data: () -> (untyped | ::String)
+    end
+  end
+end

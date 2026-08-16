@@ -3,7 +3,7 @@
 require_relative '../spec_helper'
 
 # rubocop:disable Metrics/BlockLength
-module RASN1::Types
+module RASN2::Types
   describe ObjectId do
     describe '.type' do
       it 'gets ASN.1 type' do
@@ -53,7 +53,7 @@ module RASN1::Types
       it 'raises if first subidentifier is greater than 2' do
         oi = ObjectId.new
         oi.value = '3.1'
-        expect { oi.to_der }.to raise_error(RASN1::ASN1Error, /less than 3/)
+        expect { oi.to_der }.to raise_error(RASN2::ASN1Error, /less than 3/)
       end
 
       it 'raises if first subidentifier is lesser than 2 and second is greater than 39' do
@@ -61,9 +61,9 @@ module RASN1::Types
         oi.value = '0.39'
         expect { oi.to_der }.to_not raise_error
         oi.value = '0.40'
-        expect { oi.to_der }.to raise_error(RASN1::ASN1Error, /less than 40/)
+        expect { oi.to_der }.to raise_error(RASN2::ASN1Error, /less than 40/)
         oi.value = '1.40'
-        expect { oi.to_der }.to raise_error(RASN1::ASN1Error, /less than 40/)
+        expect { oi.to_der }.to raise_error(RASN2::ASN1Error, /less than 40/)
         oi.value = '2.40'
         expect { oi.to_der }.to_not raise_error
       end

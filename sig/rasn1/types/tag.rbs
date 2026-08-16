@@ -1,0 +1,71 @@
+module RASN1
+  module Types
+    # ASN.1 Tag constructed type.
+    #
+    # A Tag type is a constructed element with schematized content
+    # (child elements, like a {Sequence}) that can be bound to flexible tag
+    # criteria instead of a fixed universal tag:
+    # * a single tag number,
+    # * a list of possible tag numbers,
+    # * any private-class tag.
+    class Tag < Constructed
+      @no_value: untyped
+
+      @value: untyped
+
+      @matched_tag: Integer?
+
+      @any_private: bool
+
+      @accepted_tags: Array[Integer]
+
+      # Placeholder ID — not used directly; tag is always dynamic.
+      ID: 0
+
+      # @return [Integer, nil] the tag number that was matched during parsing
+      attr_reader matched_tag: Integer?
+
+      # @param [Hash] options
+      # @option options [Integer, Array<Integer>, :private] :tag tag number(s) to
+      #   bind to, or +:private+ to accept any private-class tag
+      # @option options [Boolean] :any_private if +true+, accept any private-class tag
+      # @see Base#initialize
+      def initialize: (?::Hash[untyped, untyped] options) -> void
+
+      # Deep copy
+      def initialize_copy: (*untyped) -> untyped
+
+      # @return [Array]
+      def void_value: () -> ::Array[untyped]
+
+      # Get element by index or name
+      # @param [Integer, String, Symbol] idx_or_name
+      # @return [Object, nil]
+      def []: (untyped idx_or_name) -> untyped
+
+      # Parse constructed content from DER
+      # @param [String] der
+      # @param [Boolean] ber
+      # @return [void]
+      def der_to_value: (String der, ?ber: bool) -> void
+
+      private
+
+      def extract_tag_binding: (Hash[untyped, untyped] options) -> void
+
+      def check_id: (untyped der) -> (true | false)
+
+      def check_any_private_id: (untyped der) -> (true | false)
+
+      def check_multi_tag_id: (untyped der) -> (true | false)
+
+      def no_match: (untyped der) -> false
+
+      def value_to_der: () -> String
+
+      def trace_data: () -> String
+
+      def explicit_type: () -> Tag
+    end
+  end
+end

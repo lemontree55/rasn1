@@ -1,0 +1,29 @@
+module RASN1
+  module Types
+    # ASN.1 Null
+    # @author Sylvain Daubert
+    class Null < Primitive
+      @no_value: untyped
+
+      @value: untyped
+
+      # Null id value
+      ID: 5
+
+      # @return [Boolean]
+      # Build only if not optional
+      def can_build?: () -> untyped
+
+      # Check +der+ string
+      # @param [String] der
+      # @param [::Boolean] ber
+      # @return [void]
+      # @raise [ASN1Error] +der+ is not empty
+      def der_to_value: (untyped der, ?ber: bool) -> untyped
+
+      private
+
+      def value_to_der: () -> ""
+    end
+  end
+end

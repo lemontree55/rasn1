@@ -1,0 +1,89 @@
+module RASN1
+  module Types
+    # A ASN.1 CHOICE is a choice between different types.
+    #
+    # == Create a CHOICE
+    # A CHOICE is defined this way:
+    #   choice = Choice.new
+    #   choice.value = [Integer.new(implicit: 0, class: :context),
+    #                   Integer.new(implicit: 1, class: :context),
+    #                   OctetString.new(implicit: 2, class: :context)]
+    # The chosen type may be set this way:
+    #   choice.chosen = 0   # choose :int1
+    # The chosen value may be set these ways:
+    #   choise.value[choice.chosen].value = 1
+    #   choise.set_chosen_value 1
+    # The chosen value may be got these ways:
+    #   choise.value[choice.chosen].value # => 1
+    #   choice.chosen_value               # => 1
+    #
+    # == Encode a CHOICE
+    # {#to_der} only encodes the chosen value:
+    #   choise.to_der   # => "\x80\x01\x01"
+    #
+    # == Parse a CHOICE
+    # Parsing a CHOICE set {#chosen} and set value to chosen type. If parsed string does
+    # not contain a type from CHOICE, a {Rasn2::ASN1Error} is raised.
+    #   str = "\x04\x03abc"
+    #   choice.parse! str
+    #   choice.chosen        # => 2
+    #   choice.chosen_value  # => "abc"
+    # @author Sylvain Daubert
+    class Choice < Base
+      @no_value: untyped
+
+      @value: Base
+
+      # Chosen type
+      # @return [Integer] index of type in choice value
+      attr_accessor chosen: int
+
+      # Set chosen value.
+      # @note {#chosen} MUST be set before calling this method
+      # @param [Object] value
+      # @return [Object] value
+      # @raise [ChoiceError] {#chosen} not set
+      def set_chosen_value: (untyped value) -> untyped
+
+      # Get chosen value
+      # @note {#chosen} MUST be set before calling this method
+      # @return [Object] value
+      # @raise [ChoiceError] {#chosen} not set
+      def chosen_value: () -> Base
+
+      # @note {#chosen} MUST be set before calling this method
+      # @return [String] DER-formated string
+      # @raise [ChoiceError] {#chosen} not set
+      def to_der: () -> string
+
+      # Parse a DER string. This method updates object by setting {#chosen} and
+      # chosen value.
+      # @param [String] der DER string
+      # @param [Boolean] ber if +true+, accept BER encoding
+      # @return [Integer] total number of parsed bytes
+      # @raise [ASN1Error] error on parsing
+      def parse!: (untyped der, ?ber: bool) -> (0 | untyped)
+
+      # @private
+      # @see Types::Base#do_parse
+      # @since 0.15.0 Specific +#do_parse+ to handle recursivity
+      def do_parse: (untyped der, ?ber: bool) -> (untyped | ::Array[0 | untyped])
+
+      # Make choice value from DER/BER string.
+      # @param [String] der
+      # @param [::Boolean] ber
+      # @return [void]
+      # @since 0.15.0 Specific +#der_to_value+ to handle recursivity
+      def der_to_value: (untyped der, ?ber: bool) -> untyped
+
+      # Return empty array
+      # @return [Array()]
+      # @since 0.15.0
+      def void_value: () -> ::Array[untyped]
+
+      private
+
+      def check_chosen: () -> (untyped | nil)
+    end
+  end
+end

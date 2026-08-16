@@ -1,0 +1,38 @@
+module RASN1
+  module Types
+    # Mixin to add constraints on a Rasn2 type.
+    # Should not be used directly but through {Types.define_type}.
+    # @version 0.11.0
+    # @author Sylvain Daubert
+    module Constrained
+      # Define class/module methods for {Constrained} module
+      module ClassMethods
+        # @return [Proc] proc to check constraints
+        attr_accessor constraint: untyped
+
+        # Check if a constraint is really defined
+        # @return [Boolean]
+        def constrained?: () -> untyped
+
+        # Check constraint, if defined
+        # @param [Object] value the value of the type to check
+        # @raise [ConstraintError] constraint is not verified
+        def check_constraint: (untyped value) -> (nil | untyped)
+      end
+
+      extend ClassMethods
+
+      # Redefined +#value=+ to check constraint before assigning +val+
+      # @see Types::Base#value=
+      # @raise [ConstraintError] constraint is not verified
+      def value=: (untyped val) -> untyped
+
+      # Make value from +der+ string and check constraints
+      # @param [String] der
+      # @param [::Boolean] ber
+      # @return [void]
+      # @raise [ConstraintError] constraint is not verified
+      def der_to_value: (untyped der, ?ber: bool) -> untyped
+    end
+  end
+end

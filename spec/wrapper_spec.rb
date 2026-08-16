@@ -3,7 +3,7 @@
 require_relative 'spec_helper'
 
 # rubocop:disable Metrics/BlockLength
-module RASN1 # rubocop:disable Metrics/ModuleLength
+module RASN2 # rubocop:disable Metrics/ModuleLength
   include TestModel
 
   module TestWrapper
@@ -61,7 +61,35 @@ module RASN1 # rubocop:disable Metrics/ModuleLength
       end
 
       it 'raises if wrapper is explicit and implicit' do
-        expect { Wrapper.new(Types::Null.new, explicit: 1, implicit: 2) }.to raise_error(RASN1::Error)
+        expect { Wrapper.new(Types::Null.new, explicit: 1, implicit: 2) }.to raise_error(RASN2::Error)
+      end
+
+      it 'accepts a string tag for explicit (4CC-style)' do
+        wrapper = Wrapper.new(Types::Integer.new, explicit: 'ftyp')
+        expected_id = 'ftyp'.bytes.reduce(0) { |acc, b| (acc << 8) | b }
+        expect(wrapper).to be_explicit
+        expect(wrapper.id).to eq(expected_id)
+      end
+
+      it 'accepts a string tag for implicit (4CC-style)' do
+        wrapper = Wrapper.new(Types::Integer.new, implicit: 'moov')
+        expected_id = 'moov'.bytes.reduce(0) { |acc, b| (acc << 8) | b }
+        expect(wrapper).to be_implicit
+        expect(wrapper.id).to eq(expected_id)
+      end
+
+      it 'accepts a symbol tag for explicit (4CC-style)' do
+        wrapper = Wrapper.new(Types::Integer.new, explicit: :ftyp)
+        expected_id = 'ftyp'.bytes.reduce(0) { |acc, b| (acc << 8) | b }
+        expect(wrapper).to be_explicit
+        expect(wrapper.id).to eq(expected_id)
+      end
+
+      it 'accepts a symbol tag for implicit (4CC-style)' do
+        wrapper = Wrapper.new(Types::Integer.new, implicit: :moov)
+        expected_id = 'moov'.bytes.reduce(0) { |acc, b| (acc << 8) | b }
+        expect(wrapper).to be_implicit
+        expect(wrapper.id).to eq(expected_id)
       end
 
       it 'creates a lazy wrapper' do

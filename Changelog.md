@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- `Model`: content of a constructed element may now be defined through a block, as an alternative to the `:content` option. All model helpers (`sequence`, `set`, `choice`, primitives, `model`, `wrapper`, `sequence_of`, ...) are available inside the block, and blocks may be nested. When both `:content` and a block are given, block elements are appended to the ones defined by the option.
+- `Model.wrapper`: accept a block to define the wrapped element.
+
 ## 0.16.0 - 2025-06-09
 
 ### Changed

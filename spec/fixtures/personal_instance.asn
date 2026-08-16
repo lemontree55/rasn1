@@ -1,0 +1,6 @@
+myPerson PersonnelRecord ::= {
+    name    "John Doe",
+    title   "Engineer",
+    age     30,
+    employed TRUE
+}

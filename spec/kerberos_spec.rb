@@ -9,8 +9,8 @@ require 'time'
 # As well as additions from:
 # - https://datatracker.ietf.org/doc/html/rfc6806.html
 module Kerberos
-  # Adding additional methods to supplement RASN1's dsl
-  class KerberosModel < RASN1::Model
+  # Adding additional methods to supplement RASN2's dsl
+  class KerberosModel < RASN2::Model
     def self.model_name
       name.split('::').last.to_sym
     end
@@ -25,7 +25,7 @@ module Kerberos
   # IA5String.
   #
   #       KerberosString  ::= GeneralString (IA5String)
-  RASN1::Types.define_type('KerberosString', from: RASN1::Types::IA5String, in_module: self)
+  RASN2::Types.define_type('KerberosString', from: RASN2::Types::IA5String, in_module: self)
   class KerberosString
     # Override ID as the GeneralString id value
     ID = 27
@@ -36,7 +36,7 @@ module Kerberos
   #
 
   # KerberosTime    ::= GeneralizedTime -- with no fractional seconds
-  RASN1::Types.define_type('KerberosTime', from: RASN1::Types::GeneralizedTime, in_module: self)
+  RASN2::Types.define_type('KerberosTime', from: RASN2::Types::GeneralizedTime, in_module: self)
 
   #
   # 5.2.4.  Constrained Integer Types
@@ -44,19 +44,19 @@ module Kerberos
 
   #   Int32           ::= INTEGER (-2147483648..2147483647)
   #                        -- signed values representable in 32 bits
-  RASN1::Types.define_type('KerberosInt32', from: RASN1::Types::Integer, in_module: self) do |value|
+  RASN2::Types.define_type('KerberosInt32', from: RASN2::Types::Integer, in_module: self) do |value|
     (value >= -2**31) && (value < 2**31)
   end
 
   #   UInt32          ::= INTEGER (0..4294967295)
   #                        -- unsigned 32 bit values
-  RASN1::Types.define_type('KerberosUInt32', from: RASN1::Types::Integer, in_module: self) do |val|
+  RASN2::Types.define_type('KerberosUInt32', from: RASN2::Types::Integer, in_module: self) do |val|
     (val >= 0) && (val < (2**32))
   end
 
   #   Microseconds    ::= INTEGER (0..999999)
   #                        -- microseconds
-  RASN1::Types.define_type('KerberosMicroseconds', from: RASN1::Types::Integer, in_module: self) do |value|
+  RASN2::Types.define_type('KerberosMicroseconds', from: RASN2::Types::Integer, in_module: self) do |value|
     (value >= 0) && (value < 999999)
   end
 
@@ -65,7 +65,7 @@ module Kerberos
   #
 
   #   Realm           ::= KerberosString
-  RASN1::Types.define_type('KerberosRealm', from: KerberosString, in_module: self)
+  RASN2::Types.define_type('KerberosRealm', from: KerberosString, in_module: self)
 
   #   PrincipalName   ::= SEQUENCE {
   #            name-type       [0] Int32,
@@ -150,7 +150,7 @@ module Kerberos
   # 5.2.6.  AuthorizationData
   #
 
-  # Extracted class from AuthorizationData to work with RASN1 models for the following ASN1 structure:
+  # Extracted class from AuthorizationData to work with RASN2 models for the following ASN1 structure:
   #      -- NOTE: AuthorizationData is always used as an OPTIONAL field and
   #       -- should not be empty.
   #       AuthorizationData       ::= SEQUENCE OF SEQUENCE {
@@ -315,7 +315,7 @@ module Kerberos
   #   KerberosFlags   ::= BIT STRING (SIZE (32..MAX))
   #                        -- minimum number of bits shall be sent,
   #                        -- but no fewer than 32
-  class KerberosFlags < RASN1::Types::BitString
+  class KerberosFlags < RASN2::Types::BitString
     # @param [Hash] options
     # @see Base#initialize common options to all ASN.1 types
     def initialize(options = {})
@@ -347,9 +347,9 @@ module Kerberos
              ]
   end
 
-  # TODO: See if there's a way to have name bit string flags in RASN1
+  # TODO: See if there's a way to have name bit string flags in RASN2
   # ticket_flags_input = "\x03\x05\x00\x50\xE1\x00\x00".b
-  RASN1::Types.define_type('KerberosTicketFlags', from: KerberosFlags, in_module: self)
+  RASN2::Types.define_type('KerberosTicketFlags', from: KerberosFlags, in_module: self)
 
   #   -- encoded Transited field
   #    TransitedEncoding       ::= SEQUENCE {
@@ -427,7 +427,7 @@ module Kerberos
   #         -- enc-tkt-in-skey(28),
   #         -- renew(30),
   #         -- validate(31)
-  RASN1::Types.define_type('KerberosKdcOptions', from: KerberosFlags, in_module: self)
+  RASN2::Types.define_type('KerberosKdcOptions', from: KerberosFlags, in_module: self)
 
   # KDC-REQ-BODY    ::= SEQUENCE {
   #         kdc-options             [0] KDCOptions,
@@ -546,7 +546,7 @@ module Kerberos
                  explicit: 13
   end
 
-  # Extracted class from LastReq to work with RASN1 models for the following ASN1 structure:
+  # Extracted class from LastReq to work with RASN2 models for the following ASN1 structure:
   #    LastReq         ::=     SEQUENCE OF SEQUENCE {
   #            lr-type         [0] Int32,
   #            lr-value        [1] KerberosTime
@@ -625,7 +625,7 @@ module Kerberos
   #         -- reserved(0),
   #         -- use-session-key(1),
   #         -- mutual-required(2)
-  RASN1::Types.define_type('KerberosApOptions', from: KerberosFlags, in_module: self)
+  RASN2::Types.define_type('KerberosApOptions', from: KerberosFlags, in_module: self)
 
 
   #  AP-REQ          ::= [APPLICATION 14] SEQUENCE {
